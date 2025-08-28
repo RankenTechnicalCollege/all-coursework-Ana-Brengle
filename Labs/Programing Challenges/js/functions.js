@@ -71,7 +71,19 @@ document.getElementById("btnRevString").addEventListener("click", function(){
 })
 
 const capitalize = function firstLetter(string){
-    if(!string) return '';
-    return string[0].toUpperCase() + string.slice(1);
+
+    let result = ''
+    for(let i = 1; i < string.length; i++) {
+        if(string[i = 1] === ' '){
+            result += string[i].toUpperCase();
+        } else{
+            result += string[i]
+        }
+         return result
+    }
 }
+
+document.getElementById("output3").innerHTML = `Answer: ${capitalize(document.getElementById('txtCapWords').value)}`
+
+
 

@@ -1,15 +1,20 @@
 const famous = ["ApeLincoln", "TheNotoriousP.I.G", "Brieonce"];
 
 let searchName = "";
-let found = true;
 
-for(let i = 0; i < famous.length; i++) {
+document.getElementById("btnUsername").addEventListener("click", function(){
+    searchName = document.getElementById("userName").value;
+
+    for(let i = 0; i < famous.length; i++) {
     
-    if(famous[i].toLowerCase == userName){
-        document.getElementById("btnUsername").addEventListener("click", function(){
-            document.getElementById("showResult").innerHTML = `You Entered ${userName}`
-        });    
-        return found;
+    if(famous[i].toLowerCase() === searchName.toLowerCase()){
+        document.getElementById("showResult").innerHTML = `Username ${searchName} found!`  
+        break; 
+    }
+    else {
+        document.getElementById("showResult").innerHTML = `Username ${searchName} not found!`
     }
     
 }
+});
+
