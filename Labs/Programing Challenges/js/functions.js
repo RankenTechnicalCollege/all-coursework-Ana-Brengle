@@ -42,6 +42,34 @@ function doMathOperation(a,b,operation){
 }*/
 
 
+
+window.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('txtUserInput');
+
+
+    document.getElementById("btnVCount").addEventListener("click", function(){
+        document.getElementById("output").innerText = (`Answer: ${vowelCount(input.value)}`)
+    })
+    
+    document.getElementById('btnRevString').addEventListener("click", function(){
+        document.getElementById("output").innerText = (`Answer: ${reverse(input.value)}`)
+    })
+
+     document.getElementById('btnCapWords').addEventListener("click", function(){
+        document.getElementById("output").innerText = (`Answer: ${capitalize(input.value)}`)
+    })
+    document.getElementById("btnCount").addEventListener("click", function(){
+        document.getElementById("output").innerText = (`Answer: ${countWords(input.value)}`)
+    })
+    document.getElementById("btnConString").addEventListener("click", function(){
+        const addWord = prompt('Add your Name: ');
+        document.getElementById("output").innerText = (`Hello my name is ${createUser(input.value, addWord)}`)
+    })
+} )
+    
+
+
+
 const vowelCount = (string) => {
     let count = 0;
 
@@ -54,9 +82,7 @@ const vowelCount = (string) => {
     }
     return count;
 };
-document.getElementById("btnVCount").addEventListener("click", function(){
-    document.getElementById("output1").innerHTML = `Answer: ${vowelCount(document.getElementById('txtVowelCount').value)}`
-} )
+
 
 
 function reverse(string){
@@ -66,24 +92,36 @@ function reverse(string){
         a += string[i];
     } return a;
 };
-document.getElementById("btnRevString").addEventListener("click", function(){
-    document.getElementById("output2").innerHTML = `Answer: ${reverse(document.getElementById('txtReverseString').value)}`
-})
 
-const capitalize = function firstLetter(string){
 
-    let result = ''
-    for(let i = 1; i < string.length; i++) {
-        if(string[i = 1] === ' '){
-            result += string[i].toUpperCase();
-        } else{
-            result += string[i]
-        }
-         return result
-    }
+const capitalize = function (string) {
+    return string.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+    
 }
 
-document.getElementById("output3").innerHTML = `Answer: ${capitalize(document.getElementById('txtCapWords').value)}`
+const countWords = (str) => {
+
+    let c = 0;
+    let words = false;
+
+    for(const char of str){
+        if (/\s/.test(char)) {
+            words = false;
+        } else if(!words) {
+            words = true;
+            c++;
+        }
+    }
+    return c;
+}
+
+const createUser = (str1, str2) => str1 + " " +  str2;
+
+
+
+
+
 
 
 
