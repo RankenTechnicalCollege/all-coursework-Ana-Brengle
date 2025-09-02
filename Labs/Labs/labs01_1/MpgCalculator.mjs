@@ -17,6 +17,8 @@ let mpg;
 
 
 do{
+
+    
     if(miles < 0 || gallons < 0){
         console.log("ENTER A AMOUNT GREATER THAN 0")
 
