@@ -1,14 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+//import reactLogo from './assets/react.svg'
+//import viteLogo from '/vite.svg'
+
 import './App.css'
+import { useEffect, useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState([]);
+  const [bugs, setBugs] = useState([]);
+
+  useEffect(() => {
+    // Fetch users
+    fetch("https://issuetracker-service-1029534851049.us-central1.run.app/api/user/list")
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((err) => console.error("Error fetching users:", err));
+
+    // Fetch bugs
+    fetch("http://localhost:2026/api/bug/list")
+      .then((res) => res.json())
+      .then((data) => setBugs(data))
+      .catch((err) => console.error("Error fetching bugs:", err))
+      
+  }, []);
 
   return (
     <>
-      <h1></h1>
       <header>
         <nav class="navbar navbar-expand-lg bg-light">
           <div class="container-fluid">
@@ -29,25 +45,36 @@ function App() {
           </div>
         </nav>
       </header>
-      <div>
-          <h1>User</h1>
-          <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-          </ul>
-      </div>
-      <div>
-          <h1>Bugs</h1>
-          <ul>
-            <li>Bug 1</li>
-            <li>Bug 2</li>
-            <li>Bug 3</li>
-            <li>Bug 4</li>
-          </ul>
-      </div>
+      <main className="container d-flex justify-content-evenly mt-4">
+        {/* Users section */}
+        <div className="d-flex justify-content-center border border-dark border-5  rounded-bottom px-5">
+          <div className="vstack">
+            <h1>Users</h1>
+            <ul>
+              {users.map((user) => (
+                <li key={user.userId}>
+                  {users.givenName} {users.familyName} — {users.role}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-      <footer style="text-align: center"> &copy; Ana Brengle 2024</footer>
+        {/* Bugs section */}
+        <div className="d-flex justify-content-center border border-dark border-5 rounded-bottom px-5">
+          <div className="vstack">
+            <h1>Bugs</h1>
+            <ul>
+              {bugs.map((bug) => (
+                <li key={bug.id}>
+                  {bug.title} — {bug.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </main>
+      <footer className='bg-light text-center py-3'> &copy; Ana Brengle 2024</footer>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     </>
   )

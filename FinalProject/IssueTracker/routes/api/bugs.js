@@ -1,6 +1,6 @@
 import express from 'express';
 import {nanoid} from 'nanoid'
-import { userArray } from './user.js';
+import { userArray } from './users.js';
 
 const router = express.Router();
 
@@ -138,7 +138,7 @@ router.put('/:bugId/close', (req,res) =>{
 
     if(index != -1){
         bugArray.splice(index,1);//start at index, remove one element
-        res.status(200).send(`Bug ${id} deleteted succesfully`);
+        res.status(200).send(`Bug ${id} deleted successfully`);
     }else{
         res.status(404).send(`Bug not found`)
     }
