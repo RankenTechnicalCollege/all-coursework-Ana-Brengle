@@ -13,6 +13,11 @@ do {
     if(choice !== 1 && choice !== 2) {
         
         console.log("Didn't choose 1 or 2 pick: Pick a choice!")
+
+    } else if(isNaN(choice)) {
+
+        console.log("You entered a Letter. Enter 1 or 2 please")
+
     }
 
 } while (choice !== 1 && choice !== 2)
@@ -20,7 +25,7 @@ do {
 
 
 do {
-    let incomeInput = await rl.question("Enter a taxable income greater than 0: ");
+    let incomeInput = await rl.question("Enter a income greater than 0: ");
     income = parseFloat(incomeInput);
 
     if (isNaN(income) || income <= 0) {

@@ -11,21 +11,26 @@ do {
     choice = await rl.question("Choice option (1 or 2): ")
     choice = parseFloat(choice);
 
-    if(choice !== 1 && choice !== 2) {
+    if(isNaN(choice)) {
         
+        console.log("You Entered a letter, Please enter 1 or 2")
+        
+    } else if (choice !== 1 && choice !== 2){
+
         console.log("Didn't choose 1 or 2 pick: Pick a choice!")
+
     }
 
 } while (choice !== 1 && choice !== 2)
 
    do {
-      temp = await rl.question(`Please enter a valid temperature greater than 0.\n`)
+      temp = await rl.question(`Please enter a valid temperature greater than 0.`)
       temp = parseFloat(temp)
 
       if (isNaN(temp)||temp <= 0) {
 
-            console.log("Please enter a valid temperature greater than 0.\n");
-         }
+            console.log("Please enter a valid temperature greater than 0.");
+        }
    } while (isNaN(temp) || temp <= 0)
 
     if (choice === 1){

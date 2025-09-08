@@ -17,25 +17,28 @@ let mpg;
 
 
 do{
-
     
-    if(miles < 0 || gallons < 0){
-        console.log("ENTER A AMOUNT GREATER THAN 0")
+    miles = await rl.question("Please enter the amount of Miles traveled.");
+    miles = parseFloat(miles)
 
+    if (isNaN(miles) || miles <= 0) {
+        console.log("You entered a letter. PLease Enter a number, greater than 0");
     }
-    else
-    {
-       
-        miles = await rl.question("Please enter the amount of Miles traveled.");
-        parseFloat(miles)
         
-       gallons = await rl.question("Please enter the amount of Gallons used.");
-        parseFloat(gallons);
+} while ( isNaN(miles) || miles <= 0 )
 
-        mpg = miles/gallons;
-        console.log(`You have a MPG of: ${mpg.toFixed(2)}`)
+do {
 
+    gallons = await rl.question("Please enter the amount of Gallons used.");
+    gallons = parseFloat(gallons);
+
+     if(isNaN(gallons) || gallons < 0){
+        console.log("You entered a letter. PLease Enter a number, greater than 0")
     }
-}while(miles == '' || isNaN(miles) || miles <= 0 || gallons == '' || isNaN(gallons) || gallons <= 0)
+    
+} while( gallons == '' || isNaN(gallons) || gallons <= 0)
+
+     mpg = miles/gallons;
+     console.log(`You have a MPG of: ${mpg.toFixed(2)}`)
 
 rl.close();

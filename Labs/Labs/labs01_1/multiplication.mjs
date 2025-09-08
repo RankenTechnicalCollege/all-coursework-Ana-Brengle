@@ -16,11 +16,15 @@ do {
     number = await rl.question('How big do you want the table to be (1-12)?')
     number = parseInt(number)
 
-    if (isNaN(number) || number < 1 || number > 12) {
+    if (number < 1 || number > 12) {
 
-    console.log('Enter a number between 1-12')
+        console.log('Enter a number between 1-12')
     
-}
+    } else if (isNaN(number)){
+
+        console.log(' That\'s not a number. Please enter a number.');
+
+    }
 
 } while(isNaN(number) || number < 1 || number > 12)
 
