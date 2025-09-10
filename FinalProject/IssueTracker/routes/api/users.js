@@ -22,7 +22,7 @@ router.get('/list', (req, res) => {
 });
 
 router.get('/:userId', (req, res) => {
-    const id =req.params.userId;
+    const id = req.params.userId;
     //console.log(id);
     const user = users.find(user => user.userId == id);
     if(user) {
@@ -87,7 +87,7 @@ router.post('/login', (req, res) => {
             res.status(400).send('Password is required');
             return;
         } else {
-            const searchUser = users.find(u => u.email == users.email && u.password == users.password);
+            const searchUser = users.find(u => u.email == user.email && u.password == user.password);
             if(searchUser){
                 res.status(200).json({message: 'Welcome Back!'});
             }else {
@@ -98,7 +98,7 @@ router.post('/login', (req, res) => {
 
 router.put('/:userId', (req,res) => {
     const id = req.params.userId;
-    const userToUpdate = users.find(user.userId == id);
+    const userToUpdate = users.find(user => userId == id);
 
     const updatedUser = req.body;
 
@@ -126,8 +126,8 @@ router.put('/:userId', (req,res) => {
 router.delete('/:userId', (req,res) => {
     const id = req.params.userId;
     const index = users.findIndex(user => user.userId == id);
-    if(index != 1) {
-        user.splice(index,1);
+    if(index !== 1) {
+        users.splice(index,1);
         res.status(200).send(`User ${id} deleted successfully`);
     } else {
         res.status(400).send('User not found')
@@ -135,4 +135,4 @@ router.delete('/:userId', (req,res) => {
 });
 
 export {router as userRouter}
-export {users as users}
+//export {users as users}
