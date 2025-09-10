@@ -98,7 +98,7 @@ router.post('/login', (req, res) => {
 
 router.put('/:userId', (req,res) => {
     const id = req.params.userId;
-    const userToUpdate = users.find(user => userId == id);
+    const userToUpdate = users.find(user => user.userId == id);
 
     const updatedUser = req.body;
 
