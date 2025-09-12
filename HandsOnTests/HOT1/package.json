@@ -1,0 +1,28 @@
+{
+  "name": "hot1",
+  "version": "1.0.0",
+  "description": "HOT ",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start-dev": "nodemon -r dotenv/config server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RankenTechnicalCollege/all-coursework-Ana-Brengle.git"
+  },
+  "author": "Ana Brengle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RankenTechnicalCollege/all-coursework-Ana-Brengle/issues"
+  },
+  "homepage": "https://github.com/RankenTechnicalCollege/all-coursework-Ana-Brengle#readme",
+  "dependencies": {
+    "debug": "^4.4.1",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
