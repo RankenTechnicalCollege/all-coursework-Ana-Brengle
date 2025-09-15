@@ -23,3 +23,7 @@ EXERCISE 2
 8 - db.movies.updateOne({ _id: ObjectId("68c33b81e599469899a07a2c") },{$push: {cast: { $each: ["Johnny Cash"] }}})
 9 - db.theaters.deleteOne({ _id: ObjectId("59a47286cfa9a3a73e51e73f") })
 10 - db.users.deleteOne({ _id: ObjectId("59b99dbdcfa9a34dcd7885c7") })
+
+EXERCISE 3
+
+
