@@ -15,11 +15,11 @@ EXERCISE 2
 
 1 - db.users.insertOne({name: "Orla Sand", email: "orla_sand@gamofthron.es", password: "youwinoryoudie"})
 2 - db.movies.insertOne({title: "Nobody", imdb:{rating: 8.5}, tomatoes: {viewers: {rating: 8, votes: 200}} })
-3 -
-4 - 
-5 - 
-6 -
-7 - 
-8 -
-9 - 
-10 -
+3 - db.theaters.insertOne({ name: "HI-Point Theater",location: "St.Louis"})
+4 - db.comments.insertOne({ name: "Orla Sand", email: "orla_sand@emaple.com",text: "This movie was amazing!",date: new Date()})
+5 - db.movies.updateOne({ _id: ObjectId("573a1391f29313caabcd70b4") }, { $set: { "imdb.ratings": { rating: 8.5, votes: 120000 },"tomatoes.ratings": { rating: 92, votes: 500 }}})
+6 - db.movies.updateOne({ _id: ObjectId("68c33b81e599469899a07a2c") },{ $push: { countries: "France" } })
+7 - db.movies.updateOne({ _id: ObjectId("68c33b81e599469899a07a2c") },{ $push: { genres: "Thriller" } })
+8 - db.movies.updateOne({ _id: ObjectId("68c33b81e599469899a07a2c") },{$push: {cast: { $each: ["Johnny Cash"] }}})
+9 - db.theaters.deleteOne({ _id: ObjectId("59a47286cfa9a3a73e51e73f") })
+10 - db.users.deleteOne({ _id: ObjectId("59b99dbdcfa9a34dcd7885c7") })
