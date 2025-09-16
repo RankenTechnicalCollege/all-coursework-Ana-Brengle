@@ -1,11 +1,18 @@
 import express from 'express';
 const router = express.Router();
 import debug from 'debug';
-const debugTax = debug('app:taxRouter');
+const debugTax = debug('app:Tax');
 
 router.use(express.urlencoded({ extended: false }));
 
 router.post('/calc', (req, res) => {
+
+    const info = req.body;
+
+    if(info == undefined){
+        res.status(400).send('Please Choose Single or Married')
+    }
+
     const mode = req.body.mode;
     const income = req.body.income;
 

@@ -4,7 +4,7 @@ const router = express.Router();
 
 import debug from 'debug';
 
-const debugTemp= debug('app:tempRouter')
+const debugTemp= debug('app:Temp')
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -12,6 +12,13 @@ router.use(express.urlencoded({ extended: false }));
 //app.use(express.json());
 
 router.post('/convert', (req,res) => {
+
+  const info = req.body;
+
+    if(info == undefined){
+        res.status(400).send('Please choose either FtoC or CtoF')
+    }
+    
 
     const mode = req.body.mode;
     const temp = parseFloat(req.body.temp);
@@ -26,7 +33,7 @@ router.post('/convert', (req,res) => {
 
     if(!temp || temp == "" || isNaN(temp) || temp <= 0) {
 
-      res.status(400).send('Invalid Number please enter a number greater than 0');
+      res.status(400).send('Invalid number for Temperature. Please enter a number greater than 0');
       return;
     }
 

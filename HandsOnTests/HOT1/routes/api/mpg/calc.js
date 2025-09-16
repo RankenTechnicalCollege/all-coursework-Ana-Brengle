@@ -1,8 +1,9 @@
 import express from 'express';
-import debug from 'debug';
-const debugMPG = debug('app:mpgRouter');
-
 const router = express.Router();
+import debug from 'debug';
+const debugMPG = debug('app:Mpg');
+
+
 
 router.use(express.urlencoded({ extended: false }));
 

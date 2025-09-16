@@ -1,12 +1,20 @@
 import express from 'express';
-import debug from 'debug';
-const debugInterest = debug('app:interestRouter');
 
 const router = express.Router();
+import debug from 'debug';
+const debugInterest = debug('app:Interest');
+
+
 
 router.use(express.urlencoded({ extended: false }));
 
 router.post('/calc', (req, res) => {
+   const info = req.body;
+
+    if(info == undefined){
+        res.status(400).send('Please enter Information')
+    }
+
      const principal = req.body.principal;
      const interestRate = req.body.interestRate;
      const years = req.body.years;
@@ -26,8 +34,8 @@ router.post('/calc', (req, res) => {
         return;
      }
 
-     const finalAmount = principal * ((1 + interestRate / 100 / 12) ** (years * 12))
+     const finalAmount = principal * ((1 + interestRate / 100 / 12) ** (years * 12)).toFixed(2)
      debugInterest(`After ${years} with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`);
-     res.status(200).json({message:`You have a Miles per Gallon of:${mpg}`});
+     res.status(200).json({message:`After ${years} with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`});
 });
 export {router as interestRouter}
