@@ -6,7 +6,7 @@ import debug from 'debug';
 
 const debugTemp= debug('app:Temp')
 
-router.use(express.urlencoded({ extended: false }));
+//router.use(express.urlencoded({ extended: false }));
 
 
 //app.use(express.json());

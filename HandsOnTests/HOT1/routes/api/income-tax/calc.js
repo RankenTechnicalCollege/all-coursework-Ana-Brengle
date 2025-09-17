@@ -1,11 +1,12 @@
 import express from 'express';
 const router = express.Router();
+
 import debug from 'debug';
 const debugTax = debug('app:Tax');
 
-router.use(express.urlencoded({ extended: false}));
+//router.use(express.urlencoded({ extended: false}));
 
-
+//console.log("✅ Tax router loaded");
 router.post('/calc', (req, res) => {
 
     const info = req.body;
@@ -87,5 +88,5 @@ router.post('/calc', (req, res) => {
     }
      debugTax(`For a taxable income of $${income}, the tax owed is $${Math.ceil(tax)}`)
      res.status(200).json({message:`For a taxable income of $${income}, the tax owed is $${Math.ceil(tax)}`});
-})
+});
 export {router as taxRouter}

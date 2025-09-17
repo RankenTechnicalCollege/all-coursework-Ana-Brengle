@@ -6,7 +6,7 @@ const debugInterest = debug('app:Interest');
 
 
 
-router.use(express.urlencoded({ extended: false }));
+//router.use(express.urlencoded({ extended: false }));
 
 router.post('/calc', (req, res) => {
    const info = req.body;
