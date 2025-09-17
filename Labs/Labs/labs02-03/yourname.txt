@@ -15,18 +15,19 @@
 15 - db.movies.updateOne({title: "Nobody"}, {$push: {genres: "Drama"}})
 16 - db.movies.deleteMany({year: {$lt: 2000}})
 17 - db.movies.find({year: {$gte: 2010, $lt: 2020}}).sort({rating: -1})
-18 - 
-19 - 
-20 -
-21 -
-22 -
-23 - 
-24 -
-25 -
-26 - 
-27 -
-28 -
-29 -
-30 - 
-31 -
+18 - db.movies.updateMany({year: 2015}, {$set: {year: 2016}})
+19 - db.movies.deleteMany({directors: "Christopher Nolan"})
+20 - db.users.insertOne({email: "admin@example.com"})
+21 - db.users.find({email: {$regex:/admin/}})
+22 - db.comments.deleteOne({email: "johndoe@example.com"})
+23 - db.movies.createIndex({title: 1 })
+24 - db.movies.find({title: {$regex:/^A/}})
+25 - db.movies.updateMany({genres: "Action"}, {$set: {genres: "Adventure"}})
+26 - db.users.deleteMany({lastLogin: {$lt: new Date("2025-03-17")}})
+27 - db.movies.aggregate([{$group: {_id: null, imdb: {$avg: "$imdb.rating"} }}])
+28 - db.movies.updateOne({_id: ObjectId("573a139af29313caabcf0e9d")}, {$set: {"imdb.rating": 4.5}})
+29 -db.comments.deleteMany({text: /spoiler/i});
+30 - db.movies.aggregate([{$group: {_id: "$genres", count: {$sum: 1} }}])
+31 - db.movies.updateMany({}, [{$set: {title: {$toUpper: "$title"}}}])
+
 
