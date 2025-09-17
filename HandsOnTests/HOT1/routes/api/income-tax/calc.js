@@ -3,7 +3,8 @@ const router = express.Router();
 import debug from 'debug';
 const debugTax = debug('app:Tax');
 
-router.use(express.urlencoded({ extended: false }));
+router.use(express.urlencoded({ extended: false}));
+
 
 router.post('/calc', (req, res) => {
 
@@ -11,10 +12,11 @@ router.post('/calc', (req, res) => {
 
     if(info == undefined){
         res.status(400).send('Please Choose Single or Married')
+        return;
     }
 
     const mode = req.body.mode;
-    const income = req.body.income;
+    const income = parseFloat(req.body.income);
 
     if(!mode || (mode != "Single" && mode != "Married")) {
         res.status(400).send("'Mode' is required please chose: 'Single' or 'Married'.")
@@ -23,6 +25,7 @@ router.post('/calc', (req, res) => {
 
     if(!income || income == '' || isNaN(income) || income <= 0 ) {
         res.status(400).send('Invalid entry for income. Please enter a valid number greater than 0')
+        return;
     }
 
     let tax = 0;
