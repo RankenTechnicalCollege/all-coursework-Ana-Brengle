@@ -6,9 +6,7 @@ const debugMPG = debug('app:Mpg');
 router.post('/calc', (req, res) => {
     const info = req.body;
 
-    if(info == undefined){
-        res.status(400).send('Please enter numbers')
-    }
+    
 
     const milesDriven = parseFloat(req.body.milesDriven);
     const gallonsUsed = parseFloat(req.body.gallonsUsed);

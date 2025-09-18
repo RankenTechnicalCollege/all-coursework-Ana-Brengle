@@ -9,12 +9,7 @@ const debugInterest = debug('app:Interest');
 //router.use(express.urlencoded({ extended: false }));
 
 router.post('/calc', (req, res) => {
-   const info = req.body;
-
-    if(info == undefined){
-        res.status(400).send('Please enter Information')
-    }
-
+  
      const principal = req.body.principal;
      const interestRate = req.body.interestRate;
      const years = req.body.years;
@@ -34,7 +29,7 @@ router.post('/calc', (req, res) => {
         return;
      }
 
-     const finalAmount = principal * ((1 + interestRate / 100 / 12) ** (years * 12)).toFixed(2)
+     const finalAmount = principal * ((1 + interestRate / 100 / 12) * (years * 12)).toFixed(2)
      debugInterest(`After ${years} with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`);
      res.status(200).json({message:`After ${years} with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`});
 });

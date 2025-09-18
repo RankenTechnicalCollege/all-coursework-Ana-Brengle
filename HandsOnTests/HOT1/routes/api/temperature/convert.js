@@ -15,9 +15,7 @@ router.post('/convert', (req,res) => {
 
   const info = req.body;
 
-    if(info == undefined){
-        res.status(400).send('Please choose either FtoC or CtoF')
-    }
+   
     
 
     const mode = req.body.mode;

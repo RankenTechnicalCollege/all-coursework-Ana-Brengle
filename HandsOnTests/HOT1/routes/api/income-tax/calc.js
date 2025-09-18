@@ -9,12 +9,7 @@ const debugTax = debug('app:Tax');
 //console.log("✅ Tax router loaded");
 router.post('/calc', (req, res) => {
 
-    const info = req.body;
-
-    if(info == undefined){
-        res.status(400).send('Please Choose Single or Married')
-        return;
-    }
+    
 
     const mode = req.body.mode;
     const income = parseFloat(req.body.income);
@@ -33,7 +28,7 @@ router.post('/calc', (req, res) => {
 
     if(mode == "Single") {
         if(income > 626350) {
-            tax = 188769.75 + (income - 626351) * .37;
+            tax = 188769.75 + (income - 626350) * .37;
         } else if (income >= 205526) {
 
             tax = 57231 + (income - 205526) * .35 ;
