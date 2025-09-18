@@ -10,11 +10,11 @@ router.use(express.urlencoded({extended:false}));
 
 
 const users = [
-    {email: 'nina.thomas@example.com', password: 'CoralReef#58', givenName: 'Nina', familyName: 'Thomas', role: 'Teacher', assignedBug: null, userId: 1},
-    {email: 'ryan.lee@example.com', password: 'MountEverest@89', givenName: 'Ryan', familyName: 'Lee', role: 'Admin', assignedBug: null, userId: 2},
-    {email: 'lisa.kim@example.com', password: 'CherryBlossom_14', givenName: 'Lisa', familyName: 'Kim', role: 'Student', assignedBug: null, userId: 3},
-    {email: 'david.clark@example.com', password: 'JetStream!66', givenName: 'David', familyName: 'Clark', role: 'Student', assignedBug: null, userId: 4},
-    {email: 'sophia.patel@example.com', password: 'GoldenHour*30', givenName: 'Sophia', familyName: 'Patel', role: 'Teacher', assignedBug: null, userId: 5},
+    {email: 'nina.thomas@example.com', password: 'CoralReef#58', givenName: 'Nina', familyName: 'Thomas', fullName: 'Nina Thomas', role: 'Developer', assignedBug: null, userId: 1, },
+    {email: 'ryan.lee@example.com', password: 'MountEverest@89', givenName: 'Ryan', familyName: 'Lee', fullName: 'Ryan Lee', role: 'Business Analyst', assignedBug: null, userId: 2},
+    {email: 'lisa.kim@example.com', password: 'CherryBlossom_14', givenName: 'Lisa', familyName: 'Kim', fullName: 'lisa Kim', role: 'Quality Analyst', assignedBug: null, userId: 3},
+    {email: 'david.clark@example.com', password: 'JetStream!66', givenName: 'David', familyName: 'Clark', fullName: 'David Clark' , role: 'Technical Manager', assignedBug: null, userId: 4},
+    {email: 'sophia.patel@example.com', password: 'GoldenHour*30', givenName: 'Sophia', familyName: 'Patel', fullName: 'Sophia Patel', role: 'Product Manager', assignedBug: null, userId: 5},
 ]
 
 router.get('/list', (req, res) => {
