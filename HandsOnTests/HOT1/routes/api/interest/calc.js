@@ -29,8 +29,8 @@ router.post('/calc', (req, res) => {
         return;
      }
 
-     const finalAmount = principal * ((1 + interestRate / 100 / 12) * (years * 12)).toFixed(2)
-     debugInterest(`After ${years} with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`);
-     res.status(200).json({message:`After ${years} with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`});
+     const finalAmount = principal * ((1 + interestRate / 100 / 12) ** (years * 12)).toFixed(2)
+     debugInterest(`After ${years} year with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`);
+     res.status(200).json({message:`After ${years} years with an interest rate of ${interestRate}, the total investment will be $${finalAmount}`});
 });
 export {router as interestRouter}
