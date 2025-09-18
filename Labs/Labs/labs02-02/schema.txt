@@ -1,0 +1,35 @@
+Exercise 2: Implement Database 
+    Bugs
+        1 - db.Bugs.createIndex({title: 1})
+        2 - db.Bugs.insertMany([
+        { title: "Login button not responsive", 
+        description: "The login button does not respond when clicked on mobile devices.",
+        stepsToReproduce: '1. Open app on mobile device. Navigate to login page. Tap login button. No action occurs',
+        authorOfBug: null,
+        edits: [],
+        comments: [],
+        classification: 'Approved',
+        testCases: [],
+        workHoursLog: [],
+        fixedInVersion: '',
+        fixedOnDate: null,
+        closed: false
+    }, {
+        title: 'Incorrect total price in cart',
+        description: 'The total price in the shopping cart does not include tax.',
+        stepsToReproduce: '1. Add items to cart. View total price. Notice tax is missing',
+        authorOfBug: null,
+        edits: [],
+        comments: [],
+        classification: 'Unapproved',
+        testCases: [],
+        workHoursLog: [],
+        fixedInVersion: '',
+        fixedOnDate: null,
+        closed: false
+  }
+])
+    Users
+        1 - db.Users.createIndex({email: 1})
+        2 - db.Users.insertMany([{email: "nina.thomas@example.com" , password: "CoralReef#58", role: "Developer", fullName: "Nina Thomas", familyName: "Thomas", givenName: "Nina", createdBugs: [],assignedBugs: []},
+                     {email: "ryan.lee@example.com", password: "MountEverest@89", role: "Business Analyst", fullName: "Ryan Lee", familyName: "Lee", givenName: "Ryan", createdBugs: [], assignedBugs: [] }])
