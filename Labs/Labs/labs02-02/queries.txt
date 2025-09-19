@@ -1,22 +1,43 @@
 Exercise 3: Query Database
-    1 -
-    2 -
-    3 -
-    4 -
-    5 -
+    1 - db.Users.find({_id: ObjectId('68cc61c28415d2e31cea6241')}).projection({createdBugs: 1})
+    2 - db.Users.find({_id: ObjectId('68cc61c28415d2e31cea6241')}).projection({assignedBugs: 1})
+    3 - db.Users.find({givenName: 'Nina'}).projection({_id: 0,givenName: 1,assignedBugs: 1, createdBugs: 1})
+    4 - db.Bugs.find({classification: 'unclassified'})
+    5 - db.Bugs.find({classification: 'Approved', closed: false})
     6 -
-    7 -
-    8 -
-    9 -
+    7 - db.Bugs.find({ stepsToReproduce: ''})
+    8 - db.Bugs.find({ testCases: null})
+    9 - db.Bugs.find({ workHoursLog: null})
     10 -
     11 -
     12 -
 Exercise 4: Manipulate Database
-    1 -
-    2 -
-    3 -
-    4 -
-    5 -
-    6 -
-    7 -
-    8 -
+    1 - db.Users.insertOne({email: "barry.allen@example.com" , 
+                    password: "theFlash", 
+                    role: "Quality Analyst", 
+                    fullName: "Barry Allen", 
+                    familyName: "Allen", 
+                    givenName: "Barry", 
+                    createdBugs: [],
+                    assignedBugs: []
+                   })
+    2 - db.Bugs.insertOne({
+    title: 'Search function returns no results',
+    description: 'Searching for valid terms returns no results even though matching data exists.',
+    stepsToReproduce: '1. Go to search page. 2. Enter a valid search term. 3. Click search button. 4. Observe empty results.',
+    authorOfBug: null,
+    edits: [],
+    comments: [],
+    classification: 'unapproved',
+    testCases: [],
+    workHoursLog: [],
+    fixedInVersion: null,
+    fixedOnDate: null,
+    closed: false
+})
+    3 - db.Users.updateOne({_id: ObjectId('68cdbd362a041a4e004d65cb')}, {$push: {assignedBugs: ObjectId('68cda60c2a041a4e004d65ca')}})
+    4 - db.Bugs.updateOne({_id: ObjectId('68cda60c2a041a4e004d65ca')}, {$push: {comments: {commentAuthor: ObjectId('68cdbd362a041a4e004d65cb'), commentDate: new Date(), text: 'Lorem ipsum dolor sit amet consectetur adipiscing elit.'}}})
+    5 - db.Bugs.updateOne({_id: ObjectId('68cda60c2a041a4e004d65ca')}, {$push: {testCases: {passed: false}}})
+    6 - db.Bugs.updateOne({_id: ObjectId('68cda60c2a041a4e004d65ca')}, {$push: {workHoursLog: {hoursWorkedOn: 2.5}}})
+    7 - db.Bugs.updateOne({_id: ObjectId('68cda60c2a041a4e004d65ca')}, {$set: {fixedInVersion: "v1.2.3", fixedOnDate: new Date()}})
+    8 - db.Bugs.updateOne({_id: ObjectId('68cda60c2a041a4e004d65ca')}, {$set: {closed: true}})
