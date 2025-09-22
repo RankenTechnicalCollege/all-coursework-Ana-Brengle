@@ -1,0 +1,39 @@
+1 - db.listingsAndReviews.insertOne({name: "Test House", property_type: "Loft", price: 250})
+2 - db.listingsAndReviews.find()
+3 - db.listingsAndReviews.find({property_type: "Apartment"})
+4 - db.listingsAndReviews.updateOne({_id: '10006546'}, {$set: {name: "HOT2 Ranken House"}})
+5 - db.listingsAndReviews.deleteOne({_id: '10009999'})
+6 - db.listingsAndReviews.find({price: {$gte: 200}})
+7 - db.listingsAndReviews.createIndex({name: 1})
+8 - db.listingsAndReviews.aggregate([{$project: {name:1, price: 1, _id: 0}}])
+9 - db.listingsAndReviews.find().limit(5)
+10 - db.listingsAndReviews.find({_id: '1001265'})
+11 - db.listingsAndReviews.updateOne({_id: '10006546'}, {$set: {price: 123}})
+12 - db.listingsAndReviews.deleteMany({property_type: 'House'})
+13 - db.listingsAndReviews.find({name: {$regex: /Luxury/}})
+14 - db.guests.insertOne({name: 'Ana Doe', age: 25, email: 'ana.doe@example.com'})
+15 - COMBINED 14 AND 15
+16 -  db.guests.find()
+17 - db.guests.updateOne({_id: ObjectId('68d1ab7ee6a4b0b1e977f865')}, {$set: {age: 30}})
+18 - db.listingsAndReviews.aggregate([
+  {$group: {_id: '$address.market',
+            totalListings: {$sum: 1}
+           }
+           }, 
+  {
+    $sort: {totalListings: -1}
+  },
+  {
+    $limit: 5
+  } 
+])
+19 - db.guests.find({age: {$gte: 30}})
+
+20 - db.listingsAndReviews.aggregate([
+  {
+    $group: {_id: '$property_type',
+             avgPrice: {$avg: '$price'}
+            }
+  }
+])
+
