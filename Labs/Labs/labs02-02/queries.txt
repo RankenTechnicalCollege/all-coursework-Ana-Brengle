@@ -4,13 +4,13 @@ Exercise 3: Query Database
     3 - db.Users.find({givenName: 'Nina'}).projection({_id: 0,givenName: 1,assignedBugs: 1, createdBugs: 1})
     4 - db.Bugs.find({classification: 'unclassified'})
     5 - db.Bugs.find({classification: 'Approved', closed: false})
-    6 -
+    6 - db.Bugs.find({fixedOnDate: null}, {closed: false})
     7 - db.Bugs.find({ stepsToReproduce: ''})
     8 - db.Bugs.find({ testCases: null})
     9 - db.Bugs.find({ workHoursLog: null})
-    10 - db.bugs.aggregate([{$project: {title: 1,commentCount: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: 0} }}}])
-    11 - db.bugs.aggregate([{$project: {title: 1,workHoursCount: { $cond: { if: { $isArray: "$workHoursLogged" }, then: { $sum: "$workHoursLogged" }, else: 0} }}}])
-    12 - db.bugs.aggregate([{$match:{$nor:[{testCases:null}]}},{ $project: { title: {$cond:{if:{$not:{$allElementsTrue:"$testCases"}},then:"$title",else:"$$REMOVE"}}, falseTestCases: {$cond:{if:{$not:{$allElementsTrue:"$testCases"}},then:true,else:"$$REMOVE"}}, _id: 0 } }])
+    10 - db.Bugs.aggregate([{$project: {title: 1,commentCount: { $cond: { if: { $isArray: "$comments" }, then: { $size: "$comments" }, else: 0} }}}])
+    11 - db.Bugs.aggregate([{$project: {title: 1,workHoursCount: { $cond: { if: { $isArray: "$workHoursLogged" }, then: { $sum: "$workHoursLogged" }, else: 0} }}}])
+    12 - db.Bugs.aggregate([{$match:{$nor:[{testCases:null}]}},{ $project: { title: {$cond:{if:{$not:{$allElementsTrue:"$testCases"}},then:"$title",else:"$$REMOVE"}}, falseTestCases: {$cond:{if:{$not:{$allElementsTrue:"$testCases"}},then:true,else:"$$REMOVE"}}, _id: 0 } }])
 Exercise 4: Manipulate Database
     1 - db.Users.insertOne({email: "barry.allen@example.com" , 
                     password: "theFlash", 
