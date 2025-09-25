@@ -1,4 +1,5 @@
 import express from 'express';
+import {ping} from './database.js';
 import dotenv from 'dotenv';
 dotenv.config();
 import debug from 'debug';
@@ -13,13 +14,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const port = process.env.PORT || 3000;
 app.use(express.static('frontend/dist'));
+
+app.use('/api/users', (await import('./routes/api/users.js')).userRouter);
 app.use('/api/bugs', bugRouter);
 app.use('/api/users', userRouter);
 
-
+ping();
 
 app.listen(port,() =>{
-    debugServer(`SServer is now running on port http://localhost:${port}`);
+    debugServer(`Server is now running on port http://localhost:${port}`);
 });
 // import express from 'express';
 // const app = express()
