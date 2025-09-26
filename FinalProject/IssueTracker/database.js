@@ -36,4 +36,14 @@ async function getUsers() {
     return db.collection('users').find({}).toArray();
 }
 
-export {ping, getUsers}
+async function addUser() {
+    const db = await connect();
+    return db.collection('users').insertOne(user);
+}
+
+async function getUserById() {
+    const db = await connect();
+    return db.collection('users').findOne({_id: new ObjectId(id)})
+}
+
+export {ping, getUsers, addUser, getUserById};

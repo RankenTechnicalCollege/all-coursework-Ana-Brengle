@@ -1,14 +1,25 @@
-//import reactLogo from './assets/react.svg'
-//import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 import './App.css'
 
 
 
 function App() {
+
+  const [users, setUsers] = useState([])
+    useEffect(() => {
+      const fetchUsers = async () => {
+        const response = await axios.get('http://localhost:8080/api/')
+        setUsers(response.data)
+      }
+
+      fetchUsers
+    }, [])
+  
   return (
     <>
-      <header>
+      {/* <header>
         <nav className="navbar navbar-expand-lg bg-light">
           <div className="container-fluid">
             <a className="navbar-brand" href="#">Issue Tracker</a>
@@ -56,7 +67,7 @@ function App() {
         </div>
       </div>
       </main>
-      <footer className='bg-light text-center py-3'> &copy; Ana Brengle 2024</footer>
+      <footer className='bg-light text-center py-3'> &copy; Ana Brengle 2024</footer> */}
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     </>
   )

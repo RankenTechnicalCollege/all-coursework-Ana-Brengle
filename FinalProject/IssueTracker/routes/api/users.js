@@ -1,6 +1,7 @@
 import express from 'express';
-import { getUsers } from '../../database.js';
+import { getUsers, addUser, getUserById } from '../../database.js';
 const router = express.Router();
+import bcrypt from 'bcrypt';
 
 import debug from 'debug';
 
@@ -17,37 +18,49 @@ router.use(express.urlencoded({extended:false}));
     {email: 'sophia.patel@example.com', password: 'GoldenHour*30', givenName: 'Sophia', familyName: 'Patel', fullName: 'Sophia Patel', role: 'Product Manager', assignedBug: null, userId: 5},
 ]*/
 
-router.get('/list',async (req, res) => {
-    const users = await getUsers()
-    res.status(200).json(users);
-});
+router.get('', async (req, res) => {
 
-router.get('/:userId',(req, res) => {
-    const id = req.params.userId;
-    //console.log(id);
-    const user = users.find(user => user.userId == id);
-    if(user) {
-        res.status(200).json(user);
-    } else {
-        res.status(404).send('User not found')
+    try {
+        const users = await getUsers()
+        if(!users){
+            res.status(400).json({message: "User not found"});
+            return;
+        } else{
+             res.status(200).json(users);
+        }
+    } catch{
+        res.status(404).json({message: "Error uploading Users"})
     }
-    res.status(200).send(`User with id ${id} is requested`);
+    
+   
 });
 
-router.post('/register', (req,res) => {
+router.get('/:userId', async (req, res) => {
+    try{
 
-    const newUser = req.body;
-    //debugUser(`New user email is : ${newUser.email}`)
+        const id = req.params.userId;
+        const user = await getUserById();
 
-    const searchUser = users.find(user => user.email == newUser.email);
-    if(searchUser) {
-        res.status(400).send('User already exists')
-        return;
-    } else {
+        if(user) {
+        res.status(200).json(user);
+        } else {
+            res.status(404).send('User not found')
+        }
+        res.status(200).send(`User with id ${id} is requested`);
 
+    }catch{
+        res.status(404).json({message: `User ${userId} not found`});
+    }
+   
     
-    
-        newUser.userId = users.length + 1;
+});
+
+router.post('/register', async (req,res) => {
+    try {
+        const newUser = req.body;
+        
+        debugUser(JSON.stringify(result))
+
         if(!newUser.email){
             res.status(400).type('text/plain').send('Email is required');
             return;
@@ -72,10 +85,41 @@ router.post('/register', (req,res) => {
             res.status(400).send('Role is required');
             return;
         }
-        users.push(newUser);
-        res.status(200).type('text/plain').json({message: `User ${newUser.givenName} added successfully`});
+
+        newUser.createdBugs = [];
+        newUser.assignedBugs = [];
+        newUser.password = await bcrypt.hash(newUser.password, 10);
+
+        const existingUser = await getUserByEmail(email);
+        if(existingUser) {
+            res.status(400).send('User already exists')
+            return;
+        }
+
+        const addUser = await addUser(newUser);
+
 
     }
+        //users.push(newUser);
+        //res.status(200).json({message: `User ${newUser.givenName} added successfully`});
+        //const result = await addUser(newUser);   
+    catch  {
+        res.status(404).json({message: "Error adding a User."})
+    }
+    
+
+    
+
+    //const searchUser = users.find(user => user.email == newUser.email);
+
+     
+    
+    // else {
+
+    //     newUser.userId = users.length + 1;
+        
+
+    // }
 });
 
 router.post('/login', (req, res) => {
