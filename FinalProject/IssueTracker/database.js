@@ -11,7 +11,7 @@ const newId = (str) => ObjectId.createFromHexString(str);
 
 let _db = null;
 
-async function connect() {
+async function connectToDatabase() {
     if(!_db) {
         const dbUrl = process.env.DB_URL;
         const dbName = process.env.DB_NAME;
@@ -25,25 +25,43 @@ async function connect() {
 }
 
 async function ping() {
-    const db = await connect();
+    const db = await connectToDatabase();
     const pong = await db.command({ping: 1});
     debugDb('Ping')
     
 }
 
 async function getUsers() {
-    const db = await connect();
+    const db = await connectToDatabase();
     return db.collection('users').find({}).toArray();
 }
 
-async function addUser() {
-    const db = await connect();
+async function addUser(user) {
+    const db = await connectToDatabase();
     return db.collection('users').insertOne(user);
 }
 
-async function getUserById() {
-    const db = await connect();
+async function getUserById(id) {
+    const db = await connectToDatabase();
     return db.collection('users').findOne({_id: new ObjectId(id)})
 }
 
-export {ping, getUsers, addUser, getUserById};
+async function getUserByEmail(email) {
+    const db = await connectToDatabase();
+    return db.collection('users').findOne({email: email})
+    
+}
+
+async function getUpdatedUser(id, password, givenName, familyName, fullName, role) {
+    const db = await connectToDatabase();
+    return db.collection('users').updateOne({_id: new ObjectId(id)}, {$set: {password: password, fullName: fullName, givenName: givenName, familyName: familyName, role: role, lastUpdated: new Date()}})
+}
+
+async function getDeletedUser(id) {
+    const db = await connectToDatabase();
+    return db.collection('users').deleteOne({_id: new ObjectId(id)})
+}
+
+
+
+export {ping, getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser};

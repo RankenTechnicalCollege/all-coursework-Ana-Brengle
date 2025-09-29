@@ -1,7 +1,7 @@
 import express from 'express';
-import { getUsers, addUser, getUserById } from '../../database.js';
+import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser } from '../../database.js';
 const router = express.Router();
-import bcrypt from 'bcrypt';
+import bcrypt, { compare } from 'bcrypt';
 
 import debug from 'debug';
 
@@ -59,7 +59,7 @@ router.post('/register', async (req,res) => {
     try {
         const newUser = req.body;
         
-        debugUser(JSON.stringify(result))
+        //debugUser(JSON.stringify(result))
 
         if(!newUser.email){
             res.status(400).type('text/plain').send('Email is required');
@@ -90,92 +90,137 @@ router.post('/register', async (req,res) => {
         newUser.assignedBugs = [];
         newUser.password = await bcrypt.hash(newUser.password, 10);
 
-        const existingUser = await getUserByEmail(email);
+        const existingUser = await getUserByEmail(newUser.email);
         if(existingUser) {
-            res.status(400).send('User already exists')
+            res.status(400).json({message: 'User already exists'});
             return;
         }
+        const today = new Date();
+        newUser.createdAt = today.toLocaleDateString();
 
-        const addUser = await addUser(newUser);
 
+        const addedUser = await addUser(newUser);
+        debugUser(addedUser);
+
+        if(addUser.insertedId){
+            res.status(201).json({message: `User ${newUser.givenName} added successfully`})
+        }else {
+            res.status(404).json({message: "Error adding a User."})
+        }
 
     }
-        //users.push(newUser);
-        //res.status(200).json({message: `User ${newUser.givenName} added successfully`});
-        //const result = await addUser(newUser);   
     catch  {
         res.status(404).json({message: "Error adding a User."})
     }
     
-
-    
-
-    //const searchUser = users.find(user => user.email == newUser.email);
-
-     
-    
-    // else {
-
-    //     newUser.userId = users.length + 1;
-        
-
-    // }
 });
 
-router.post('/login', (req, res) => {
-    const user = req.body;
+router.post('/login', async (req, res) => {
+    try {
+        const user = req.body;
 
-    if(!user.email){
-            res.status(400).send('Email is required');
-            return;
-        } else if(!user.password){
-            res.status(400).send('Password is required');
+         if(!user.email || !user.password){
+            res.status(400).send('Email and Password are required');
             return;
         } else {
-            const searchUser = users.find(u => u.email == user.email && u.password == user.password);
-            if(searchUser){
-                res.status(200).json({message: 'Welcome Back!'});
-            }else {
-                res.status(401).send('Invalid credentials');
+            const existingUser = await getUserByEmail(email);
+            if(!existingUser){
+                res.status(400).json({message: 'Invalid login credential provided. Please try again.'});
+
+            }else if(await compare(user.password, existingUser.password)) {
+                res.status(200).json({message: `Welcome back ${user.givenName}`});
+
+            } else{
+                res.status(400).json({message: `Invalid login credential provided. Please try again.`});
             }
         }
+
+    } catch {
+
+        res.status(400).json({message: `Invalid login credential provided. Please try again.`});
+    }
+       
 });
 
-router.put('/:userId', (req,res) => {
-    const id = req.params.userId;
-    const userToUpdate = users.find(user => user.userId == id);
+router.patch('/:userId', async (req,res) => {
+    try{
 
-    const updatedUser = req.body;
+        const id = req.params.userId;
+        const userToUpdate = req.body;
+        const prevUser = await getUserById(id);
 
-    if(userToUpdate) 
-    {
+        let password = null;
+        let fullName = null;
+        let givenName = null;
+        let familyName = null;
+        let role = null;
 
-        for(const key in updatedUser) {
-            userToUpdate[key] = updatedUser[key];
+        if(!prevUser) {
+            res.status(400).json({message: `User ${userId} not found`});
         }
 
-        const index = users.findIndex(user => user.userId == id);
-        if(index != -1) {
-            users[index] = userToUpdate;
+        if(!userToUpdate.password){
+            password = prevUser.password
+        } else {
+            password = userToUpdate.password;
+            password = await bcrypt.hash(updatedUser.password, 10)
         }
-        res.status(200).send(`User ${id} updated successfully`)
-    } else {
 
+        if(!userToUpdate.givenName){
+            givenName = prevUser.givenName;
+        }else {
+            givenName = userToUpdate.givenName;
+        }
+
+        if(!userToUpdate.familyName) {
+            familyName = prevUser.familyName;
+        }else {
+            familyName = userToUpdate.familyName;
+        }
+
+        if(!userToUpdate.fullName) {
+            fullName = prevUser.fullName;
+        }else {
+            fullName = userToUpdate.fullName;
+        }
+
+        if(!userToUpdate.role) {
+            role = prevUser.role;
+        }else {
+            role = userToUpdate.role;
+        }
+
+        const updatedUser = await getUpdatedUser(id, password, fullName,givenName,familyName,role);
+        debugUser(updatedUser);
+        if(updatedUser.modifiedCount === 1){
+            res.status(200).send(`User ${id} updated successfully`)
+        } else {
+            res.status(404).send(`User not found.`)
+        }
+
+
+
+
+    } catch{
         res.status(404).send(`User not found.`)
-
     }
 
     
 });
 
-router.delete('/:userId', (req,res) => {
-    const id = req.params.userId;
-    const index = users.findIndex(user => user.userId == id);
-    if(index !== 1) {
-        users.splice(index,1);
-        res.status(200).send(`User ${id} deleted successfully`);
-    } else {
-        res.status(400).send('User not found')
+router.delete('/:userId', async (req,res) => {
+    try {
+        const id = req.params.userId;
+        const deletedUser = await getDeletedUser(id);
+        debugUser(deletedUser);
+
+        if(deletedUser.deletedCount == 1){
+            res.status(200).json({message: `User ${id} deleted successfully`});
+        } else {
+            res.status(404).json({message: `User ${id} not found.`});
+        }
+    } catch  {
+        res.status(404).json({message: 'Error deleting User'})
     }
 });
 
