@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser } from '../../database.js';
+import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser} from '../../database.js';
 const router = express.Router();
 import bcrypt, { compare } from 'bcrypt';
 
@@ -42,7 +42,7 @@ router.get('/:userId', async (req, res) => {
         const user = await getUserById();
 
         if(user) {
-        res.status(200).json(user);
+            res.status(200).json(user);
         } else {
             res.status(404).send('User not found')
         }

@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import debug from 'debug';
 const debugServer = debug('app:Server');
-//import { bugRouter } from './routes/api/bugs.js';
+import { bugRouter } from './routes/api/bugs.js';
 import { userRouter } from './routes/api/users.js';
 
 
@@ -18,6 +18,7 @@ app.use(express.static('frontend/dist'));
 app.use('/api/users;', (await import('./routes/api/users.js')).userRouter);
 app.use('/api/bugs', (await import('./routes/api/bugs.js')).bugRouter);
 app.use('/api/users', userRouter);
+app.use('/api/bugs', bugRouter);
 
 ping();
 

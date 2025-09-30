@@ -62,6 +62,32 @@ async function getDeletedUser(id) {
     return db.collection('users').deleteOne({_id: new ObjectId(id)})
 }
 
+async function getAllBugs() {
+    const db = await connectToDatabase();
+    return db.collection('bugs').find({}).toArray();
+}
+
+async function getBugIds(id) {
+    const db = await connectToDatabase();
+    return db.collection('bugs').findOne({_id: new ObjectId(id)})
+    
+}
+
+async function addedBug(title, stepsToReproduce, description) {
+    const db = await connectToDatabase();
+    return db.collection('bugs').insertOne({title: title, stepsToReproduce: stepsToReproduce, description: description, createdDate: new Date(Date.now()), lastUpdated: new Date(Date.now()), authorOfBug: null, edits:[], comments:[], classification: "unclassified", classifiedOn: null, assignedToUserId: null, assignedToUserName: null, assignedOn: null, testCases:[],workHoursLogged:[], fixInVersion: null, fixedOnDate: null, closed: false, closedOn: null});
+}
+
+async function getUpdatedBug(id, title, stepsToReproduce, description) {
+    const db = await connectToDatabase();
+    return db.collection('bugs').updateOne({_id: new ObjectId(id)}, {$set: {title: title, stepsToReproduce: stepsToReproduce, description: description, lastUpdated: new Date(Date.now())}})
+}
+
+async function classifyBug(id, classification) {
+    const db = await connectToDatabase();
+     return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$set: {classification: classification, classifiedOn: new Date(Date.now()), lastUpdated: new Date(Date.now())}});
+}
 
 
-export {ping, getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser};
+
+export {ping, getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug};
