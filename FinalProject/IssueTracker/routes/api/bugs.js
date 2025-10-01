@@ -8,7 +8,7 @@ const debugBug = debug('app:BugRouter');
 
 router.use(express.urlencoded({extended: false}));
 
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug  } from '../../database.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById  } from '../../database.js';
 
 // const bugs = [
 //      { id: 1, title: 'Login button not responsive', description: 'The login button does not respond when clicked on mobile devices.', stepsToReproduce: '1. Open app on mobile device\n2. Navigate to login page\n3. Tap login button\n4. No action occurs', classification: 'approved', classifiedOn: null, lastUpdated: new Date(Date.now()), assignedToUserName: null, assignedToUserId: null, assignedOn: null, closed: false, closedOn: null},
@@ -88,9 +88,9 @@ router.patch('/:bugId', async(req,res) => {
         const oldBug = await getBugIds();
         const bugToUpdate = req.body;
 
-        let title = null;
-        let stepsToReproduce = null;
-        let description = null;
+        let title = "";
+        let stepsToReproduce = "";
+        let description = "";
 
 
         if(!oldBug) {
@@ -131,7 +131,7 @@ router.patch('/:bugId', async(req,res) => {
     
 });
 
-router.put('/:bugId/classify', async(req,res) => {
+router.patch('/:bugId/classify', async(req,res) => {
     try{
         const id = req.params.bugId;
         const bugToUpdate = req.body
@@ -156,34 +156,28 @@ router.put('/:bugId/classify', async(req,res) => {
 
 });
 
-router.put('/:bugId/assign', (req,res) => {
-    //const id = req.params.bugId;
-    const index = bugs.findIndex(bug => bug.id == req.params.bugId);
+router.put('/:bugId/assign', async(req,res) => {
+    try {
+        const id = req.params.bugId;
+        const bugToAssign = req.body;
+        const assignToUser = await getUserById(bugToAssign.assignedToUserId);
+        const assignedBug = await assignBug(id,bugToAssign.assignedToUserId,userToAssign.fullName);
 
-    if(index === -1) {
-        res.status(404).type('text/plain').send(`Bug not found.`);
-        return;
+        if(assignToUser == undefined){
+            res.status(404).json({message: "User not Found."})
+        }
+
+        if(!assignedBug.modifiedCount === 0){
+            res.status(404).json({message: `Bug not found.`})
+        } else{
+            res.status(200).json({message: `Bug ${id} assigned to ${assignToUser.fullName}`})
+        }
+
+        
+    } catch  {
+        res.status(404).json({message: `Error assigning bug.`})
     }
     
-
-    const assignedId = req.body.assignedToUserId;
-    if(!assignedId || assignedId.toString().trim() === '') {
-        res.status(400).type('text/plain').send(`Invalid or missing User Id`);
-        return;
-    }
-
-    const assignedName = req.body.assignedToUserName;
-    if(!assignedName || assignedName.toString().trim() === '') {
-        res.status(400).type('text/plain').send(`Invalid or missing User Name`);
-        return;
-    }
-
-    bugs[index].assignedOn = new Date(Date.now());
-    bugs[index].lastUpdated = new Date(Date.now());
-    bugs[index].assignedToUserName = assignedName;
-    bugs[index].assignedToUserId = assignedId;
-
-    res.status(200).type('text/plain').send('Bug assigned');
 
     
 });
