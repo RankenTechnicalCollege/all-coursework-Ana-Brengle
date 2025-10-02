@@ -8,7 +8,7 @@ const debugBug = debug('app:BugRouter');
 
 router.use(express.urlencoded({extended: false}));
 
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById  } from '../../database.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug  } from '../../database.js';
 
 // const bugs = [
 //      { id: 1, title: 'Login button not responsive', description: 'The login button does not respond when clicked on mobile devices.', stepsToReproduce: '1. Open app on mobile device\n2. Navigate to login page\n3. Tap login button\n4. No action occurs', classification: 'approved', classifiedOn: null, lastUpdated: new Date(Date.now()), assignedToUserName: null, assignedToUserId: null, assignedOn: null, closed: false, closedOn: null},
@@ -85,7 +85,7 @@ router.post('/new', async(req,res) => {
 router.patch('/:bugId', async(req,res) => {
     try {
         const id = req.params.bugId;
-        const oldBug = await getBugIds();
+        const oldBug = await getBugIds(id);
         const bugToUpdate = req.body;
 
         let title = "";
@@ -94,7 +94,7 @@ router.patch('/:bugId', async(req,res) => {
 
 
         if(!oldBug) {
-            res.status(400).json({message: `Bug ${userId} not found`});
+            res.status(400).json({message: `Bug ${id} not found`});
         }
 
         if(!bugToUpdate.title){
@@ -146,7 +146,7 @@ router.patch('/:bugId/classify', async(req,res) => {
         if(classification.modifiedCount === 0){
             res.status(404).json({message: `Bug not found.`})
         }else{
-            res.status(200).json({message: `Bug ${bugId} classified`})
+            res.status(200).json({message: `Bug ${id} classified`})
         }
 
     } catch{
@@ -156,23 +156,24 @@ router.patch('/:bugId/classify', async(req,res) => {
 
 });
 
-router.put('/:bugId/assign', async(req,res) => {
+router.patch('/:bugId/assign', async(req,res) => {
     try {
-        const id = req.params.bugId;
-        const bugToAssign = req.body;
-        const assignToUser = await getUserById(bugToAssign.assignedToUserId);
-        const assignedBug = await assignBug(id,bugToAssign.assignedToUserId,userToAssign.fullName);
+       const id = req.params.bugId;
+       const {assignedToUserId }= req.body;
 
-        if(assignToUser == undefined){
-            res.status(404).json({message: "User not Found."})
-        }
+       const assignToUser = await getUserById(assignedToUserId);
 
-        if(!assignedBug.modifiedCount === 0){
-            res.status(404).json({message: `Bug not found.`})
-        } else{
-            res.status(200).json({message: `Bug ${id} assigned to ${assignToUser.fullName}`})
-        }
+       if(!assignToUser){
+        return res.status(404).json({message: `User not Found`})
+       }
 
+       const result = await assignBug(id, assignedToUserId, assignToUser.fullName)
+
+       if(result.modifiedCount === 0 ){
+         return res.status(404).json({ message: `Bug not found.` });
+       } else {
+        res.status(200).json({ message: `Bug ${id} assigned to ${assignToUser.fullName}` });
+       }
         
     } catch  {
         res.status(404).json({message: `Error assigning bug.`})
@@ -182,35 +183,30 @@ router.put('/:bugId/assign', async(req,res) => {
     
 });
 
-router.put('/:bugId/close', (req,res) => {
-    const index = bugs.findIndex(bug => bug.id == req.params.bugId);
-    const closedBugs = req.body;
+router.patch('/:bugId/close', async(req,res) => {
+    try{
+        const id = req.params.bugId;
+        const closed = req.body.closed;
 
-    if(index === -1) {
-        res.status(404).type('text/plain').send(`Bug not found.`);
-        return;
+        const closeBug = await getBugIds(id);
+
+        if(!closeBug) {
+            return res.status(404).json({message: `Bug not Found`})
+        }
+
+        const bugClosed = await getClosedBug(id, closed)
+
+        if(bugClosed.modifiedCount > 0){
+            return res.status(200).json({message: `Bug ${id} closed!`})
+        } else {
+            return res.status(400).json({message: `Bug not Closed`})
+        }
+
+    } catch{
+        res.status(404).json({message: `Error closing bug`})
     }
 
-    if(closedBugs == undefined) {
-        return res.status(400).type('text/plain').send('Must be defined');
-    }
-
-    const closedBug = req.body.closed;
-    debugBug(JSON.stringify(closedBug));
-    //if(closedBug != 'false'){
-    //     return res.status(400).type('text/plain').send('Invalid or missing closed (must be false)');
-    // }
-
-    if(closedBugs.closed != 'true') {
-        return res.status(400).type('text/plain').send('Invalid or missing closed (must be true)');
-    }
-
-  bugs[index].closed = 'true';
-  bugs[index].closedOn = new Date().toISOString();
-  bugs[index].lastUpdated = new Date().toISOString();
-
-  return res.status(200).type('text/plain').send('Bug closed!');
-
+   
 
 
 });

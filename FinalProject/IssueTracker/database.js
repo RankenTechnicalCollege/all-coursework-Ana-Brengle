@@ -88,6 +88,15 @@ async function classifyBug(id, classification) {
      return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$set: {classification: classification, classifiedOn: new Date(Date.now()), lastUpdated: new Date(Date.now())}});
 }
 
+async function assignBug(id, assignedToUserId, fullName) {
+    const db = await connectToDatabase();
+    return await db.collection("bugs").updateOne({_id: new ObjectId(id)}, {$set: {assignedToUserId: assignedToUserId, lastUpdated: new Date(Date.now()), assignedOn: new Date(Date.now()), assignedToUserName: fullName}})
+}
+
+async function getClosedBug(id, closed) {
+    const db = await connectToDatabase();
+    return await db.collection("bugs").updateOne({_id: new ObjectId(id)}, {$set: {closed: closed, lastUpdated: new Date(Date.now()), closedOn: new Date(Date.now())}});
+}
 
 
-export {ping, getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug};
+export {ping, getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug};
