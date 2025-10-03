@@ -34,10 +34,11 @@ router.get('', async(req, res) => {
 router.get('/:bugId', async(req, res) => {
     try {
         const id = req.params.bugId;
-        const bug = getBugIds();
+        const bug = await getBugIds(id);
 
         if(bug) {
             res.status(200).json(bug);
+            return;
         } else {
             res.status(404).send('Bug not found')
         }
@@ -136,15 +137,15 @@ router.patch('/:bugId/classify', async(req,res) => {
         const id = req.params.bugId;
         const bugToUpdate = req.body
 
-        if(!bugToUpdate || bugToUpdate.classification.toString().trim() === '') {
+        if(!bugToUpdate || !bugToUpdate.classification || bugToUpdate.classification.toString().trim() === '') {
             res.status(404).type('text/plain').json({message: `Invalid or missing classification`});
             return;
         }
         const classification = await classifyBug(id, bugToUpdate.classification);
         debugBug(classification);
 
-        if(classification.modifiedCount === 0){
-            res.status(404).json({message: `Bug not found.`})
+        if(classification.matchedCount === 0){
+            res.status(404).json({message: `Bug not found or classification unchanged.`})
         }else{
             res.status(200).json({message: `Bug ${id} classified`})
         }
@@ -190,17 +191,25 @@ router.patch('/:bugId/close', async(req,res) => {
 
         const closeBug = await getBugIds(id);
 
+        
+
         if(!closeBug) {
             return res.status(404).json({message: `Bug not Found`})
         }
 
-        const bugClosed = await getClosedBug(id, closed)
+        const bugClosed = await getClosedBug(id, closed);
 
-        if(bugClosed.modifiedCount > 0){
-            return res.status(200).json({message: `Bug ${id} closed!`})
-        } else {
-            return res.status(400).json({message: `Bug not Closed`})
+        if (bugClosed.modifiedCount === 0) {
+            res.status(404).json({message: 'Bug not found'});
+            return;
         }
+        if (closed == "true") {
+            res.status(200).json({message: `Bug ${id} closed.`});
+            
+        }
+            res.status(404).json({message: 'Bug not closed'});
+        
+            
 
     } catch{
         res.status(404).json({message: `Error closing bug`})

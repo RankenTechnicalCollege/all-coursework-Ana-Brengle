@@ -1,7 +1,7 @@
 import express from 'express';
 import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser} from '../../database.js';
 const router = express.Router();
-import bcrypt, { compare } from 'bcrypt';
+import bcrypt from 'bcrypt';
 
 import debug from 'debug';
 
@@ -10,13 +10,7 @@ const debugUser = debug('app:User')
 router.use(express.urlencoded({extended:false}));
 
 
-/*const users = [
-    {email: 'nina.thomas@example.com', password: 'CoralReef#58', givenName: 'Nina', familyName: 'Thomas', fullName: 'Nina Thomas', role: 'Developer', assignedBug: null, userId: 1, },
-    {email: 'ryan.lee@example.com', password: 'MountEverest@89', givenName: 'Ryan', familyName: 'Lee', fullName: 'Ryan Lee', role: 'Business Analyst', assignedBug: null, userId: 2},
-    {email: 'lisa.kim@example.com', password: 'CherryBlossom_14', givenName: 'Lisa', familyName: 'Kim', fullName: 'lisa Kim', role: 'Quality Analyst', assignedBug: null, userId: 3},
-    {email: 'david.clark@example.com', password: 'JetStream!66', givenName: 'David', familyName: 'Clark', fullName: 'David Clark' , role: 'Technical Manager', assignedBug: null, userId: 4},
-    {email: 'sophia.patel@example.com', password: 'GoldenHour*30', givenName: 'Sophia', familyName: 'Patel', fullName: 'Sophia Patel', role: 'Product Manager', assignedBug: null, userId: 5},
-]*/
+
 
 router.get('', async (req, res) => {
 
@@ -27,6 +21,7 @@ router.get('', async (req, res) => {
             return;
         } else{
              res.status(200).json(users);
+             return;
         }
     } catch{
         res.status(404).json({message: "Error uploading Users"})
@@ -36,20 +31,21 @@ router.get('', async (req, res) => {
 });
 
 router.get('/:userId', async (req, res) => {
+    
     try{
-
         const id = req.params.userId;
-        const user = await getUserById();
+        const user = await getUserById(id);
 
         if(user) {
             res.status(200).json(user);
+            return;
         } else {
             res.status(404).send('User not found')
+            return;
         }
-        res.status(200).send(`User with id ${id} is requested`);
 
     }catch{
-        res.status(404).json({message: `User ${userId} not found`});
+        res.status(404).json({message: `User ${id} not found`});
     }
    
     
@@ -58,8 +54,6 @@ router.get('/:userId', async (req, res) => {
 router.post('/register', async (req,res) => {
     try {
         const newUser = req.body;
-        
-        //debugUser(JSON.stringify(result))
 
         if(!newUser.email){
             res.status(400).type('text/plain').send('Email is required');
@@ -85,16 +79,17 @@ router.post('/register', async (req,res) => {
             res.status(400).send('Role is required');
             return;
         }
-
-        newUser.createdBugs = [];
-        newUser.assignedBugs = [];
-        newUser.password = await bcrypt.hash(newUser.password, 10);
+        const hashPassword = await bcrypt.hash(newUser.password, 10 );
+        newUser.password = hashPassword;
 
         const existingUser = await getUserByEmail(newUser.email);
         if(existingUser) {
             res.status(400).json({message: 'User already exists'});
             return;
         }
+
+        newUser.createdBugs = [];
+        newUser.assignedBugs = [];
         const today = new Date();
         newUser.createdAt = today.toLocaleDateString();
 
@@ -102,10 +97,12 @@ router.post('/register', async (req,res) => {
         const addedUser = await addUser(newUser);
         debugUser(addedUser);
 
-        if(addUser.insertedId){
+        if(addedUser.insertedId){
             res.status(201).json({message: `User ${newUser.givenName} added successfully`})
+            return;
         }else {
             res.status(404).json({message: "Error adding a User."})
+            return;
         }
 
     }
@@ -122,18 +119,23 @@ router.post('/login', async (req, res) => {
          if(!user.email || !user.password){
             res.status(400).send('Email and Password are required');
             return;
-        } else {
-            const existingUser = await getUserByEmail(email);
+        } 
+    
+            const existingUser = await getUserByEmail(user.email);
             if(!existingUser){
                 res.status(400).json({message: 'Invalid login credential provided. Please try again.'});
+                return;
 
-            }else if(await compare(user.password, existingUser.password)) {
-                res.status(200).json({message: `Welcome back ${user.givenName}`});
+            }
+            if (existingUser && await bcrypt.compare(user.password, existingUser.password)) {
+                res.status(200).json({message: `Welcome back ${existingUser.givenName}`});
+                return;
 
             } else{
                 res.status(400).json({message: `Invalid login credential provided. Please try again.`});
+                return;
             }
-        }
+        
 
     } catch {
 
@@ -156,14 +158,15 @@ router.patch('/:userId', async (req,res) => {
         let role = null;
 
         if(!prevUser) {
-            res.status(400).json({message: `User ${userId} not found`});
+            res.status(400).json({message: `User ${id} not found`});
+            return;
         }
 
         if(!userToUpdate.password){
             password = prevUser.password
         } else {
             password = userToUpdate.password;
-            password = await bcrypt.hash(updatedUser.password, 10)
+            password = await bcrypt.hash(userToUpdate.password, 10)
         }
 
         if(!userToUpdate.givenName){
