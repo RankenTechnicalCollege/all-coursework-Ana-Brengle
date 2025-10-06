@@ -62,6 +62,8 @@ async function getDeletedUser(id) {
     return db.collection('users').deleteOne({_id: new ObjectId(id)})
 }
 
+
+//---------------BUG DATABASE------------//
 async function getAllBugs() {
     const db = await connectToDatabase();
     return db.collection('bugs').find({}).toArray();
@@ -98,5 +100,8 @@ async function getClosedBug(id, closed) {
     return await db.collection("bugs").updateOne({_id: new ObjectId(id)}, {$set: {closed: closed, lastUpdated: new Date(Date.now()), closedOn: new Date(Date.now())}});
 }
 
+async function getBugComments(params) {
+    
+}
 
 export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug};

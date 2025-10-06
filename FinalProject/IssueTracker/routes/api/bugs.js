@@ -3,22 +3,15 @@ import express from 'express';
 const router = express.Router();
 
 import debug from 'debug';
-import { validate } from '../../middleware/joiValidator.js';
 
 import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema } from '../../validation/bugSchema.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug  } from '../../database.js';
+import { validId } from '../../middleware/validId.js';
+import { validate } from '../../middleware/joiValidator.js';
 
 const debugBug = debug('app:BugRouter');
 
 router.use(express.urlencoded({extended: false}));
-
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug  } from '../../database.js';
-import { validId } from '../../middleware/validId.js';
-
-// const bugs = [
-//      { id: 1, title: 'Login button not responsive', description: 'The login button does not respond when clicked on mobile devices.', stepsToReproduce: '1. Open app on mobile device\n2. Navigate to login page\n3. Tap login button\n4. No action occurs', classification: 'approved', classifiedOn: null, lastUpdated: new Date(Date.now()), assignedToUserName: null, assignedToUserId: null, assignedOn: null, closed: false, closedOn: null},
-//      { id: 2, title: 'Incorrect total price in cart', description: 'The total price in the shopping cart does not include tax.', stepsToReproduce: '1. Add items to cart\n2. View total price\n3. Notice tax is missing',  classification: 'unapproved', classifiedOn: null, lastUpdated: new Date(Date.now()), assignedToUserName: null, assignedToUserId: null, assignedOn: null, closed: false, closedOn: null },
-//      { id: 3, title: 'Notification emails not sent', description: 'Users do not receive notification emails after password reset.', stepsToReproduce: '1. Request password reset\n2. Complete reset\n3. No notification email received',  classification: 'Duplicate', classifiedOn: null, lastUpdated: new Date(Date.now()), assignedToUserName: null, assignedToUserId: null, assignedOn: null, closed: false, closedOn: null }
-// ];
 
 router.get('', async(req, res) => {
     try{
@@ -220,6 +213,25 @@ router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(
    
 
 
+});
+
+router.get('/:bugId/comments', async(req,res) => {
+   try {
+        const id = req.params.bugId;
+        const bug = await getBugIds(id);
+        const comments = await getBugComments(id);
+
+        if(bug) {
+            res.status(200).json(bug);
+            return;
+        } else {
+            res.status(404).send('Bug not found')
+        }
+        res.status(200).json({message: `Bug with id ${id} is requested`});
+
+    } catch  {
+         res.status(404).json({message: 'Bug not found'})
+    }
 });
 
 export {router as bugRouter};
