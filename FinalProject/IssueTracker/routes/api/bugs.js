@@ -3,12 +3,16 @@ import express from 'express';
 const router = express.Router();
 
 import debug from 'debug';
+import { validate } from '../../middleware/joiValidator.js';
+
+import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema } from '../../validation/bugSchema.js';
 
 const debugBug = debug('app:BugRouter');
 
 router.use(express.urlencoded({extended: false}));
 
 import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug  } from '../../database.js';
+import { validId } from '../../middleware/validId.js';
 
 // const bugs = [
 //      { id: 1, title: 'Login button not responsive', description: 'The login button does not respond when clicked on mobile devices.', stepsToReproduce: '1. Open app on mobile device\n2. Navigate to login page\n3. Tap login button\n4. No action occurs', classification: 'approved', classifiedOn: null, lastUpdated: new Date(Date.now()), assignedToUserName: null, assignedToUserId: null, assignedOn: null, closed: false, closedOn: null},
@@ -27,11 +31,9 @@ router.get('', async(req, res) => {
     }catch{
         res.status(400).json({message: 'Error loading bugs.'})
     }
-    // debugBug('bug list route hit');
-    // res.json(bugs);
 });
 
-router.get('/:bugId', async(req, res) => {
+router.get('/:bugId', validId('bugId'), async(req, res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -50,7 +52,7 @@ router.get('/:bugId', async(req, res) => {
 
 });
 
-router.post('/new', async(req,res) => {
+router.post('/new', validate(addBugSchema),async(req,res) => {
     try {
         const newBug= req.body;
         if(!newBug.title){
@@ -83,7 +85,7 @@ router.post('/new', async(req,res) => {
 
 });
 
-router.patch('/:bugId', async(req,res) => {
+router.patch('/:bugId', validId('bugId'), validate(updateBugSchema), async(req,res) => {
     try {
         const id = req.params.bugId;
         const oldBug = await getBugIds(id);
@@ -132,7 +134,7 @@ router.patch('/:bugId', async(req,res) => {
     
 });
 
-router.patch('/:bugId/classify', async(req,res) => {
+router.patch('/:bugId/classify', validId('bugId'), validate(classifyBugSchema),async(req,res) => {
     try{
         const id = req.params.bugId;
         const bugToUpdate = req.body
@@ -157,10 +159,10 @@ router.patch('/:bugId/classify', async(req,res) => {
 
 });
 
-router.patch('/:bugId/assign', async(req,res) => {
+router.patch('/:bugId/assign', validId('bugId'), validate(assignBugSchema),async(req,res) => {
     try {
        const id = req.params.bugId;
-       const {assignedToUserId }= req.body;
+       const {assignedToUserId } = req.body;
 
        const assignToUser = await getUserById(assignedToUserId);
 
@@ -184,7 +186,7 @@ router.patch('/:bugId/assign', async(req,res) => {
     
 });
 
-router.patch('/:bugId/close', async(req,res) => {
+router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(req,res) => {
     try{
         const id = req.params.bugId;
         const closed = req.body.closed;

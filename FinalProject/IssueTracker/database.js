@@ -24,12 +24,12 @@ async function connectToDatabase() {
     
 }
 
-async function ping() {
-    const db = await connectToDatabase();
-    const pong = await db.command({ping: 1});
-    debugDb('Ping')
+// async function ping() {
+//     const db = await connectToDatabase();
+//     const pong = await db.command({ping: 1});
+//     debugDb('Ping')
     
-}
+// }
 
 async function getUsers() {
     const db = await connectToDatabase();
@@ -99,4 +99,4 @@ async function getClosedBug(id, closed) {
 }
 
 
-export {ping, getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug};
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug};

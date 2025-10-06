@@ -1,17 +1,22 @@
 import express from 'express';
-import {ping} from './database.js';
+//import {ping} from './database.js';
 import dotenv from 'dotenv';
 dotenv.config();
 import debug from 'debug';
 const debugServer = debug('app:Server');
 import { bugRouter } from './routes/api/bugs.js';
 import { userRouter } from './routes/api/users.js';
+import cors from 'cors'
+import { registerSchema } from './validation/userSchema.js';
+import { validate } from './middleware/joiValidator.js';
+import { validId } from './middleware/validId.js';
 
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 const port = process.env.PORT || 3000;
 app.use(express.static('frontend/dist'));
 
@@ -20,22 +25,18 @@ app.use('/api/bugs', (await import('./routes/api/bugs.js')).bugRouter);
 app.use('/api/users', userRouter);
 app.use('/api/bugs', bugRouter);
 
-ping();
+//ping();
 
 app.listen(port,() =>{
     debugServer(`Server is now running on port http://localhost:${port}`);
 });
-// import express from 'express';
-// const app = express()
-// const port = 3000
 
-// app.get('/', (req, res) => {
-//   res.send('Hello World!')
-// })
-
-// app.listen(port, () => {
-//   console.log(`Example app listening on port ${port}`)
-// })
+app.post('/api/users', validate(registerSchema), (req, res) => {
+    res.status(201).json({
+        message: 'User registered successfully!',
+        data: req.body
+    })
+});
 
 
 

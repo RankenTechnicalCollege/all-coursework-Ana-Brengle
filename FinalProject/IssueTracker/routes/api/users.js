@@ -1,19 +1,19 @@
 import express from 'express';
 import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser} from '../../database.js';
-const router = express.Router();
-import bcrypt from 'bcrypt';
 
+import bcrypt from 'bcrypt';
+import { registerSchema, loginSchema, updateUserSchema } from '../../validation/userSchema.js';
+import { validate } from '../../middleware/joiValidator.js';
+import { validId } from '../../middleware/validId.js';
 import debug from 'debug';
 
 const debugUser = debug('app:User')
+const router = express.Router();
 
 router.use(express.urlencoded({extended:false}));
 
 
-
-
 router.get('', async (req, res) => {
-
     try {
         const users = await getUsers()
         if(!users){
@@ -26,12 +26,9 @@ router.get('', async (req, res) => {
     } catch{
         res.status(404).json({message: "Error uploading Users"})
     }
-    
-   
 });
 
-router.get('/:userId', async (req, res) => {
-    
+router.get('/:userId',validId('userId'), async (req, res) => { 
     try{
         const id = req.params.userId;
         const user = await getUserById(id);
@@ -47,11 +44,9 @@ router.get('/:userId', async (req, res) => {
     }catch{
         res.status(404).json({message: `User ${id} not found`});
     }
-   
-    
 });
 
-router.post('/register', async (req,res) => {
+router.post('/register', validate(registerSchema), async (req,res) => {
     try {
         const newUser = req.body;
 
@@ -104,15 +99,13 @@ router.post('/register', async (req,res) => {
             res.status(404).json({message: "Error adding a User."})
             return;
         }
-
     }
     catch  {
         res.status(404).json({message: "Error adding a User."})
     }
-    
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', validate(loginSchema),async (req, res) => {
     try {
         const user = req.body;
 
@@ -140,13 +133,11 @@ router.post('/login', async (req, res) => {
     } catch {
 
         res.status(400).json({message: `Invalid login credential provided. Please try again.`});
-    }
-       
+    }  
 });
 
-router.patch('/:userId', async (req,res) => {
+router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (req,res) => {
     try{
-
         const id = req.params.userId;
         const userToUpdate = req.body;
         const prevUser = await getUserById(id);
@@ -201,17 +192,12 @@ router.patch('/:userId', async (req,res) => {
             res.status(404).send(`User not found.`)
         }
 
-
-
-
     } catch{
         res.status(404).send(`User not found.`)
     }
-
-    
 });
 
-router.delete('/:userId', async (req,res) => {
+router.delete('/:userId', validId('userId'), async (req,res) => {
     try {
         const id = req.params.userId;
         const deletedUser = await getDeletedUser(id);
@@ -228,4 +214,3 @@ router.delete('/:userId', async (req,res) => {
 });
 
 export {router as userRouter}
-//export {users as users}
