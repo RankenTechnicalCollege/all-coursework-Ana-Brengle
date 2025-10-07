@@ -100,8 +100,19 @@ async function getClosedBug(id, closed) {
     return await db.collection("bugs").updateOne({_id: new ObjectId(id)}, {$set: {closed: closed, lastUpdated: new Date(Date.now()), closedOn: new Date(Date.now())}});
 }
 
-async function getBugComments(params) {
-    
+async function getBugComments(id) {
+    const db = await connectToDatabase();
+    const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
+    return bug.comments
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug};
+async function getCommentsId(id, commentId) {
+    const db = await connectToDatabase();
+    const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
+    if (!bug || !bug.comments) return null;
+    const comment = bug.comments.find(c => c._id == commentId);
+    debugDb(comment)
+    return comment;
+}
+
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId};

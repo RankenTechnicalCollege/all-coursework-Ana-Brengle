@@ -5,7 +5,7 @@ const router = express.Router();
 import debug from 'debug';
 
 import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema } from '../../validation/bugSchema.js';
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug  } from '../../database.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId  } from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 
@@ -164,6 +164,7 @@ router.patch('/:bugId/assign', validId('bugId'), validate(assignBugSchema),async
        }
 
        const result = await assignBug(id, assignedToUserId, assignToUser.fullName)
+       debugBug(result)
 
        if(result.modifiedCount === 0 ){
          return res.status(404).json({ message: `Bug not found.` });
@@ -193,7 +194,7 @@ router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(
         }
 
         const bugClosed = await getClosedBug(id, closed);
-
+        debugBug(bugClosed);
         if (bugClosed.modifiedCount === 0) {
             res.status(404).json({message: 'Bug not found'});
             return;
@@ -219,19 +220,48 @@ router.get('/:bugId/comments', async(req,res) => {
    try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
-        const comments = await getBugComments(id);
-
-        if(bug) {
-            res.status(200).json(bug);
+        
+        if(!bug) {
+            res.status(400).json({message: 'Bug not found'});
             return;
-        } else {
-            res.status(404).send('Bug not found')
         }
-        res.status(200).json({message: `Bug with id ${id} is requested`});
+        
+        const comments = await getBugComments(id);
+        debugBug(comments);
+        if(!comments){
+            res.status(400).json({message: 'Bug not found and no comments for this bug.'});
+            return;
+        }
+        res.status(200).json(comments)
 
     } catch  {
          res.status(404).json({message: 'Bug not found'})
     }
+});
+
+router.get('/:bugId/comments/:commentId', async(req, res) => {
+   try {
+     const id = req.params.bugId;
+     const bug = await getBugIds(id);
+
+    if(!bug) {
+        res.status(400).json({message: 'Bug not found'});
+        return;
+    }
+    const commentId = req.params.commentId;
+    const comments = await getCommentsId(id, commentId)
+
+    debugBug(comments)
+
+    if(!comments) {
+        res.status(400).json({message: 'Bug not found and no comments for this bug.'});
+        return;
+    }
+    res.status(200).json(comments)
+
+   } catch {
+     res.status(404).json({message: 'Error loading Bug and Comments'})
+   } 
 });
 
 export {router as bugRouter};
