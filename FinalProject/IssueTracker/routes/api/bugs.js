@@ -4,10 +4,12 @@ const router = express.Router();
 
 import debug from 'debug';
 
-import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema } from '../../validation/bugSchema.js';
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId  } from '../../database.js';
+import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema, addCommentSchema } from '../../validation/bugSchema.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug  } from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
+//import { date } from 'joi';
+import { ObjectId } from 'mongodb';
 
 const debugBug = debug('app:BugRouter');
 
@@ -258,10 +260,48 @@ router.get('/:bugId/comments/:commentId', async(req, res) => {
         return;
     }
     res.status(200).json(comments)
-
    } catch {
      res.status(404).json({message: 'Error loading Bug and Comments'})
    } 
+});
+
+router.post('/:bugId/comments', validate(addBugSchema), validId('bugId'),async(req,res) => {
+    try {
+        const id = req.params.bugId;
+        const bug = await getBugIds(id)
+
+        if(!bug) {
+             res.status(400).json({message: 'Bug not found'});
+            return;
+        }
+        const newComment = req.body
+        const bugAuthor = await getUserById(newComment.authorId)
+
+        if(!bugAuthor) {
+            res.status(400).json({message: 'Author not found'});
+            return;
+        }
+        const commentId = new ObjectId();
+        const orderedComment = {
+            commentId: commentId,
+            authorId: newComment.authorId,
+            text: newComment.text,
+            createdAt: new Date(),
+         };
+    
+        
+        const addComment = await addCommentToBug(id, orderedComment)
+        debugBug(addComment)
+         if(addComment.modifiedCount === 1){
+            res.status(201).json({message: `Comment added successfully.`})
+            return;
+        }else {
+            res.status(404).json({message: "Error adding a comment to bug."})
+        }
+
+    } catch {
+         res.status(500).json({message: "Error adding comment to bug."})
+    }
 });
 
 export {router as bugRouter};

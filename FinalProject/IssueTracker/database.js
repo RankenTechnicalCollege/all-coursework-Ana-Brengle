@@ -115,4 +115,10 @@ async function getCommentsId(id, commentId) {
     return comment;
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId};
+async function addCommentToBug(id, comment) {
+    const db = await connectToDatabase();
+    const newComment = await db.collection('bugs').updateOne({_id: new ObjectId(id)}, {$push: {comments: comment}})
+    return newComment;
+}
+
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug};

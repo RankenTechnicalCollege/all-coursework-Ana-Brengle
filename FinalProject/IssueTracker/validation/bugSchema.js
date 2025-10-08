@@ -1,9 +1,9 @@
 import Joi from "joi";
 
 const addBugSchema = Joi.object({
-  title: Joi.string().min(1).required(),
-  description: Joi.string().min(1).required(),
-  stepsToReproduce: Joi.string().min(1).required()
+  title: Joi.string().required(),
+  description: Joi.string().required(),
+  stepsToReproduce: Joi.string().required()
 }).required();
 
 const updateBugSchema = Joi.object({
@@ -24,4 +24,10 @@ const closeBugSchema = Joi.object({
   closed: Joi.boolean().required()
 }).required();
 
-export {closeBugSchema, assignBugSchema, classifyBugSchema, updateBugSchema, addBugSchema}
+const addCommentSchema = Joi.object({
+  authorId: Joi.string().required(),
+  text: Joi.string().required()
+}).required();
+
+
+export {closeBugSchema, assignBugSchema, classifyBugSchema, updateBugSchema, addBugSchema, addCommentSchema}
