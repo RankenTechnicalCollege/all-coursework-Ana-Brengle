@@ -121,4 +121,24 @@ async function addCommentToBug(id, comment) {
     return newComment;
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug};
+async function getBugTests(id) {
+    const db = await connectToDatabase();
+    const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
+    return bug.tests
+}
+
+async function getTestsId(id, testId) {
+    const db = await connectToDatabase();
+    const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
+    if (!bug || !bug.tests) return null;
+    const test = bug.tests.find(t => t._id == testId);
+    debugDb(test);
+    return test;
+}
+
+async function addTestCase(id, test) {
+    const db = await connectToDatabase()
+    return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {tests : test}, $set: {lastUpdated: new Date(Date.now())}});
+}
+
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase};

@@ -5,7 +5,7 @@ const router = express.Router();
 import debug from 'debug';
 
 import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema, addCommentSchema } from '../../validation/bugSchema.js';
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug  } from '../../database.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase  } from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 //import { date } from 'joi';
@@ -265,7 +265,7 @@ router.get('/:bugId/comments/:commentId', async(req, res) => {
    } 
 });
 
-router.post('/:bugId/comments', validate(addBugSchema), validId('bugId'),async(req,res) => {
+router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id)
@@ -293,7 +293,7 @@ router.post('/:bugId/comments', validate(addBugSchema), validId('bugId'),async(r
         const addComment = await addCommentToBug(id, orderedComment)
         debugBug(addComment)
          if(addComment.modifiedCount === 1){
-            res.status(201).json({message: `Comment added successfully.`})
+            res.status(202).json({message: `Comment added successfully.`})
             return;
         }else {
             res.status(404).json({message: "Error adding a comment to bug."})
@@ -301,6 +301,89 @@ router.post('/:bugId/comments', validate(addBugSchema), validId('bugId'),async(r
 
     } catch {
          res.status(500).json({message: "Error adding comment to bug."})
+    }
+});
+
+router.get('/:bugId/tests', async(req,res) => {
+    try{
+        const id = req.params.bugId;
+        const bug = await getBugIds(id);
+        
+        if(!bug) {
+            res.status(400).json({message: 'Bug not found'});
+            return;
+        }
+        
+        const tests = await getBugTests(id);
+        debugBug(tests);
+        if(!tests){
+            res.status(400).json({message: 'There are no Tests for this bug.'});
+            return;
+        }
+        res.status(200).json(tests)
+    } catch {
+        res.status(404).json({message: 'Bug not found and no tests for this bug.'});
+    }
+});
+
+router.get('/:bugId/tests/:testId', async(req,res) => {
+    try {
+        const id = req.params.bugId;
+        const bug = await getBugIds(id);
+
+        if(!bug) {
+            res.status(400).json({message: 'Bug not found'});
+            return;
+        }
+        const testId = req.params.testId;
+        const tests = await getTestsId(id, testId)
+
+        debugBug(tests)
+
+        if(!tests) {
+            res.status(400).json({message: 'Test Not Found.'});
+            return;
+        }
+        res.status(200).json(tests)  
+    } catch {
+        res.status(404).json({message: 'Error loading Bug and Tests'})
+    }
+
+});
+
+router.post('/:bugId/tests', async(req,res) => {
+    try{
+        const id = req.params.bugId;
+        const bug = await getBugIds(id)
+
+        if(!bug) {
+             res.status(400).json({message: 'Bug not found'});
+            return;
+        }
+        // const user = await getUserById(newTest.userId);
+        // if(!user || user.role !== 'Quality Analyst') {
+        //     return res.status(403).json({ message: 'Access denied. Only Quality Analysts can add test cases.' });
+        //}
+
+        const testId = new ObjectId();
+        const addedTestCase = await addTestCase(id, test)
+  
+        if (addedTestCase.modifiedCount === 0) {
+            res.status(404).json({message: 'Failed to add test to bug'});
+            return;
+        }
+
+        const test =  req.body;
+        if (test.status && test.status.toLowerCase() === 'pass') {
+            return res.status(200).json({ message: 'Bug has Passed' });
+        } else if (test.status && test.status.toLowerCase() === 'fail') {
+            return res.status(200).json({ message: 'Bug has Failed' });
+        } else {
+            return res.status(200).json({ message: 'Bug has not been tested' });
+        }
+
+    } catch{
+        res.status(404).json({message: 'Error adding Test Case to Bug.'})
     }
 });
 
