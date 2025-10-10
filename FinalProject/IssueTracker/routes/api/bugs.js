@@ -284,7 +284,10 @@ router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),asy
         const commentId = new ObjectId();
         const orderedComment = {
             commentId: commentId,
-            authorId: newComment.authorId,
+            commentAuthor: {
+                id: bugAuthor._id,
+                name: bugAuthor.name
+            },
             text: newComment.text,
             createdAt: new Date(),
          };
@@ -353,38 +356,60 @@ router.get('/:bugId/tests/:testId', async(req,res) => {
 
 router.post('/:bugId/tests', async(req,res) => {
     try{
+        const {authorId, title, status} = req.body;
         const id = req.params.bugId;
-        const bug = await getBugIds(id)
 
+
+        const bug = await getBugIds(id)
         if(!bug) {
              res.status(400).json({message: 'Bug not found'});
             return;
         }
-        // const user = await getUserById(newTest.userId);
-        // if(!user || user.role !== 'Quality Analyst') {
-        //     return res.status(403).json({ message: 'Access denied. Only Quality Analysts can add test cases.' });
-        //}
 
-        const testId = new ObjectId();
-        const addedTestCase = await addTestCase(id, test)
+        const user = await getUserById(authorId);
+        debugBug(user)
+        if(!user) {
+            res.status(400).json({message: 'User not found'});
+            return;
+        }
+        if(user.role !== 'Quality Analyst') {
+            return res.status(403).json({ message: 'Access denied. Only Quality Analysts can add test cases.' });
+        }
+
+        const testId = new ObjectId()
+        const testCase = {
+            testId: testId,
+            title: title,
+            status: status,
+            testAuthor: {
+                id: user._id,
+                name: user.fullName
+            },
+            createdAt: new Date(),
+            lastUpdated: new Date()
+        };
+
+        const addedTestCase = await addTestCase(id, testCase)
   
         if (addedTestCase.modifiedCount === 0) {
             res.status(404).json({message: 'Failed to add test to bug'});
             return;
         }
 
-        const test =  req.body;
-        if (test.status && test.status.toLowerCase() === 'pass') {
-            return res.status(200).json({ message: 'Bug has Passed' });
-        } else if (test.status && test.status.toLowerCase() === 'fail') {
-            return res.status(200).json({ message: 'Bug has Failed' });
-        } else {
-            return res.status(200).json({ message: 'Bug has not been tested' });
-        }
+        //debugBug(addTestCase);
+        res.status(200).json({ message: 'Test case added' });
 
     } catch{
         res.status(404).json({message: 'Error adding Test Case to Bug.'})
     }
+});
+
+router.patch('/:bugId/tests/:testId', async(req,res) =>{
+
+});
+
+router.delete('/:bugId/tests/:testId', async(req,res) =>{
+
 });
 
 export {router as bugRouter};
