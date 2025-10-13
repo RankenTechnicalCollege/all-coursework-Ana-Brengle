@@ -4,8 +4,8 @@ const router = express.Router();
 
 import debug from 'debug';
 
-import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema, addCommentSchema } from '../../validation/bugSchema.js';
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase  } from '../../database.js';
+import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema, addCommentSchema, addTestCaseSchema } from '../../validation/bugSchema.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, deleteTestCase  } from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 //import { date } from 'joi';
@@ -307,7 +307,7 @@ router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),asy
     }
 });
 
-router.get('/:bugId/tests', async(req,res) => {
+router.get('/:bugId/tests', validId('bugId'), async(req,res) => {
     try{
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -329,7 +329,7 @@ router.get('/:bugId/tests', async(req,res) => {
     }
 });
 
-router.get('/:bugId/tests/:testId', async(req,res) => {
+router.get('/:bugId/tests/:testId', validId('bugId'), validId('testId') ,async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -354,7 +354,7 @@ router.get('/:bugId/tests/:testId', async(req,res) => {
 
 });
 
-router.post('/:bugId/tests', async(req,res) => {
+router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
     try{
         const {authorId, title, status} = req.body;
         const id = req.params.bugId;
@@ -404,12 +404,90 @@ router.post('/:bugId/tests', async(req,res) => {
     }
 });
 
-router.patch('/:bugId/tests/:testId', async(req,res) =>{
+router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), validate(updateBugSchema), async(req,res) =>{
+    try {
+        const id = req.params.bugId;
+        const bug = await getBugIds(id);
 
+        if(!bug) {
+             res.status(400).json({message: 'Bug not found'});
+            return;
+        }
+        const testId = req.params.testId;
+        const updateTest = req.body;
+        const oldTest = await getTestsId(id, testId);
+        if (!oldTest) {
+            res.status(404).json({ message: 'Test case not found' });
+            return;
+        }
+
+        let status = "";
+        let testAuthor = {
+            id: oldTest.testAuthor.id,
+            name: oldTest.testAuthor.name
+        };
+
+        if(!updateTest.status){
+            status = oldTest.status;
+        } else {
+            status = updateTest.status;
+        }
+
+        if (updateTest.testAuthor) {
+            if (updateTest.testAuthor.id) {
+                const user = await getUserById(updateTest.testAuthor.id);
+                if (!user) {
+                    return res.status(400).json({ message: 'Test author not found' });
+                }
+                testAuthor = {
+                    id: user._id,
+                    name: user.fullName
+                };
+            } else {
+                testAuthor = oldTest.testAuthor;
+            }
+        } else {
+            testAuthor = oldTest.testAuthor;
+        }
+
+        const result = await getUpdatedTestCase(id, testId, testAuthor, status);
+        if (result.modifiedCount === 0) {
+            return res.status(500).json({ message: 'Failed to update test case' });
+        }
+
+        res.status(200).json({ message: 'Test case updated successfully' });
+
+    } catch  {
+         res.status(404).json({message: 'Error Updating Test Case.'})
+    }
 });
 
-router.delete('/:bugId/tests/:testId', async(req,res) =>{
-
+router.delete('/:bugId/tests/:testId', validId('bugId'), validId('testId'),async(req,res) =>{
+    try {
+        const id = req.params.bugId;
+        const bug = await GetBugById(id);
+        if (!bug) {
+            res.status(404).json({message: 'Bug not found'});
+            return;
+        }
+        const testId = req.params.testCaseId;
+        const deleteTestCase = await getTestsId(id, testId);
+        if (!deleteTestCase) {
+            res.status(404).json({message: 'Test case not found'});
+            return;
+        }
+        testId = new ObjectId(req.params.testId);
+        const deletedTestCase = await deleteTestCase(id, testId);
+        debugBug(deletedTestCase);
+        if (deletedTestCase.modifiedCount === 0) {
+            res.status(404).json({message: 'Bug or test case not found'});
+            return;
+        }
+        res.status(200).json({message: `Test case ${testCaseId} deleted successfully.`});
+        
+    } catch {
+         res.status(404).json({message: 'Error deleting Test Case.'})
+    }
 });
 
 export {router as bugRouter};

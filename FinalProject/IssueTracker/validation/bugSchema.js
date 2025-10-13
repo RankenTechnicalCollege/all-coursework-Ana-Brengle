@@ -29,5 +29,15 @@ const addCommentSchema = Joi.object({
   text: Joi.string().required()
 }).required();
 
+const addTestCaseSchema = Joi.object({
+  title: Joi.string().required(),
+  status: Joi.string().valid("passed", "failed").required()
+}).required()
 
-export {closeBugSchema, assignBugSchema, classifyBugSchema, updateBugSchema, addBugSchema, addCommentSchema}
+const updateTestCaseSchema = Joi.object({
+  title: Joi.string().optional(),
+  status: Joi.string().valid("passed", "failed").optional()
+})
+
+
+export {closeBugSchema, assignBugSchema, classifyBugSchema, updateBugSchema, addBugSchema, addCommentSchema, addTestCaseSchema, updateTestCaseSchema}

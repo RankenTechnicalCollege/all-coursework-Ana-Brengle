@@ -138,8 +138,19 @@ async function getTestsId(id, testId) {
 
 async function addTestCase(id, testCase) {
     const db = await connectToDatabase()
-    const newTestCase = await db.collection('bugs').updateOne({_id: new ObjectId(id)}, {$push: {testCases: testCase}})
-    return newTestCase;
+    return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {testCases : testCase}, $set: {lastUpdated: new Date(Date.now())}});
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase};
+async function getUpdatedTestCase(id, testId, testAuthor, status) {
+    const db = await connectToDatabase();
+    return await db.collection('bugs').updateOne({_id: new ObjectId(id)}, {$set: {testAuthor: testAuthor, status: status, lastUpdated: new Date(Date.now())}})
+}
+
+async function deleteTestCase(id, testId) {
+    const db = await connectToDatabase();
+    const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {id: testId}}, $set: {lastUpdated: new Date(Date.now())}});
+    debugDb(test);
+    return test;
+}
+
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase};
