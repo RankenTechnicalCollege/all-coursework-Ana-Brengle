@@ -30,14 +30,15 @@ const addCommentSchema = Joi.object({
 }).required();
 
 const addTestCaseSchema = Joi.object({
+  authorId: Joi.string().required(),
   title: Joi.string().required(),
   status: Joi.string().valid("passed", "failed").required()
 }).required()
 
 const updateTestCaseSchema = Joi.object({
   title: Joi.string().optional(),
-  status: Joi.string().valid("passed", "failed").optional()
-})
-
+  status: Joi.string().valid("passed", "failed").optional(),
+  testAuthor_id: Joi.string().optional()
+}).required()
 
 export {closeBugSchema, assignBugSchema, classifyBugSchema, updateBugSchema, addBugSchema, addCommentSchema, addTestCaseSchema, updateTestCaseSchema}

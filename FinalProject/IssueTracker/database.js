@@ -124,31 +124,31 @@ async function addCommentToBug(id, comment) {
 async function getBugTests(id) {
     const db = await connectToDatabase();
     const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
-    return bug.tests
+    return bug.testCases
 }
 
 async function getTestsId(id, testId) {
     const db = await connectToDatabase();
     const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
-    if (!bug || !bug.tests) return null;
-    const test = bug.tests.find(t => t._id == testId);
+    if (!bug || !bug.testCases) return null;
+    const test = bug.testCases.find(t => t.testId == testId);
     debugDb(test);
     return test;
 }
 
 async function addTestCase(id, testCase) {
     const db = await connectToDatabase()
-    return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {testCases : testCase}, $set: {lastUpdated: new Date(Date.now())}});
+    return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {testCases : testCase}, $set: {lastUpdated: new Date()}});
 }
 
-async function getUpdatedTestCase(id, testId, testAuthor, status) {
+async function getUpdatedTestCase(id, testId, title, testAuthor, status) {
     const db = await connectToDatabase();
-    return await db.collection('bugs').updateOne({_id: new ObjectId(id)}, {$set: {testAuthor: testAuthor, status: status, lastUpdated: new Date(Date.now())}})
+    return await db.collection('bugs').updateOne({_id: new ObjectId(id), "testCases.testId": new ObjectId(testId)}, {$set: {"testCases.$.title": title,"testCases.$.testAuthor": testAuthor,"testCases.$.status": status,"testCases.$.lastUpdated": new Date()}})
 }
 
 async function deleteTestCase(id, testId) {
     const db = await connectToDatabase();
-    const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {id: testId}}, $set: {lastUpdated: new Date(Date.now())}});
+    const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {id: testId}}, $set: {lastUpdated: new Date()}});
     debugDb(test);
     return test;
 }

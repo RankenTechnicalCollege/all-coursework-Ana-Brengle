@@ -4,8 +4,8 @@ const router = express.Router();
 
 import debug from 'debug';
 
-import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema, addCommentSchema, addTestCaseSchema } from '../../validation/bugSchema.js';
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, deleteTestCase  } from '../../database.js';
+import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema, addCommentSchema, addTestCaseSchema,updateTestCaseSchema } from '../../validation/bugSchema.js';
+import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase  } from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 //import { date } from 'joi';
@@ -404,7 +404,7 @@ router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), asyn
     }
 });
 
-router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), validate(updateBugSchema), async(req,res) =>{
+router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -421,7 +421,8 @@ router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), valid
             return;
         }
 
-        let status = "";
+        let status = updateTest.status ? updateTest.status : oldTest.status;
+        let title = updateTest.title ? updateTest.title : oldTest.title;
         let testAuthor = {
             id: oldTest.testAuthor.id,
             name: oldTest.testAuthor.name
@@ -433,32 +434,36 @@ router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), valid
             status = updateTest.status;
         }
 
-        if (updateTest.testAuthor) {
-            if (updateTest.testAuthor.id) {
-                const user = await getUserById(updateTest.testAuthor.id);
-                if (!user) {
-                    return res.status(400).json({ message: 'Test author not found' });
-                }
-                testAuthor = {
-                    id: user._id,
-                    name: user.fullName
-                };
-            } else {
-                testAuthor = oldTest.testAuthor;
-            }
+        if(!updateTest.title){
+            title = oldTest.title;
         } else {
+            title = updateTest.title;
+        }
+
+        if (updateTest.testAuthor_id) {
+            const user = await getUserById(updateTest.testAuthor_id);
+            if (!user) {
+                return res.status(400).json({ message: 'Test author not found' });
+            }
+            testAuthor = {
+                id: user._id,
+                name: user.fullName,
+            };
+        } else {
+            // Ignore any other testAuthor fields, keep oldTest.testAuthor as is
             testAuthor = oldTest.testAuthor;
         }
 
-        const result = await getUpdatedTestCase(id, testId, testAuthor, status);
+        const result = await getUpdatedTestCase(id, testId, title, testAuthor, status);
         if (result.modifiedCount === 0) {
             return res.status(500).json({ message: 'Failed to update test case' });
         }
 
         res.status(200).json({ message: 'Test case updated successfully' });
 
-    } catch  {
-         res.status(404).json({message: 'Error Updating Test Case.'})
+    } catch  (error){
+          console.error("Error updating test case:", error);
+            res.status(500).json({ message: 'Error Updating Test Case.' });
     }
 });
 
