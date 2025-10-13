@@ -23,8 +23,9 @@ router.get('', async(req, res) => {
         } else {
             res.status(200).json(bugs)
         }
-    }catch{
-        res.status(400).json({message: 'Error loading bugs.'})
+    }catch (error) {
+        console.error("Error loading bugs:", error);
+        res.status(500).json({ message: 'Error loading bugs.' });
     }
 });
 
@@ -41,8 +42,9 @@ router.get('/:bugId', validId('bugId'), async(req, res) => {
         }
         res.status(200).json({message: `Bug with id ${id} is requested`});
 
-    } catch  {
-         res.status(404).json({message: 'Bug not found'})
+    } catch  (error) {
+        console.error("Error retrieving bug by ID:", error);
+        res.status(500).json({ message: 'Error retrieving bug.' });
     }
 
 });
@@ -73,8 +75,9 @@ router.post('/new', validate(addBugSchema),async(req,res) => {
             res.status(404).json({message: "Error adding a Bug."})
         }
 
-    } catch {
-         res.status(404).json({message: "Error adding a Bug."})
+    } catch (error) {
+        console.error("Error adding bug:", error);
+        res.status(500).json({ message: "Error adding a Bug." });
     }
 
 
@@ -123,8 +126,9 @@ router.patch('/:bugId', validId('bugId'), validate(updateBugSchema), async(req,r
         }
 
 
-    } catch {
-        res.status(404).send(`Error updating bug .`)
+    } catch (error){
+       console.error("Error updating bug:", error);
+        res.status(500).send(`Error updating bug.`);
     }
     
 });
@@ -147,8 +151,9 @@ router.patch('/:bugId/classify', validId('bugId'), validate(classifyBugSchema),a
             res.status(200).json({message: `Bug ${id} classified`})
         }
 
-    } catch{
-        res.status(404).json({message: `Error classifying bug. `})
+    } catch (error) {
+        console.error("Error classifying bug:", error);
+        res.status(500).json({ message: `Error classifying bug.` });
     }
     
 
@@ -174,12 +179,10 @@ router.patch('/:bugId/assign', validId('bugId'), validate(assignBugSchema),async
         res.status(200).json({ message: `Bug ${id} assigned to ${assignToUser.fullName}` });
        }
         
-    } catch  {
-        res.status(404).json({message: `Error assigning bug.`})
+    } catch (error) {
+        console.error("Error assigning bug:", error);
+        res.status(500).json({ message: `Error assigning bug.` });
     }
-    
-
-    
 });
 
 router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(req,res) => {
@@ -188,8 +191,6 @@ router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(
         const closed = req.body.closed;
 
         const closeBug = await getBugIds(id);
-
-        
 
         if(!closeBug) {
             return res.status(404).json({message: `Bug not Found`})
@@ -205,17 +206,12 @@ router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(
             res.status(200).json({message: `Bug ${id} closed.`});
             
         }
-            res.status(404).json({message: 'Bug not closed'});
-        
-            
+        res.status(404).json({message: 'Bug not closed'});
 
-    } catch{
-        res.status(404).json({message: `Error closing bug`})
+    } catch (error) {
+        console.error("Error closing bug:", error);
+        res.status(500).json({ message: `Error closing bug` });
     }
-
-   
-
-
 });
 
 router.get('/:bugId/comments', async(req,res) => {
@@ -236,8 +232,9 @@ router.get('/:bugId/comments', async(req,res) => {
         }
         res.status(200).json(comments)
 
-    } catch  {
-         res.status(404).json({message: 'Bug not found'})
+    } catch (error){
+        console.error("Bug not found and no comments for this bug:", error);
+        res.status(500).json({ message: 'Bug not found and no comments for this bug.' });
     }
 });
 
@@ -260,8 +257,9 @@ router.get('/:bugId/comments/:commentId', async(req, res) => {
         return;
     }
     res.status(200).json(comments)
-   } catch {
-     res.status(404).json({message: 'Error loading Bug and Comments'})
+   } catch (error){
+      console.error("Bug not found and no comments for this bug:", error);
+      res.status(500).json({ message: 'Bug not found and no comments for this bug.' });
    } 
 });
 
@@ -286,7 +284,7 @@ router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),asy
             commentId: commentId,
             commentAuthor: {
                 id: bugAuthor._id,
-                name: bugAuthor.name
+                name: bugAuthor.fullName
             },
             text: newComment.text,
             createdAt: new Date(),
@@ -302,8 +300,9 @@ router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),asy
             res.status(404).json({message: "Error adding a comment to bug."})
         }
 
-    } catch {
-         res.status(500).json({message: "Error adding comment to bug."})
+    } catch (error){
+        console.error("Bug not found and no comments for this bug:", error);
+        res.status(500).json({ message: 'Bug not found and no comments for this bug.' });
     }
 });
 
@@ -324,8 +323,9 @@ router.get('/:bugId/tests', validId('bugId'), async(req,res) => {
             return;
         }
         res.status(200).json(tests)
-    } catch {
-        res.status(404).json({message: 'Bug not found and no tests for this bug.'});
+    } catch (error) {
+        console.error("Bug not found and no tests for this bug:", error); 
+        res.status(500).json({ message: 'Bug not found and no tests for this bug.' });
     }
 });
 
@@ -348,8 +348,9 @@ router.get('/:bugId/tests/:testId', validId('bugId'), validId('testId') ,async(r
             return;
         }
         res.status(200).json(tests)  
-    } catch {
-        res.status(404).json({message: 'Error loading Bug and Tests'})
+    } catch (error) {
+        console.error("Error loading test case and bug:", error);
+        res.status(500).json({ message: 'Error Loading Test Cases and Bugs.' });
     }
 
 });
@@ -399,8 +400,9 @@ router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), asyn
         //debugBug(addTestCase);
         res.status(200).json({ message: 'Test case added' });
 
-    } catch{
-        res.status(404).json({message: 'Error adding Test Case to Bug.'})
+    } catch (error) {
+        console.error("Error adding test case:", error);
+        res.status(500).json({ message: 'Error Adding Test Case to Bug.' });
     }
 });
 
@@ -450,7 +452,6 @@ router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), valid
                 name: user.fullName,
             };
         } else {
-            // Ignore any other testAuthor fields, keep oldTest.testAuthor as is
             testAuthor = oldTest.testAuthor;
         }
 
@@ -463,35 +464,36 @@ router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), valid
 
     } catch  (error){
           console.error("Error updating test case:", error);
-            res.status(500).json({ message: 'Error Updating Test Case.' });
+        res.status(500).json({ message: 'Error Updating Test Case.' });
     }
 });
 
 router.delete('/:bugId/tests/:testId', validId('bugId'), validId('testId'),async(req,res) =>{
     try {
         const id = req.params.bugId;
-        const bug = await GetBugById(id);
+        const bug = await getBugIds(id);
         if (!bug) {
             res.status(404).json({message: 'Bug not found'});
             return;
         }
-        const testId = req.params.testCaseId;
-        const deleteTestCase = await getTestsId(id, testId);
-        if (!deleteTestCase) {
+        const testId = req.params.testId;
+        const testCaseToDelete = await getTestsId(id, testId);
+        if (!testCaseToDelete) {
             res.status(404).json({message: 'Test case not found'});
             return;
         }
-        testId = new ObjectId(req.params.testId);
-        const deletedTestCase = await deleteTestCase(id, testId);
+        const deleteTest = new ObjectId(testId);
+        const deletedTestCase = await deleteTestCase(id, deleteTest);
         debugBug(deletedTestCase);
         if (deletedTestCase.modifiedCount === 0) {
             res.status(404).json({message: 'Bug or test case not found'});
             return;
         }
-        res.status(200).json({message: `Test case ${testCaseId} deleted successfully.`});
+        res.status(200).json({message: `Test case ${testId} deleted successfully.`});
         
-    } catch {
-         res.status(404).json({message: 'Error deleting Test Case.'})
+    } catch (error) {
+        console.error("Error deleting test case:", error);
+        res.status(500).json({ message: 'Error Deleting Test Case.' });
     }
 });
 

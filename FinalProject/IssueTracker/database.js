@@ -148,7 +148,7 @@ async function getUpdatedTestCase(id, testId, title, testAuthor, status) {
 
 async function deleteTestCase(id, testId) {
     const db = await connectToDatabase();
-    const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {id: testId}}, $set: {lastUpdated: new Date()}});
+    const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {testId: testId}}, $set: {lastUpdated: new Date()}});
     debugDb(test);
     return test;
 }
