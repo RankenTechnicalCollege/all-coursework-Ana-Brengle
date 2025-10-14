@@ -17,8 +17,10 @@ const updateUserSchema = Joi.object({
     role: Joi.string().valid('Developer', 'Business Analyst', 'Quality Analyst', 'Product Manager', 'Technical Manager').optional(),
     givenName: Joi.string().optional(),
     familyName: Joi.string().optional(),
+    fullName: Joi.string().optional(),
     password: Joi.string().max(8).optional(),
-}).min(1);
+    email: Joi.string().email().optional()
+}).required();
 
 
 

@@ -13,8 +13,34 @@ const router = express.Router();
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('', async (req, res) => {
+router.get('', validId('userId'), async (req, res) => {
     try {
+        const {keywords, role, minAge, maxAge, limit,sortBy, order,page} = req.query;
+        
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 0;
+        const skip = limitNum > 0 ? (pageNum - 1) * limitNum : 0;
+
+        const filter = {};
+
+        if(keywords) filter.$text = {$search: keywords};
+        if (role) filter.role = role;
+
+        if(minAge || maxAge) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const dateFilter = {};
+            if (maxAge) dateFilter.$gte = new Date(today.getTime() - maxAge * 24 * 60 * 60 * 1000);
+            if (minAge) dateFilter.$lte = new Date(today.getTime() - minAge * 24 * 60 * 60 * 1000);
+
+            filter.createdAt = dateFilter;
+        }
+
+        
+
+
+
         const users = await getUsers()
         if(!users){
             res.status(400).json({message: "User not found"});
