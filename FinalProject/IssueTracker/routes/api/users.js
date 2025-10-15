@@ -15,11 +15,11 @@ router.use(express.urlencoded({extended:false}));
 
 router.get('', validId('userId'), async (req, res) => {
     try {
-        const {keywords, role, minAge, maxAge, limit,sortBy, order,page} = req.query;
+        const {keywords, role, maxAge, minAge, sortBy, pageSize, pageNum } = req.query;
         
-        const pageNum = parseInt(page) || 1;
-        const limitNum = parseInt(limit) || 0;
-        const skip = limitNum > 0 ? (pageNum - 1) * limitNum : 0;
+        pageNum = parseInt(pageNum) || 1;
+        pageSize = parseInt(pageSize) || 5;
+        const skip = (pageNum - 1) * pageSize;
 
         const filter = {};
 
@@ -37,11 +37,18 @@ router.get('', validId('userId'), async (req, res) => {
             filter.createdAt = dateFilter;
         }
 
-        
+        const sortOptions = {
+            familyName: { familyName: 1, givenName: 1, createdAt: 1 },
+            role: { role: 1, givenName: 1, familyName: 1, createdAt: 1 },
+            newest: { createdAt: -1 },
+            oldest: { createdAt: 1 },
+            givenName: { givenName: 1, familyName: 1, createdAt: 1 }
+        }
+         const sort = sortOptions[sortBy] || sortOptions['givenName']
 
 
 
-        const users = await getUsers()
+        const users = await getUsers(filter,pageSize,skip, sort)
         if(!users){
             res.status(400).json({message: "User not found"});
             return;
