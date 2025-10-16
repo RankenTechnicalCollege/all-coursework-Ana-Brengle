@@ -7,9 +7,9 @@ const debugServer = debug('app:Server');
 import { bugRouter } from './routes/api/bugs.js';
 import { userRouter } from './routes/api/users.js';
 import cors from 'cors'
-import { registerSchema } from './validation/userSchema.js';
-import { validate } from './middleware/joiValidator.js';
-import { validId } from './middleware/validId.js';
+//import { registerSchema } from './validation/userSchema.js';
+//import { validate } from './middleware/joiValidator.js';
+
 
 
 const app = express();
@@ -31,12 +31,12 @@ app.listen(port,() =>{
     debugServer(`Server is now running on port http://localhost:${port}`);
 });
 
-app.post('/api/users', validate(registerSchema), (req, res) => {
-    res.status(201).json({
-        message: 'User registered successfully!',
-        data: req.body
-    })
-});
+// app.post('/api/users', validate(registerSchema), (req, res) => {
+//     res.status(201).json({
+//         message: 'User registered successfully!',
+//         data: req.body
+//     })
+// });
 
 
 
