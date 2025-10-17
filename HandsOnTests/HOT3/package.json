@@ -12,9 +12,11 @@
   "author": "Ana Brengle",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "debug": "^4.4.3",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "joi": "^18.0.1",
     "mongodb": "^6.20.0"
   }
 }

@@ -1,22 +1,24 @@
+import { MongoClient, ObjectId } from "mongodb";
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 import debug from 'debug';
-import { MongoClient, } from "mongodb";
+
 const debugDb = debug('app:Database');
 
 let _db = null;
+
 async function connectToDatabase() {
     if(!_db){
-        const dbUrl = process.env.DB_URL;
-        const dbName = process.env.DB_NAME;
+        const connectionString = process.env.MONGO_URI;
+        const dbName = process.env.MONGO_DB_NAME;
         
-        const client = await MongoClient.connect(dbUrl);
+        const client = await MongoClient.connect(connectionString);
+
         _db = client.db(dbName);
-        debugDb('Connected.');
+        //debugDb('Connected.');
     }
     return _db;
-    
 }
 
 async function ping() {
@@ -25,4 +27,19 @@ async function ping() {
     debugDb('Ping')
     
 }
-export  {ping}
+
+async function getProducts() {
+    const db = await connectToDatabase();
+    return await db.collection('products').find({}).toArray();
+}
+
+async function getProductByName(productName) {
+   const db = await connectToDatabase();
+   return await db.collection('products').findOne({name: productName})
+}
+
+async function getProductId(productId) {
+    const db = await connectToDatabase();
+   return await db.collection('products').findOne({_id: new ObjectId(productId)});
+}
+export  {ping, getProducts, getProductByName, getProductId}

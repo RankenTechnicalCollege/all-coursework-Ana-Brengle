@@ -1,18 +1,26 @@
 import express from "express"
 import dotenv from 'dotenv'
+
+dotenv.config();
+
 import debug from "debug";
+const debugServer = debug('app:Server');
+
+import cors from'cors'
+
 import { ping } from "./database.js";
 import { productRouter } from "./routes/api/products.js";
 
 
-dotenv.config();
+
 ping();
 
 const app = express()
-const debugServer = debug('app:Server');
+
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(cors());
 app.use(express.static("frontend/dist"));
 
 app.use('/api/products', productRouter)
