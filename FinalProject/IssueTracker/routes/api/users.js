@@ -13,7 +13,7 @@ const router = express.Router();
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('', validId('userId'), async (req, res) => {
+router.get('', async (req, res) => {
     try {
         const {keywords, role, maxAge, minAge, sortBy, pageSize, pageNum } = req.query;
         
@@ -119,7 +119,7 @@ router.post('/register', validate(registerSchema), async (req,res) => {
         newUser.createdBugs = [];
         newUser.assignedBugs = [];
         const today = new Date();
-        newUser.createdAt = today.toLocaleDateString();
+        newUser.createdAt = new Date();
 
 
         const addedUser = await addUser(newUser);

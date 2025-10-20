@@ -17,9 +17,43 @@ router.use(express.urlencoded({extended: false}));
 
 router.get('', async(req, res) => {
     try{
-        const bugs = await getAllBugs();
+        const {keywords, classification, minAge, maxAge, closed, page, limit, sortBy, order} = req.query;
+
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 0;
+        const skip = limitNum > 0 ? (pageNum - 1) * limitNum : 0;
+        
+        const filter = {};
+        if (keywords) filter.$text = { $search: keywords };
+        if (classification) filter.classification = classification;
+        if (closed !== undefined) filter.closed = closed === 'true';
+
+        if (minAge || maxAge) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dateFilter = {};
+            if (maxAge) dateFilter.$gte = new Date(today.getTime() - maxAge * 24 * 60 * 60 * 1000);
+            if (minAge) dateFilter.$lte = new Date(today.getTime() - minAge * 24 * 60 * 60 * 1000);
+            filter.createdAt = dateFilter;
+        }
+
+
+        const sortOptions = {
+            newest: {createdAt: -1},
+            oldest: {createdAt: 1},
+            title: {title: 1, createdAt: -1},
+            classification: {classification: 1, createdOn: -1},
+            assignedTo: {assignedToUserName: 1, createdOn: -1},
+            createdBy: {authorOfBug: 1, createdOn: -1}
+        }
+
+        const sort = sortOptions[sortBy] || sortOptions.newest
+
+
+
+        const bugs = await getAllBugs(filter, sort, skip, limitNum);
         if(!bugs){
-            res.status(400).json({message: "Bugs not Found"})
+            res.status(404).json({message: "Bugs not Found"})
         } else {
             res.status(200).json(bugs)
         }
@@ -96,6 +130,7 @@ router.patch('/:bugId', validId('bugId'), validate(updateBugSchema), async(req,r
 
         if(!oldBug) {
             res.status(400).json({message: `Bug ${id} not found`});
+            return;
         }
 
         if(!bugToUpdate.title){
@@ -128,7 +163,7 @@ router.patch('/:bugId', validId('bugId'), validate(updateBugSchema), async(req,r
 
     } catch (error){
        console.error("Error updating bug:", error);
-        res.status(500).send(`Error updating bug.`);
+    res.status(500).send(`Error updating bug.`);
     }
     
 });
@@ -204,9 +239,8 @@ router.patch('/:bugId/close', validId('bugId'), validate(closeBugSchema), async(
         }
         if (closed == "true") {
             res.status(200).json({message: `Bug ${id} closed.`});
-            
         }
-        res.status(404).json({message: 'Bug not closed'});
+        return res.status(404).json({message: 'Bug not closed'});
 
     } catch (error) {
         console.error("Error closing bug:", error);
