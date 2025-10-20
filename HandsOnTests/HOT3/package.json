@@ -12,6 +12,7 @@
   "author": "Ana Brengle",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.12.2",
     "cors": "^2.8.5",
     "debug": "^4.4.3",
     "dotenv": "^17.2.3",

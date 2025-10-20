@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import debug from 'debug';
 
+
 const debugDb = debug('app:Database');
 
 let _db = null;
@@ -40,6 +41,21 @@ async function getProductByName(productName) {
 
 async function getProductId(productId) {
     const db = await connectToDatabase();
-   return await db.collection('products').findOne({_id: new ObjectId(productId)});
+    return await db.collection('products').findOne({_id: new ObjectId(productId)});
 }
-export  {ping, getProducts, getProductByName, getProductId}
+
+async function addedProduct(product) {
+    const db = await connectToDatabase();
+    return await db.collection('products').insertOne(product);
+}
+
+async function getUpdatedProduct(productId, name, description, category, price) {
+    const db = await connectToDatabase();
+    return await db.collection("products").updateOne({_id: new ObjectId(productId)},{$set: {name: name, description: description, category: category, price: price, lastUpdatedOn: new Date()}});
+}
+
+async function deletedProduct(productId) {
+    const db = await connectToDatabase();
+    return await db.collection("products").deleteOne({_id: new ObjectId(productId)});
+}
+export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct}

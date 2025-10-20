@@ -4,7 +4,9 @@ const router = express.Router();
 import debug from 'debug';
 const debugProducts = debug('app:Products');
 
-import { getProducts, getProductByName, getProductId } from '../../database.js';
+import { getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct } from '../../database.js';
+import { validate, validId } from '../../middleware/validator.js';
+import { addProductSchema, updateProductSchema } from '../../validation/productsSchema.js';
 
 router.get('', async (req, res) =>{
     try{
@@ -41,7 +43,7 @@ router.get('/name/:productName', async (req, res) =>{
     }
 })
 
-router.get('/name/:productId', async (req, res) =>{
+router.get('/:productId', validId('productId'),async (req, res) =>{
     try{
         const productId = req.params.productId;
         const product = await getProductId(productId)
@@ -50,7 +52,7 @@ router.get('/name/:productId', async (req, res) =>{
             res.status(404).json({message: `Product ${productId} not found!`});
             return;
         } else{
-            res.status(200).json({message: `Product ${productId} found`})
+            res.status(200).json(product)
         }
     } catch (error){
         console.error("Error loading product:", error);
@@ -58,7 +60,7 @@ router.get('/name/:productId', async (req, res) =>{
     }
 })
 
-router.post('', async (req, res) =>{
+router.post('', validate(addProductSchema),async (req, res) =>{
     try {
         const newProduct = req.body
         if(!newProduct.name){
@@ -77,11 +79,11 @@ router.post('', async (req, res) =>{
             res.status(400).json({message: 'Products Price is required'});
             return;
         }
-        const productToAdd = await addedProduct(newProduct.name, newProduct.description, newProduct.category, newProduct.price)
+        const productToAdd = await addedProduct(newProduct)
         debugProducts(productToAdd);
 
         if(productToAdd.insertedId){
-            res.status(200).json({message: `Product ${newProduct.name} found`})
+            res.status(200).json({message: `Product ${newProduct.name} added`})
         } else{
             res.status(400).json({message: `Product not added`})
         }
@@ -91,12 +93,74 @@ router.post('', async (req, res) =>{
     }
 })
 
-router.patch('', async (req, res) =>{
-    
+router.patch('/:productId', validId('productId'), validate(updateProductSchema), async (req, res) =>{
+    try {
+        
+        const productToUpdate = req.body;
+        const productId = req.params.productId
+        const oldProduct = await getProductId(productId)
+
+        let name = null;
+        let description = null;
+        let category = null;
+        let price = null;
+
+        if(!oldProduct) {
+            res.status(400).json({message: `Product ${productId} not found`});
+            return;
+        }
+        
+        if(!productToUpdate.name){
+            name = oldProduct.name;
+        } else{
+            name = productToUpdate.name
+        }
+        if(!productToUpdate.description){
+            description = oldProduct.description;
+        } else{
+            description = productToUpdate.description
+        }
+        if(!productToUpdate.category){
+            category = oldProduct.category;
+        } else{
+            category = productToUpdate.category
+        }
+        if(!productToUpdate.price){
+            price = oldProduct.price;
+        } else{
+            price = productToUpdate.price
+        }
+
+        const updatedProduct = await getUpdatedProduct(productId,name,description,category,price)
+        debugProducts(updatedProduct)
+        if(!updatedProduct){
+            res.status(400).json({message: 'Error updating Product'})
+            return;
+        } else {
+            res.status(200).json({message: `Product ${productId} updated successfully`})
+        }
+
+    } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({message: 'Error Updating Product'})
+    }
 })
 
-router.delete('', async (req, res) =>{
-    
+router.delete('/:productId', validId('productId'), async (req, res) =>{
+    try {
+        const productId = req.params.productId;
+        const deleteProduct = await deletedProduct(productId)
+
+        if(deleteProduct.deletedCount === 1) {
+            res.status(200).json({message: `Product ${productId} deleted successfully`});
+            return;
+        } else{
+            res.status(404).json({message: `Product ${productId} not found.`});
+        }
+    } catch (error) {
+         console.error("Error deleting product:", error);
+        res.status(500).json({message: 'Error Deleting Product'})
+    }
 })
 
 
