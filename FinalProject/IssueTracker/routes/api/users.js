@@ -118,7 +118,7 @@ router.post('/register', validate(registerSchema), async (req,res) => {
 
         newUser.createdBugs = [];
         newUser.assignedBugs = [];
-        const today = new Date();
+        //const today = new Date();
         newUser.createdAt = new Date();
 
 

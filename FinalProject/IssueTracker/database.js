@@ -77,7 +77,7 @@ async function getBugIds(id) {
 
 async function addedBug(title, stepsToReproduce, description) {
     const db = await connectToDatabase();
-    return db.collection('bugs').insertOne({title: title, stepsToReproduce: stepsToReproduce, description: description, createdAt: new Date(Date.now()), lastUpdated: new Date(Date.now()), authorOfBug: null, edits:[], comments:[], classification: "", classifiedOn: null, assignedToUserId: null, assignedToUserName: null, assignedOn: null, testCases:[],workHoursLogged:[], fixInVersion: null, fixedOnDate: null, closed: false, closedOn: null});
+    return db.collection('bugs').insertOne({title: title, stepsToReproduce: stepsToReproduce, description: description, createdOn: new Date(Date.now()), lastUpdated: new Date(Date.now()), authorOfBug: null, edits:[], comments:[], classification: "", classifiedOn: null, assignedToUserId: null, assignedToUserName: null, assignedOn: null, testCases:[],workHoursLogged:[], fixInVersion: null, fixedOnDate: null, closed: false, closedOn: null});
 }
 
 async function getUpdatedBug(id, title, stepsToReproduce, description) {
@@ -95,6 +95,8 @@ async function assignBug(id, assignedToUserId, fullName) {
     return await db.collection("bugs").updateOne({_id: new ObjectId(id)}, {$set: {assignedToUserId: assignedToUserId, lastUpdated: new Date(Date.now()), assignedOn: new Date(Date.now()), assignedToUserName: fullName}})
 }
 
+
+//--------COMMENT DATABASE-------------//
 async function getClosedBug(id, closed) {
     const db = await connectToDatabase();
     return await db.collection("bugs").updateOne({_id: new ObjectId(id)}, {$set: {closed: closed, lastUpdated: new Date(Date.now()), closedOn: new Date(Date.now())}});
@@ -121,6 +123,8 @@ async function addCommentToBug(id, comment) {
     return newComment;
 }
 
+
+//--------------TEST DATABASE---------------------//
 async function getBugTests(id) {
     const db = await connectToDatabase();
     const bug = await db.collection("bugs").findOne({_id: new ObjectId(id)})
