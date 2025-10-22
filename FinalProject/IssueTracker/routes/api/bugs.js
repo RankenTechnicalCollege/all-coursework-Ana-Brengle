@@ -39,8 +39,8 @@ router.get('', async(req, res) => {
 
 
         const sortOptions = {
-            newest: {createdAt: -1},
-            oldest: {createdAt: 1},
+            newest: {createdOn: -1},
+            oldest: {createdOn: 1},
             title: {title: 1, createdAt: -1},
             classification: {classification: 1, createdOn: -1},
             assignedTo: {assignedToUserName: 1, createdOn: -1},
@@ -420,7 +420,7 @@ router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), asyn
                 id: user._id,
                 name: user.fullName
             },
-            createdAt: new Date(),
+            createdOn: new Date(),
             lastUpdated: new Date()
         };
 

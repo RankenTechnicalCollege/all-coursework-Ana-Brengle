@@ -20,8 +20,8 @@ app.use(cors());
 const port = process.env.PORT || 3000;
 app.use(express.static('frontend/dist'));
 
-app.use('/api/users;', (await import('./routes/api/users.js')).userRouter);
-app.use('/api/bugs', (await import('./routes/api/bugs.js')).bugRouter);
+//app.use('/api/users;', (await import('./routes/api/users.js')).userRouter);
+//app.use('/api/bugs', (await import('./routes/api/bugs.js')).bugRouter);
 app.use('/api/users', userRouter);
 app.use('/api/bugs', bugRouter);
 
