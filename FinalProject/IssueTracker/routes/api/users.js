@@ -6,7 +6,7 @@ import { registerSchema, loginSchema, updateUserSchema } from '../../validation/
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import debug from 'debug';
-import { error } from 'better-auth/api';
+//import { error } from 'better-auth/api';
 
 const debugUser = debug('app:User')
 const router = express.Router();
