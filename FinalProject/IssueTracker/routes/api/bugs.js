@@ -17,7 +17,7 @@ router.use(express.urlencoded({extended: false}));
 
 router.get('', async(req, res) => {
     try{
-        const {keywords, classification, minAge, maxAge, closed, page, limit, sortBy, order} = req.query;
+        const {keywords, classification, minAge, maxAge, closed, page, limit, sortBy} = req.query;
 
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 0;
@@ -34,14 +34,14 @@ router.get('', async(req, res) => {
             const dateFilter = {};
             if (maxAge) dateFilter.$gte = new Date(today.getTime() - maxAge * 24 * 60 * 60 * 1000);
             if (minAge) dateFilter.$lte = new Date(today.getTime() - minAge * 24 * 60 * 60 * 1000);
-            filter.createdAt = dateFilter;
+            filter.createdOn = dateFilter;
         }
 
 
         const sortOptions = {
             newest: {createdOn: -1},
             oldest: {createdOn: 1},
-            title: {title: 1, createdAt: -1},
+            title: {title: 1, createdOn: -1},
             classification: {classification: 1, createdOn: -1},
             assignedTo: {assignedToUserName: 1, createdOn: -1},
             createdBy: {authorOfBug: 1, createdOn: -1}
@@ -321,7 +321,7 @@ router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),asy
                 name: bugAuthor.fullName
             },
             text: newComment.text,
-            createdAt: new Date(),
+            createdOn: new Date(),
          };
     
         

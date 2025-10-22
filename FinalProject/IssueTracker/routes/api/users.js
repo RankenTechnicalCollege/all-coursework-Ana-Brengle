@@ -6,6 +6,7 @@ import { registerSchema, loginSchema, updateUserSchema } from '../../validation/
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import debug from 'debug';
+import { error } from 'better-auth/api';
 
 const debugUser = debug('app:User')
 const router = express.Router();
@@ -15,10 +16,10 @@ router.use(express.urlencoded({extended:false}));
 
 router.get('', async (req, res) => {
     try {
-        const {keywords, role, maxAge, minAge, sortBy, pageSize, pageNum } = req.query;
+        const {keywords, role, maxAge, minAge, sortBy } = req.query;
         
-        pageNum = parseInt(pageNum) || 1;
-        pageSize = parseInt(pageSize) || 5;
+        const pageNum = parseInt(req.query.pageNum) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 5;
         const skip = (pageNum - 1) * pageSize;
 
         const filter = {};
@@ -56,7 +57,8 @@ router.get('', async (req, res) => {
              res.status(200).json(users);
              return;
         }
-    } catch{
+    } catch (error){
+        console.error("Error loading users:", error);
         res.status(404).json({message: "Error uploading Users"})
     }
 });

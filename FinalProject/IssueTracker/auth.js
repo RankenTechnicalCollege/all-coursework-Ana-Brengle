@@ -11,5 +11,16 @@ export const auth = betterAuth({
     trustedOrigins: ["http://localhost:8080", "http://localhost:3000","https://issuetracker-2025-470049259207.us-central1.run.app/"],
     database: mongodbAdapter(db,{
         client
-    })
+    }),
+    emailAndPassword: {
+        enabled: true
+    },
+    session: {
+        cookieCache: true, 
+        maxAge: 60 * 60,
+    },
+    user: {
+        
+    }
+
 });

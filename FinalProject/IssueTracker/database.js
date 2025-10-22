@@ -10,6 +10,9 @@ const debugDb = debug('app:Database');
 const newId = (str) => ObjectId.createFromHexString(str);
 
 let _db = null;
+let _client = null;
+
+
 
 async function connectToDatabase() {
     if(!_db) {
@@ -24,6 +27,17 @@ async function connectToDatabase() {
     
 }
 
+async function getClient() {
+    if(!_client){
+        await connectToDatabase();
+    }
+    return _client
+}
+
+async function getDatabase() {
+    return await connectToDatabase();
+}
+
 // async function ping() {
 //     const db = await connectToDatabase();
 //     const pong = await db.command({ping: 1});
@@ -31,9 +45,9 @@ async function connectToDatabase() {
     
 // }
 
-async function getUsers() {
+async function getUsers(filter, pageSize, skip, sort) {
     const db = await connectToDatabase();
-    return db.collection('users').find({}).toArray();
+    return db.collection('users').find(filter).sort(sort).skip(skip).limit(pageSize).toArray();
 }
 
 async function addUser(user) {
@@ -64,9 +78,9 @@ async function getDeletedUser(id) {
 
 
 //---------------BUG DATABASE------------//
-async function getAllBugs() {
+async function getAllBugs(filter, sort, skip, limit) {
     const db = await connectToDatabase();
-    return db.collection('bugs').find({}).toArray();
+    return db.collection('bugs').find(filter).sort(sort).skip(skip).limit(limit).toArray();
 }
 
 async function getBugIds(id) {
@@ -157,4 +171,4 @@ async function deleteTestCase(id, testId) {
     return test;
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase};
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase};
