@@ -1,12 +1,12 @@
 import express from 'express';
-import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser} from '../../database.js';
-
+import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, saveAuditLog} from '../../database.js';
 import bcrypt from 'bcrypt';
 import { registerSchema, loginSchema, updateUserSchema } from '../../validation/userSchema.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
+import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import debug from 'debug';
-//import { error } from 'better-auth/api';
+import { error } from 'better-auth/api';
 
 const debugUser = debug('app:User')
 const router = express.Router();
@@ -59,11 +59,11 @@ router.get('', async (req, res) => {
         }
     } catch (error){
         console.error("Error loading users:", error);
-        res.status(404).json({message: "Error uploading Users"})
+        res.status(500).json({message: "Error uploading Users"})
     }
 });
 
-router.get('/:userId',validId('userId'), async (req, res) => { 
+router.get('/:userId',isAuthenticated ,validId('userId'), async (req, res) => { 
     try{
         const id = req.params.userId;
         const user = await getUserById(id);
@@ -76,8 +76,9 @@ router.get('/:userId',validId('userId'), async (req, res) => {
             return;
         }
 
-    }catch{
-        res.status(404).json({message: `User ${id} not found`});
+    }catch (error) {
+        console.error("Error loading user:", error);
+        res.status(500).json({message: "Error Uploading User Id"})
     }
 });
 
@@ -120,7 +121,6 @@ router.post('/register', validate(registerSchema), async (req,res) => {
 
         newUser.createdBugs = [];
         newUser.assignedBugs = [];
-        //const today = new Date();
         newUser.createdAt = new Date();
 
 
@@ -135,8 +135,9 @@ router.post('/register', validate(registerSchema), async (req,res) => {
             return;
         }
     }
-    catch  {
-        res.status(404).json({message: "Error adding a User."})
+    catch  (error){
+        console.error("Error adding user:", error);
+        res.status(500).json({message: "Error Adding User"})
     }
 });
 
@@ -164,10 +165,9 @@ router.post('/login', validate(loginSchema),async (req, res) => {
                 return;
             }
         
-
-    } catch {
-
-        res.status(400).json({message: `Invalid login credential provided. Please try again.`});
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        res.status(500).json({message: "Invalid login credential provided. Please try again."})
     }  
 });
 
@@ -195,29 +195,10 @@ router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (r
             password = await bcrypt.hash(userToUpdate.password, 10)
         }
 
-        if(!userToUpdate.givenName){
-            givenName = prevUser.givenName;
-        }else {
-            givenName = userToUpdate.givenName;
-        }
-
-        if(!userToUpdate.familyName) {
-            familyName = prevUser.familyName;
-        }else {
-            familyName = userToUpdate.familyName;
-        }
-
-        if(!userToUpdate.fullName) {
-            fullName = prevUser.fullName;
-        }else {
-            fullName = userToUpdate.fullName;
-        }
-
-        if(!userToUpdate.role) {
-            role = prevUser.role;
-        }else {
-            role = userToUpdate.role;
-        }
+        givenName = userToUpdate.givenName || prevUser.givenName;
+        familyName = userToUpdate.familyName || prevUser.familyName;
+        fullName = userToUpdate.fullName || `${givenName} ${familyName}`;
+        role = userToUpdate.role || prevUser.role;
 
         const updatedUser = await getUpdatedUser(id, password, fullName,givenName,familyName,role);
         debugUser(updatedUser);
@@ -227,8 +208,9 @@ router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (r
             res.status(404).send(`User not found.`)
         }
 
-    } catch{
-        res.status(404).send(`User not found.`)
+    } catch(error) {
+        console.error("Error updating in user:", error);
+        res.status(500).json({message: "Error Updating User"})
     }
 });
 
@@ -243,8 +225,9 @@ router.delete('/:userId', validId('userId'), async (req,res) => {
         } else {
             res.status(404).json({message: `User ${id} not found.`});
         }
-    } catch  {
-        res.status(404).json({message: 'Error deleting User'})
+    } catch  (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({message: "Error Deleting User"})
     }
 });
 

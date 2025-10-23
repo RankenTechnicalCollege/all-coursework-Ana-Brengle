@@ -20,7 +20,17 @@ export const auth = betterAuth({
         maxAge: 60 * 60,
     },
     user: {
-        
+        additionalFields: {
+            role: {
+                type: "object",
+                required: true,
+            },
+            profile: {
+                type: "object",
+                required: false
+            }
+
+        }
     }
 
 });

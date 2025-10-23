@@ -38,6 +38,11 @@ async function getDatabase() {
     return await connectToDatabase();
 }
 
+async function saveAuditLog(log) {
+    const db = await connectToDatabase();
+    const dbResult = await db.collection('AuditLog').insertOne(log)
+}
+
 // async function ping() {
 //     const db = await connectToDatabase();
 //     const pong = await db.command({ping: 1});
@@ -171,4 +176,4 @@ async function deleteTestCase(id, testId) {
     return test;
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase};
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase, saveAuditLog};

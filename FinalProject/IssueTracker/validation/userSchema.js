@@ -4,8 +4,8 @@ const registerSchema = Joi.object({
     role: Joi.string().valid('Developer', 'Business Analyst', 'Quality Analyst', 'Product Manager', 'Technical Manager').required(),
     givenName: Joi.string().required(),
     familyName: Joi.string().required(),
-    password: Joi.string().max(8).required(),
-    createdAt: Joi.date().required()
+    password: Joi.string().min(6).required(),
+    createdAt: Joi.date().default(() => new Date())
 }).required();
 
 const loginSchema = Joi.object({
