@@ -6,15 +6,13 @@ import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import debug from 'debug';
-import { error } from 'better-auth/api';
-
 const debugUser = debug('app:User')
 const router = express.Router();
-
+router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('', async (req, res) => {
+router.get('',isAuthenticated, async (req, res) => {
     try {
         const {keywords, role, maxAge, minAge, sortBy } = req.query;
         
@@ -63,7 +61,7 @@ router.get('', async (req, res) => {
     }
 });
 
-router.get('/:userId',isAuthenticated ,validId('userId'), async (req, res) => { 
+router.get('/:userId',validId('userId'), async (req, res) => { 
     try{
         const id = req.params.userId;
         const user = await getUserById(id);
@@ -123,7 +121,6 @@ router.post('/register', validate(registerSchema), async (req,res) => {
         newUser.assignedBugs = [];
         newUser.createdAt = new Date();
 
-
         const addedUser = await addUser(newUser);
         debugUser(addedUser);
 
@@ -141,7 +138,7 @@ router.post('/register', validate(registerSchema), async (req,res) => {
     }
 });
 
-router.post('/login', validate(loginSchema),async (req, res) => {
+router.post('/login',  validate(loginSchema),async (req, res) => {
     try {
         const user = req.body;
 

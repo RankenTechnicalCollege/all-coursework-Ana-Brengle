@@ -1,4 +1,3 @@
-//import { error } from 'better-auth/api';
 import {auth} from '../auth.js'
 
 export async function isAuthenticated(req, res, next) {

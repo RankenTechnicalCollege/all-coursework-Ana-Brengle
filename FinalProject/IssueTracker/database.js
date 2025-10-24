@@ -27,17 +27,6 @@ async function connectToDatabase() {
     
 }
 
-async function getClient() {
-    if(!_client){
-        await connectToDatabase();
-    }
-    return _client
-}
-
-async function getDatabase() {
-    return await connectToDatabase();
-}
-
 async function saveAuditLog(log) {
     const db = await connectToDatabase();
     const dbResult = await db.collection('AuditLog').insertOne(log)
@@ -174,6 +163,17 @@ async function deleteTestCase(id, testId) {
     const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {testId: testId}}, $set: {lastUpdated: new Date()}});
     debugDb(test);
     return test;
+}
+
+async function getClient() {
+    if(!_client){
+        await connectToDatabase();
+    }
+    return _client
+}
+
+async function getDatabase() {
+    return await connectToDatabase();
 }
 
 export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase, saveAuditLog};
