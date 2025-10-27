@@ -12,7 +12,7 @@ router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('',isAuthenticated, async (req, res) => {
+router.get('', isAuthenticated, async (req, res) => {
     try {
         const {keywords, role, maxAge, minAge, sortBy } = req.query;
         
@@ -61,7 +61,7 @@ router.get('',isAuthenticated, async (req, res) => {
     }
 });
 
-router.get('/:userId',validId('userId'), async (req, res) => { 
+router.get('/:userId',isAuthenticated, validId('userId'), async (req, res) => { 
     try{
         const id = req.params.userId;
         const user = await getUserById(id);

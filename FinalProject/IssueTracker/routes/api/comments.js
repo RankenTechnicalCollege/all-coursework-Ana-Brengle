@@ -3,6 +3,7 @@ const router = express.Router();
 import debug from 'debug';
 import { addCommentSchema} from '../../validation/bugSchema.js';
 import { getBugComments, getCommentsId, addCommentToBug  } from '../../database.js';
+import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { ObjectId } from 'mongodb';
