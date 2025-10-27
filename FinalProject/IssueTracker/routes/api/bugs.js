@@ -250,7 +250,7 @@ router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assig
         return res.status(404).json({message: `User not Found`})
        }
 
-       debugBug(bugToAssign)
+       debugBug(assignToUser)
 
         let log = {
             timestamp: new Date(Date.now()),
@@ -261,7 +261,7 @@ router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assig
             performedBy: author.email
         }
         if(assignedToUserId && assignedToUserId !== oldBug.assignedToUserId){
-            log.update.push({field: "assignToUserId", oldValue: oldBug.assignedToUserId, newValue: bugToAssign.assignedToUserId});
+            log.update.push({field: "assignToUserId", oldValue: oldBug.assignedToUserId, newValue: assignedToUserId});
         }
        const result = await assignBug(id, assignToUser._id, assignToUser.fullName, authorId)
        await saveAuditLog(log)
