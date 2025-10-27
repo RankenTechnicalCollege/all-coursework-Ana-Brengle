@@ -1,7 +1,6 @@
 import { betterAuth } from "better-auth";
 import { getClient, getDatabase } from "./database.js";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { string } from "joi";
 
 const client = await getClient();
 const db = await getDatabase();
