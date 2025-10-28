@@ -146,7 +146,7 @@ async function getTestsId(id, testId) {
 
 async function addTestCase(id, testCase) {
     const db = await connectToDatabase()
-    return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {testCases : testCase}, $set: {lastUpdated: new Date()}});
+    return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {testCases : testCase}, $set: {createdBy: createdBy,createdOn: new Date(Date.now()),lastUpdated: new Date()}});
 }
 
 async function getUpdatedTestCase(id, testId, title, testAuthor, status) {
