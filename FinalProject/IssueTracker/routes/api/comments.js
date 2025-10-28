@@ -7,11 +7,12 @@ import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { ObjectId } from 'mongodb';
-router.use(express.json())
-
 const debugComment = debug('app:CommentRouter');
+router.use(express.json())
+router.use(express.urlencoded({extended: false}));
 
-router.get('/:bugId/comments', async(req,res) => {
+
+router.get('/:bugId/comments', isAuthenticated, async(req,res) => {
    try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -35,7 +36,7 @@ router.get('/:bugId/comments', async(req,res) => {
     }
 });
 
-router.get('/:bugId/comments/:commentId', async(req, res) => {
+router.get('/:bugId/comments/:commentId', isAuthenticated, async(req, res) => {
    try {
      const id = req.params.bugId;
      const bug = await getBugIds(id);
@@ -60,7 +61,7 @@ router.get('/:bugId/comments/:commentId', async(req, res) => {
    } 
 });
 
-router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),async(req,res) => {
+router.post('/:bugId/comments', isAuthenticated, validate(addCommentSchema), validId('bugId'),async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id)
@@ -102,6 +103,6 @@ router.post('/:bugId/comments', validate(addCommentSchema), validId('bugId'),asy
         res.status(500).json({ message: 'Bug not found and no comments for this bug.' });
     }
 });
-router.use(express.urlencoded({extended: false}));
+
 
 export {router as commentRouter}

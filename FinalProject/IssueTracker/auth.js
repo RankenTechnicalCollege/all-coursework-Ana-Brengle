@@ -43,8 +43,8 @@ export const auth = betterAuth({
                 required: true,
                 defaultValue: []
             }, 
-            givenName: {
-                type: "string",
+            role: {
+                type: "object",
                 required: true
             }
         }

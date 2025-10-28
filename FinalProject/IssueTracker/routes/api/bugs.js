@@ -134,8 +134,10 @@ router.patch('/:bugId', isAuthenticated, validId('bugId'), validate(updateBugSch
             res.status(400).json({message: `Bug ${id} not found`});
             return;
         }
+        
         const author = req.user;
         const authorId = author.id;
+        
         if(!author) return res.status(400).json({message: 'Author not found'})
 
          let log = {
@@ -196,9 +198,11 @@ router.patch('/:bugId/classify', isAuthenticated, validId('bugId'), validate(cla
             res.status(400).json({message: `Bug ${id} not found`});
             return;
         }
+
         const author = req.user;
         const authorId = author.id;
-        if(!author) return res.status(400).json({message: 'Author not found'})
+        if(!author) return res.status(400).json({message: 'Author not found'});
+
         let log = {
             timestamp: new Date(Date.now()),
             col: 'bug',
@@ -240,17 +244,16 @@ router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assig
             res.status(400).json({message: `Bug ${id} not found`});
             return;
         }
-
         const author = req.user;
-        if(!author) return res.status(400).json({message: 'Author not found'})
         const authorId = author.id;
+        if(!author) return res.status(400).json({message: 'Author not found'})
         
-       const assignToUser = await getUserById(assignedToUserId)
-       if(!assignToUser){
-        return res.status(404).json({message: `User not Found`})
-       }
+        const assignToUser = await getUserById(assignedToUserId)
+        if(!assignToUser){
+            return res.status(404).json({message: `User not Found`})
+        }
 
-       debugBug(assignToUser)
+        debugBug(assignToUser)
 
         let log = {
             timestamp: new Date(Date.now()),
@@ -281,27 +284,37 @@ router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assig
 
 router.patch('/:bugId/close', isAuthenticated, validId('bugId'), validate(closeBugSchema), async(req,res) => {
     try{
-        const id = req.params.bugId;
-        const closed = req.body.closed;
-
-        const closeBug = await getBugIds(id);
-
-        if(!closeBug) {
-            return res.status(404).json({message: `Bug not Found`})
+        const id = req.params.bugId
+        const bugToClose = req.body;
+        const oldBug = await getBugIds(id)
+        if(!oldBug) {
+            res.status(400).json({message: `Bug ${id} not found`});
+            return;
         }
 
-        const bugClosed = await getClosedBug(id, closed);
-        debugBug(bugClosed);
-        if (bugClosed.modifiedCount === 0) {
+        const author = req.user;
+        const authorId = author.id;
+        if(!author) return res.status(400).json({message: 'Author not found'})
+        
+        if(!bugToClose.closed) return res.status(400).json({message: "To close the bug, the closed field must be 'true'. "})
+
+        let log = {
+            timestamp: new Date(Date.now()),
+            col: 'bug',
+            op: 'update',
+            target: id,
+            update: [{field: "closed", oldValue: oldBug.closed, newValue: true}],
+            performedBy: author.email
+        }
+
+        const closedBug = await getClosedBug(id, authorId)
+
+        await saveAuditLog(log)
+        debugBug(closedBug);
+        if (closedBug.modifiedCount === 0) {
             res.status(404).json({message: 'Bug not found'});
             return;
         }
-        if (closed == "true") {
-            res.status(200).json({message: `Bug ${id} closed.`});
-        }else {
-            return res.status(404).json({message: 'Bug not closed'});
-        }
-
     } catch (error) {
         console.error("Error closing bug:", error);
         res.status(500).json({ message: `Error closing bug` });

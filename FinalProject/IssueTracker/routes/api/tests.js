@@ -1,8 +1,8 @@
 import express from 'express';
-const router = express.Router();
 import debug from 'debug';
+const router = express.Router();
 import { addTestCaseSchema,updateTestCaseSchema } from '../../validation/bugSchema.js';
-import { getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase  } from '../../database.js';
+import { getUserById,getBugIds,getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, saveAuditLog  } from '../../database.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
@@ -11,7 +11,8 @@ const debugTest = debug('app:TestRouter');
 router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
-router.get('/:bugId/tests', validId('bugId'), async(req,res) => {
+
+router.get('/:bugId/tests',isAuthenticated, validId('bugId'), async(req,res) => {
     try{
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -34,7 +35,7 @@ router.get('/:bugId/tests', validId('bugId'), async(req,res) => {
     }
 });
 
-router.get('/:bugId/tests/:testId', validId('bugId'), validId('testId') ,async(req,res) => {
+router.get('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId') ,async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -60,13 +61,12 @@ router.get('/:bugId/tests/:testId', validId('bugId'), validId('testId') ,async(r
 
 });
 
-router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
+router.post('/:bugId/tests', isAuthenticated, validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
     try{
-        const {authorId, title, status} = req.body;
+        const { title, status} = req.body;
         const id = req.params.bugId;
-
-
         const bug = await getBugIds(id)
+        const authorId = req.session.userId
         if(!bug) {
              res.status(400).json({message: 'Bug not found'});
             return;
@@ -89,13 +89,20 @@ router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), asyn
             status: status,
             testAuthor: {
                 id: user._id,
-                name: user.fullName
+                name: `${user.givenName}`
             },
             createdOn: new Date(),
             lastUpdated: new Date()
         };
-
-        const addedTestCase = await addTestCase(id, testCase)
+        const log = {
+            timestamp: new Date(Date.now()),
+            col: 'bug test',
+            op: 'insert',
+            target: id,
+            performedBy: user.email
+        }
+        const addedTestCase = await addTestCase(id, testCase, user._id)
+        await saveAuditLog(log)
   
         if (addedTestCase.modifiedCount === 0) {
             res.status(404).json({message: 'Failed to add test to bug'});
@@ -111,69 +118,63 @@ router.post('/:bugId/tests', validId('bugId'), validate(addTestCaseSchema), asyn
     }
 });
 
-router.patch('/:bugId/tests/:testId', validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
+router.patch('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
-
-        if(!bug) {
-             res.status(400).json({message: 'Bug not found'});
-            return;
-        }
+        
+        if(!bug) return res.status(400).json({message: `Bug not found`});
+        
+        const author = req.user;
+        if(!author) return res.status(400).json({message: 'Author not found'})
         const testId = req.params.testId;
         const updateTest = req.body;
         const oldTest = await getTestsId(id, testId);
-        if (!oldTest) {
-            res.status(404).json({ message: 'Test case not found' });
-            return;
+        if (!oldTest) return res.status(404).json({ message: 'Test case not found' });
+
+        
+        let log = {
+            timestamp: new Date(Date.now()),
+            col: 'bug',
+            op: 'update test',
+            target: id,
+            update: [],
+            performedBy: author.email
         }
-
-        let status = updateTest.status ? updateTest.status : oldTest.status;
-        let title = updateTest.title ? updateTest.title : oldTest.title;
-        let testAuthor = {
-            id: oldTest.testAuthor.id,
-            name: oldTest.testAuthor.name
-        };
-
-        if(!updateTest.status){
-            status = oldTest.status;
-        } else {
-            status = updateTest.status;
-        }
-
-        if(!updateTest.title){
-            title = oldTest.title;
-        } else {
+        let title;
+        let status;
+        let testAuthor;
+        if(updateTest.title && updateTest. title !== oldTest.title){
             title = updateTest.title;
+            log.update.push({field: "title", oldValue: oldTest.title, newValue: updateTest.title});
+        } else{
+            title = oldTest.title
         }
-
-        if (updateTest.testAuthor_id) {
-            const user = await getUserById(updateTest.testAuthor_id);
-            if (!user) {
-                return res.status(400).json({ message: 'Test author not found' });
-            }
-            testAuthor = {
-                id: user._id,
-                name: user.fullName,
-            };
-        } else {
-            testAuthor = oldTest.testAuthor;
+        if(updateTest.status && updateTest.status !== oldTest.status){
+            status = updateTest.status;
+            log.update.push({field: "status", oldValue: oldTest.status, newValue: updateTest.status});
+        } else{
+            status = oldTest.status
         }
+        testAuthor = {
+            id: author.id,
+            name: `${author.givenName} ${author.familyName}`
+        }
+        log.update.push({field: "testAuthor", oldValue: oldTest.testAuthor, newValue: updateTest.testAuthor});
 
         const result = await getUpdatedTestCase(id, testId, title, testAuthor, status);
+        await saveAuditLog(log);
         if (result.modifiedCount === 0) {
             return res.status(500).json({ message: 'Failed to update test case' });
         }
-
-        res.status(200).json({ message: 'Test case updated successfully' });
-
-    } catch  (error){
-          console.error("Error updating test case:", error);
+        res.status(200).json({ message: 'Test case updated' });
+    } catch{
+        console.error("Error updating test case:", error);
         res.status(500).json({ message: 'Error Updating Test Case.' });
     }
 });
 
-router.delete('/:bugId/tests/:testId', validId('bugId'), validId('testId'),async(req,res) =>{
+router.delete('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId'),async(req,res) =>{
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -201,4 +202,5 @@ router.delete('/:bugId/tests/:testId', validId('bugId'), validId('testId'),async
         res.status(500).json({ message: 'Error Deleting Test Case.' });
     }
 });
+router.use(express.urlencoded({extended: false}));
 export{router as testRouter}

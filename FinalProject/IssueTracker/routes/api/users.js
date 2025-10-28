@@ -80,93 +80,93 @@ router.get('/:userId',isAuthenticated, validId('userId'), async (req, res) => {
     }
 });
 
-router.post('/register', validate(registerSchema), async (req,res) => {
-    try {
-        const newUser = req.body;
+// router.post('/register', validate(registerSchema), async (req,res) => {
+//     try {
+//         const newUser = req.body;
 
-        if(!newUser.email){
-            res.status(400).type('text/plain').send('Email is required');
-            return;
-        }
+//         if(!newUser.email){
+//             res.status(400).type('text/plain').send('Email is required');
+//             return;
+//         }
 
-        if(!newUser.password){
-            res.status(400).type('text/plain').send('Password is required');
-            return;
-        }
+//         if(!newUser.password){
+//             res.status(400).type('text/plain').send('Password is required');
+//             return;
+//         }
 
-        if(!newUser.givenName){
-            res.status(400).send('First name is required');
-            return;
-        }
+//         if(!newUser.givenName){
+//             res.status(400).send('First name is required');
+//             return;
+//         }
 
-        if(!newUser.familyName){
-            res.status(400).send('Family name is required');
-            return;
-        }
+//         if(!newUser.familyName){
+//             res.status(400).send('Family name is required');
+//             return;
+//         }
 
-        if(!newUser.role){
-            res.status(400).send('Role is required');
-            return;
-        }
-        const hashPassword = await bcrypt.hash(newUser.password, 10 );
-        newUser.password = hashPassword;
+//         if(!newUser.role){
+//             res.status(400).send('Role is required');
+//             return;
+//         }
+//         const hashPassword = await bcrypt.hash(newUser.password, 10 );
+//         newUser.password = hashPassword;
 
-        const existingUser = await getUserByEmail(newUser.email);
-        if(existingUser) {
-            res.status(400).json({message: 'User already exists'});
-            return;
-        }
+//         const existingUser = await getUserByEmail(newUser.email);
+//         if(existingUser) {
+//             res.status(400).json({message: 'User already exists'});
+//             return;
+//         }
 
-        newUser.createdBugs = [];
-        newUser.assignedBugs = [];
-        newUser.createdAt = new Date();
+//         newUser.createdBugs = [];
+//         newUser.assignedBugs = [];
+//         newUser.createdAt = new Date();
 
-        const addedUser = await addUser(newUser);
-        debugUser(addedUser);
+//         const addedUser = await addUser(newUser);
+//         debugUser(addedUser);
 
-        if(addedUser.insertedId){
-            res.status(201).json({message: `User ${newUser.givenName} added successfully`})
-            return;
-        }else {
-            res.status(404).json({message: "Error adding a User."})
-            return;
-        }
-    }
-    catch  (error){
-        console.error("Error adding user:", error);
-        res.status(500).json({message: "Error Adding User"})
-    }
-});
+//         if(addedUser.insertedId){
+//             res.status(201).json({message: `User ${newUser.givenName} added successfully`})
+//             return;
+//         }else {
+//             res.status(404).json({message: "Error adding a User."})
+//             return;
+//         }
+//     }
+//     catch  (error){
+//         console.error("Error adding user:", error);
+//         res.status(500).json({message: "Error Adding User"})
+//     }
+// });
 
-router.post('/login',  validate(loginSchema),async (req, res) => {
-    try {
-        const user = req.body;
+// router.post('/login',  validate(loginSchema),async (req, res) => {
+//     try {
+//         const user = req.body;
 
-         if(!user.email || !user.password){
-            res.status(400).send('Email and Password are required');
-            return;
-        } 
+//          if(!user.email || !user.password){
+//             res.status(400).send('Email and Password are required');
+//             return;
+//         } 
     
-            const existingUser = await getUserByEmail(user.email);
-            if(!existingUser){
-                res.status(400).json({message: 'Invalid login credential provided. Please try again.'});
-                return;
+//             const existingUser = await getUserByEmail(user.email);
+//             if(!existingUser){
+//                 res.status(400).json({message: 'Invalid login credential provided. Please try again.'});
+//                 return;
 
-            }
-            if (existingUser && await bcrypt.compare(user.password, existingUser.password)) {
-                res.status(200).json({message: `Welcome back ${existingUser.givenName}`});
-                return;
+//             }
+//             if (existingUser && await bcrypt.compare(user.password, existingUser.password)) {
+//                 res.status(200).json({message: `Welcome back ${existingUser.givenName}`});
+//                 return;
 
-            } else{
-                res.status(400).json({message: `Invalid login credential provided. Please try again.`});
-                return;
-            }
+//             } else{
+//                 res.status(400).json({message: `Invalid login credential provided. Please try again.`});
+//                 return;
+//             }
         
-    } catch (error) {
-        console.error("Error logging in user:", error);
-        res.status(500).json({message: "Invalid login credential provided. Please try again."})
-    }  
-});
+//     } catch (error) {
+//         console.error("Error logging in user:", error);
+//         res.status(500).json({message: "Invalid login credential provided. Please try again."})
+//     }  
+// });
 
 router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (req,res) => {
     try{

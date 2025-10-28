@@ -24,8 +24,8 @@ app.use(express.static('frontend/dist'));
 app.all('/api/auth/*splat', toNodeHandler(auth));
 app.use('/api/users', userRouter);
 app.use('/api/bugs', bugRouter);
-app.use('/api/comments', commentRouter);
-app.use('/api/tests', testRouter);
+app.use('/api/bugs', commentRouter);
+app.use('/api/bugs', testRouter);
 
 app.listen(port,() =>{
     debugServer(`Server is now running on port http://localhost:${port}`);
