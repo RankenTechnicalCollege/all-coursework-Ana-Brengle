@@ -1,4 +1,3 @@
-import { error } from "better-auth/api";
 import { getDatabase } from "../database.js";
 
 export const hasPermissions = (permission) => {

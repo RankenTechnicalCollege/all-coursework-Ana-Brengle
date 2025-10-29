@@ -2,7 +2,7 @@ import express from 'express';
 import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, saveAuditLog} from '../../database.js';
 import bcrypt from 'bcrypt';
 import { registerSchema, loginSchema, updateUserSchema } from '../../validation/userSchema.js';
-//import { hasRole } from '../../middleware/hasRole.js';
+import { hasRole } from '../../middleware/hasRole.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
