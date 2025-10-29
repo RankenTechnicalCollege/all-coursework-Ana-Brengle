@@ -97,7 +97,7 @@ router.post('/:bugId/tests', isAuthenticated, validId('bugId'), validate(addTest
         const log = {
             timestamp: new Date(Date.now()),
             col: 'bug test',
-            op: 'insert',
+            op: 'insert test case',
             target: id,
             performedBy: user.email
         }
@@ -136,7 +136,7 @@ router.patch('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId
         let log = {
             timestamp: new Date(Date.now()),
             col: 'bug',
-            op: 'update test',
+            op: 'update test case',
             target: id,
             update: [],
             performedBy: author.email
@@ -176,31 +176,42 @@ router.patch('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId
 
 router.delete('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId'),async(req,res) =>{
     try {
-        const id = req.params.bugId;
-        const bug = await getBugIds(id);
-        if (!bug) {
-            res.status(404).json({message: 'Bug not found'});
-            return;
-        }
+        const bugId = req.params.bugId;
+        const bug = await getBugIds(bugId)
+
+        if(!bug) return res.status(400).json({message: "Bgg not found"});
+
+        const author = req.user;
+        if(!author) return res.status(400).json({message: "Author not found"});
+
         const testId = req.params.testId;
-        const testCaseToDelete = await getTestsId(id, testId);
-        if (!testCaseToDelete) {
-            res.status(404).json({message: 'Test case not found'});
-            return;
-        }
+        const testCaseToDelete = await getTestsId(bugId, testId);
+        if(!testCaseToDelete) return res.status(400).json({message: "Test case not found"});
         const deleteTest = new ObjectId(testId);
-        const deletedTestCase = await deleteTestCase(id, deleteTest);
+
+        let log = {
+            timestamp: new Date(Date.now()),
+            col: 'bug',
+            op: 'delete test case',
+            target: bugId,
+            testId: testId,
+            performedBy: author.email
+        }
+        const deletedTestCase = await deleteTestCase(bugId, deleteTest);
         debugTest(deletedTestCase);
         if (deletedTestCase.modifiedCount === 0) {
             res.status(404).json({message: 'Bug or test case not found'});
             return;
         }
+        await saveAuditLog(log)
         res.status(200).json({message: `Test case ${testId} deleted successfully.`});
+
+
+
         
     } catch (error) {
         console.error("Error deleting test case:", error);
         res.status(500).json({ message: 'Error Deleting Test Case.' });
     }
 });
-router.use(express.urlencoded({extended: false}));
 export{router as testRouter}

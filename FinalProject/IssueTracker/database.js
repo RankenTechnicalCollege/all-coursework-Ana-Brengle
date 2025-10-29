@@ -144,7 +144,7 @@ async function getTestsId(id, testId) {
     return test;
 }
 
-async function addTestCase(id, testCase) {
+async function addTestCase(id, testCase,createdBy) {
     const db = await connectToDatabase()
     return await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$push: {testCases : testCase}, $set: {createdBy: createdBy,createdOn: new Date(Date.now()),lastUpdated: new Date()}});
 }
@@ -154,9 +154,9 @@ async function getUpdatedTestCase(id, testId, title, testAuthor, status) {
     return await db.collection('bugs').updateOne({_id: new ObjectId(id), "testCases.testId": new ObjectId(testId)}, {$set: {"testCases.$.title": title,"testCases.$.testAuthor": testAuthor,"testCases.$.status": status,"testCases.$.lastUpdated": new Date()}})
 }
 
-async function deleteTestCase(id, testId) {
+async function deleteTestCase(bugId, testId) {
     const db = await connectToDatabase();
-    const test = await db.collection("bugs").updateOne({_id: new ObjectId(id)},{$pull: {testCases: {testId: testId}}, $set: {lastUpdated: new Date()}});
+    const test = await db.collection("bugs").updateOne({_id: new ObjectId(bugId)},{$pull: {testCases: {testId: testId}}, $set: {lastUpdated: new Date()}});
     debugDb(test);
     return test;
 }
