@@ -9,7 +9,7 @@ export const hasPermissions = (permission) => {
                 return res.status(403).json({error: 'No roles assigned to user'})
             }
             const db = await getDatabase();
-            const rolesCollection = db.collection('role')
+            //const rolesCollection = db.collection('role')
 
             const roleDocuments = await db.collection('role').find({ name: {$in: userRoles}}).toArray();
 
@@ -25,9 +25,10 @@ export const hasPermissions = (permission) => {
                 })
             }
                 
-
+            next()
         } catch (error){
-
+            console.error('Permission check error:', error);
+            return res.status(500).json({ error: 'Error checking permissions' });
         }
     }
 }

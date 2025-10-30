@@ -44,9 +44,9 @@ async function addUser(user) {
     return db.collection('user').insertOne(user);
 }
 
-async function getUserById(id) {
+async function getUserById(userId) {
     const db = await connectToDatabase();
-    return db.collection('user').findOne({_id: new ObjectId(id)})
+    return db.collection('user').findOne({_id: new ObjectId(userId)})
 }
 
 async function getUserByEmail(email) {
@@ -55,14 +55,14 @@ async function getUserByEmail(email) {
     
 }
 
-async function getUpdatedUser(id, password, givenName, familyName, fullName, role) {
+async function getUpdatedUser(userId, password, givenName, familyName, fullName, role) {
     const db = await connectToDatabase();
-    return db.collection('user').updateOne({_id: new ObjectId(id)}, {$set: {password: password, fullName: fullName, givenName: givenName, familyName: familyName, role: role, lastUpdated: new Date()}})
+    return db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {password: password, fullName: fullName, givenName: givenName, familyName: familyName, role: role, lastUpdated: new Date()}})
 }
 
-async function getDeletedUser(id) {
+async function getDeletedUser(userId) {
     const db = await connectToDatabase();
-    return db.collection('user').deleteOne({_id: new ObjectId(id)})
+    return db.collection('user').deleteOne({_id: new ObjectId(userId)})
 }
 
 

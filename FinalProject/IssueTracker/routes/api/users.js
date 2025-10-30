@@ -3,6 +3,7 @@ import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDele
 import bcrypt from 'bcrypt';
 import { registerSchema, loginSchema, updateUserSchema } from '../../validation/userSchema.js';
 import { hasRole } from '../../middleware/hasRole.js';
+import { hasPermissions } from '../../middleware/hasPermissions.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
@@ -13,7 +14,7 @@ router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('', isAuthenticated, async (req, res) => {
+router.get('', isAuthenticated, hasPermissions('canViewData'), async (req, res) => {
     try {
         const {keywords, role, maxAge, minAge, sortBy } = req.query;
         
@@ -45,9 +46,6 @@ router.get('', isAuthenticated, async (req, res) => {
             givenName: { givenName: 1, familyName: 1, createdAt: 1 }
         }
          const sort = sortOptions[sortBy] || sortOptions['givenName']
-
-
-
         const users = await getUsers(filter,pageSize,skip, sort)
         if(!users){
             res.status(400).json({message: "User not found"});
@@ -64,8 +62,8 @@ router.get('', isAuthenticated, async (req, res) => {
 
 router.get('/:userId',isAuthenticated, validId('userId'), async (req, res) => { 
     try{
-        const id = req.params.userId;
-        const user = await getUserById(id);
+        const userId = req.params.userId;
+        const user = await getUserById(userId);
 
         if(user) {
             res.status(200).json(user);
@@ -171,9 +169,9 @@ router.get('/:userId',isAuthenticated, validId('userId'), async (req, res) => {
 
 router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (req,res) => {
     try{
-        const id = req.params.userId;
+        const userId = req.params.userId;
         const userToUpdate = req.body;
-        const prevUser = await getUserById(id);
+        const prevUser = await getUserById(userId);
 
         let password = null;
         let fullName = null;
@@ -182,7 +180,7 @@ router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (r
         let role = null;
 
         if(!prevUser) {
-            res.status(400).json({message: `User ${id} not found`});
+            res.status(400).json({message: `User ${userId} not found`});
             return;
         }
 
@@ -198,10 +196,10 @@ router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (r
         fullName = userToUpdate.fullName || `${givenName} ${familyName}`;
         role = userToUpdate.role || prevUser.role;
 
-        const updatedUser = await getUpdatedUser(id, password, fullName,givenName,familyName,role);
+        const updatedUser = await getUpdatedUser(userId, password, fullName,givenName,familyName,role);
         debugUser(updatedUser);
         if(updatedUser.modifiedCount === 1){
-            res.status(200).send(`User ${id} updated successfully`)
+            res.status(200).send(`User ${userId} updated successfully`)
         } else {
             res.status(404).send(`User not found.`)
         }
@@ -214,14 +212,14 @@ router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (r
 
 router.delete('/:userId', validId('userId'), async (req,res) => {
     try {
-        const id = req.params.userId;
-        const deletedUser = await getDeletedUser(id);
+        const userId = req.params.userId;
+        const deletedUser = await getDeletedUser(userId);
         debugUser(deletedUser);
 
         if(deletedUser.deletedCount == 1){
-            res.status(200).json({message: `User ${id} deleted successfully`});
+            res.status(200).json({message: `User ${userId} deleted successfully`});
         } else {
-            res.status(404).json({message: `User ${id} not found.`});
+            res.status(404).json({message: `User ${userId} not found.`});
         }
     } catch  (error) {
         console.error("Error deleting user:", error);
