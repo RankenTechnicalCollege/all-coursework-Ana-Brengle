@@ -8,6 +8,7 @@ import debug from 'debug';
 const debugDb = debug('app:Database');
 
 let _db = null;
+let _client = null
 
 async function connectToDatabase() {
     if(!_db){
@@ -15,7 +16,6 @@ async function connectToDatabase() {
         const dbName = process.env.MONGO_DB_NAME;
         
         const client = await MongoClient.connect(connectionString);
-
         _db = client.db(dbName);
         //debugDb('Connected.');
     }
@@ -29,9 +29,9 @@ async function ping() {
     
 }
 
-async function getProducts() {
+async function getProducts(filter, pageSize, skip, sort) {
     const db = await connectToDatabase();
-    return await db.collection('products').find({}).toArray();
+    return await db.collection('products').find(filter).sort(sort).skip(skip).limit(pageSize).toArray();
 }
 
 async function getProductByName(productName) {
@@ -58,4 +58,16 @@ async function deletedProduct(productId) {
     const db = await connectToDatabase();
     return await db.collection("products").deleteOne({_id: new ObjectId(productId)});
 }
-export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct}
+
+async function getClient() {
+    if(!_client){
+        await connectToDatabase();
+    }
+    return _client
+}
+
+async function getDatabase() {
+    return await connectToDatabase();
+}
+
+export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, getDatabase}

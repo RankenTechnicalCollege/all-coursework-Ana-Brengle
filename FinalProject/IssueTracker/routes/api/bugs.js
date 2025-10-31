@@ -2,7 +2,7 @@ import express from 'express';
 import debug from 'debug';
 const router = express.Router();
 import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema} from '../../validation/bugSchema.js';
-import { getAllBugs,getBugIds, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, saveAuditLog} from '../../database.js';
+import { getAllBugs,getBugId, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, saveAuditLog} from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
@@ -62,7 +62,7 @@ router.get('', isAuthenticated, async(req, res) => {
 router.get('/:bugId', isAuthenticated,validId('bugId'), async(req, res) => {
     try {
         const id = req.params.bugId;
-        const bug = await getBugIds(id);
+        const bug = await getBugId(id);
 
         if(bug) {
             res.status(200).json(bug);
@@ -128,7 +128,7 @@ router.post('/new', isAuthenticated, validate(addBugSchema),async(req,res) => {
 router.patch('/:bugId', isAuthenticated, validId('bugId'), validate(updateBugSchema), async(req,res) => {
     try {
         const id = req.params.bugId;
-        const oldBug = await getBugIds(id);
+        const oldBug = await getBugId(id);
         const bugToUpdate = req.body;
         if(!oldBug) {
             res.status(400).json({message: `Bug ${id} not found`});
@@ -159,7 +159,7 @@ router.patch('/:bugId', isAuthenticated, validId('bugId'), validate(updateBugSch
             title = oldBug.title
         }
         if(bugToUpdate.description && bugToUpdate.description !== oldBug.description){
-            title = bugToUpdate.description;
+            description = bugToUpdate.description;
             log.update.push({field: "description", oldValue: oldBug.description, newValue: bugToUpdate.description});
         } else{
             description = oldBug.description
@@ -192,7 +192,7 @@ router.patch('/:bugId/classify', isAuthenticated, validId('bugId'), validate(cla
     try{
         const id = req.params.bugId;
         const bugToUpdate = req.body
-        const oldBug = getBugIds(id)
+        const oldBug = await getBugId(id)
 
         if(!oldBug) {
             res.status(400).json({message: `Bug ${id} not found`});
@@ -239,7 +239,7 @@ router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assig
     try {
        const id = req.params.bugId;
        const {assignedToUserId} = req.body;
-       const oldBug = await getBugIds(id)
+       const oldBug = await getBugId(id)
        if(!oldBug) {
             res.status(400).json({message: `Bug ${id} not found`});
             return;
@@ -286,7 +286,7 @@ router.patch('/:bugId/close', isAuthenticated, validId('bugId'), validate(closeB
     try{
         const id = req.params.bugId
         const bugToClose = req.body;
-        const oldBug = await getBugIds(id)
+        const oldBug = await getBugId(id)
         if(!oldBug) {
             res.status(400).json({message: `Bug ${id} not found`});
             return;

@@ -10,7 +10,10 @@ import cors from'cors'
 
 import { ping } from "./database.js";
 import { productRouter } from "./routes/api/products.js";
+import { userRouter } from "./routes/api/users.js";
 
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./auth.js";
 
 
 ping();
@@ -20,10 +23,17 @@ const app = express()
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-app.use(cors());
+app.use(cors(
+  {
+    origin: ['http://localhost:2023', 'http://localhost:5137', 'http://localhost:3000'],
+    credentials: true
+  }
+));
 app.use(express.static("frontend/dist"));
 
+app.all('/api/auth/*splat', toNodeHandler(auth))
 app.use('/api/products', productRouter)
+app.use('/api/users', userRouter)
 
 const port = process.env.PORT || 3000
 

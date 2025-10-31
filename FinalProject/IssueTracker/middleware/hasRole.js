@@ -1,5 +1,3 @@
-import { error } from "better-auth/api";
-
 export const hasRole = (allowedRoles) => {
     return (req, res, next) => {
         const userRoles = req.user.role || [];

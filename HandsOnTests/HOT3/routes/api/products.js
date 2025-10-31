@@ -10,7 +10,41 @@ import { addProductSchema, updateProductSchema } from '../../validation/products
 
 router.get('', async (req, res) =>{
     try{
-        const products = await getProducts();
+        const {keywords, category, maxPrice, minPrice, sortBy} = req.query;
+
+        const pageNum = parseInt(req.query.pageNum) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 5;
+        const skip = (pageNum - 1) * pageSize;
+
+        const filter = {};
+
+        if(keywords) filter.$text = {$search: keywords};
+        if(category) filter.category = {$search: keywords};
+
+
+        if(minPrice) {
+            const minPriceValue = parseFloat(minPrice);
+            if(isNaN(minPriceValue)){
+                priceFilter.$gte = minPriceValue;
+            } 
+        }
+
+        if(maxPrice) {
+            const maxPriceValue = parseFloat(maxPrice);
+            if(isNaN(maxPriceValue)){
+                priceFilter.$lte = maxPriceValue;
+            } 
+        }
+
+        const sortOptions = {
+            name: {name: 1},
+            category: {category: 1, name: 1},
+            lowestPrice: { price: 1, name: 1},
+            newest: {createdAt: -1, name: 1}
+        };
+
+        const sort = sortOptions[sortBy] || sortOptions['name'];
+        const products = await getProducts(filter, pageSize, skip, sort);
     
         if(!products){
             res.status(404).json({message: 'Products not found'});

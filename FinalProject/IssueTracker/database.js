@@ -72,7 +72,7 @@ async function getAllBugs(filter, sort, skip, limit) {
     return db.collection('bugs').find(filter).sort(sort).skip(skip).limit(limit).toArray();
 }
 
-async function getBugIds(id) {
+async function getBugId(id) {
     const db = await connectToDatabase();
     return db.collection('bugs').findOne({_id: new ObjectId(id)})
     
@@ -177,4 +177,4 @@ async function saveAuditLog(log) {
     await db.collection('edits').insertOne(log)
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugIds, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase, saveAuditLog};
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugId, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase, saveAuditLog};
