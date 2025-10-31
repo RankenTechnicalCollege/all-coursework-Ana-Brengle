@@ -46,7 +46,8 @@ router.get("/me", async (req, res) =>{
         
 
     } catch (error) {
-
+        console.error("Error user not found:", error);
+        res.status(500).json({message: "Error Finding User"})
     }
 })
 
@@ -55,7 +56,8 @@ router.patch("/me", async (req, res) =>{
         
 
     } catch (error) {
-
+        console.error("Error updating user:", error);
+        res.status(500).json({message: "Error Updating User"})
     }
 })
 
