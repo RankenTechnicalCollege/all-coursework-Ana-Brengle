@@ -59,6 +59,27 @@ async function deletedProduct(productId) {
     return await db.collection("products").deleteOne({_id: new ObjectId(productId)});
 }
 
+async function getUsers() {
+    const db = await connectToDatabase();
+    return await db.collection("user").find({}).toArray();
+}
+
+async function getUserById(userId) {
+    const db = await connectToDatabase();
+    return await db.collection('user').findOne({_id: new ObjectId(userId)});
+}
+
+async function getUpdatedUser(userId, fullName, email, password) {
+     const db = await connectToDatabase();
+    return await db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {fullName: fullName, password: password, email: email, lastUpdatedOn: new Date()}});
+}
+
+async function getRoles(role) {
+    const db = await connectToDatabase();
+    return await db.collection('role').findOne({role: role})
+}
+
+
 async function getClient() {
     if(!_client){
         await connectToDatabase();
@@ -70,4 +91,4 @@ async function getDatabase() {
     return await connectToDatabase();
 }
 
-export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, getDatabase}
+export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, getDatabase, getUsers, getUserById, getRoles, getUpdatedUser}

@@ -1,17 +1,20 @@
 import express from 'express';
 import debug from 'debug';
 import { validate, validId } from '../../middleware/validator.js';
-import { registerUserSchema, loginUserSchema, updateUserSchema } from '../../validation/userSchema.js';
+import {  updateUserSchema } from '../../validation/userSchema.js';
+import {  isAuthenticated } from '../../middleware/authentication.js';
+import { hasRole } from '../../middleware/hasRole.js';
+import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 const debugUser = debug('app:User')
 const router = express.Router();
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("", async (req, res) =>{
+router.get("",  hasRole('admin'), async (req, res) =>{
     try{
         const users = await getUsers();
-        if(!users){
-            res.status(400).json({message: "User not found"});
+        if(!users || users.length === 0){
+            res.status(404).json({message: "User not found"});
             return;
         } else{
              res.status(200).json(users);
@@ -24,13 +27,13 @@ router.get("", async (req, res) =>{
     }
 })
 
-router.get("/:userId", validId('userId'),async (req, res) =>{
+router.get("/:userId", isAuthenticated, hasRole('admin'), validId('userId'), async (req, res) =>{
     try{
         const userId = req.params.userId
         const user = await getUsers(userId)
 
         if(!user) {
-            res.status(400).json(user);
+            res.status(404).json(user);
             return;
         }
         res.status(200).json(user);
@@ -41,9 +44,12 @@ router.get("/:userId", validId('userId'),async (req, res) =>{
     }
 })
 
-router.get("/me", async (req, res) =>{
+router.get("/me", isAuthenticated, async (req, res) =>{
     try{
-        
+        const user = await getUserById(req.user.id);
+
+        if(!user) return res.status(404).json({message: "User not found"});
+        res.status(200).json(user);
 
     } catch (error) {
         console.error("Error user not found:", error);
@@ -51,9 +57,44 @@ router.get("/me", async (req, res) =>{
     }
 })
 
-router.patch("/me", async (req, res) =>{
+router.patch("/me", isAuthenticated, async (req, res) =>{
     try{
+        const userId = req.user.id;
+        const oldUser = await getUserById(userId);
+        if (!oldUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         
+        const userToUpdate = req.body;
+        let password;
+        let email;
+        let fullName;
+
+        if(userToUpdate.password && userToUpdate.password !== oldUser.password){
+            password = userToUpdate.password;
+        } else{
+            password = oldUser.password
+        }
+
+        if(userToUpdate.email && userToUpdate.email!== oldUser.email){
+            email = userToUpdate.email;
+        } else{
+            email = oldUser.email
+        }
+
+        if(userToUpdate.fullName && userToUpdate.fullName!== oldUser.fullName){
+            fullName = userToUpdate.fullName;
+        } else{
+            fullName = oldUser.fullName
+        }
+        const updatedUser = await getUpdatedUser(userId, fullName, email, password)
+        debugUser(JSON.stringify(updatedUser))
+
+        if(updatedUser.modifiedCount === 1){
+            res.status(200).send(`User ${fullName} updated successfully`)
+        } else {
+            res.status(404).send(`User not updated.`)
+        }
 
     } catch (error) {
         console.error("Error updating user:", error);

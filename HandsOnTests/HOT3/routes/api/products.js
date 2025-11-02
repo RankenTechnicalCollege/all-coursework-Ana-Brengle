@@ -6,6 +6,8 @@ const debugProducts = debug('app:Products');
 
 import { getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct } from '../../database.js';
 import { validate, validId } from '../../middleware/validator.js';
+import { isAuthenticated } from '../../middleware/authentication.js';
+import { hasRole } from '../../middleware/hasRole.js';
 import { addProductSchema, updateProductSchema } from '../../validation/productsSchema.js';
 
 router.get('', async (req, res) =>{
@@ -59,7 +61,7 @@ router.get('', async (req, res) =>{
     
 })
 
-router.get('/name/:productName', async (req, res) =>{
+router.get('/name/:productName', isAuthenticated, async (req, res) =>{
     try {
         const productName = req.params.productName
         const product = await getProductByName(productName)
@@ -77,7 +79,7 @@ router.get('/name/:productName', async (req, res) =>{
     }
 })
 
-router.get('/:productId', validId('productId'),async (req, res) =>{
+router.get('/:productId',validId('productId'), isAuthenticated,async (req, res) =>{
     try{
         const productId = req.params.productId;
         const product = await getProductId(productId)
@@ -94,7 +96,7 @@ router.get('/:productId', validId('productId'),async (req, res) =>{
     }
 })
 
-router.post('', validate(addProductSchema),async (req, res) =>{
+router.post('', hasRole('admin'), validate(addProductSchema),async (req, res) =>{
     try {
         const newProduct = req.body
         if(!newProduct.name){
@@ -127,7 +129,7 @@ router.post('', validate(addProductSchema),async (req, res) =>{
     }
 })
 
-router.patch('/:productId', validId('productId'), validate(updateProductSchema), async (req, res) =>{
+router.patch('/:productId', hasRole('admin'), validId('productId'), validate(updateProductSchema), async (req, res) =>{
     try {
         
         const productToUpdate = req.body;
@@ -180,7 +182,7 @@ router.patch('/:productId', validId('productId'), validate(updateProductSchema),
     }
 })
 
-router.delete('/:productId', validId('productId'), async (req, res) =>{
+router.delete('/:productId', hasRole('admin'), validId('productId'), async (req, res) =>{
     try {
         const productId = req.params.productId;
         const deleteProduct = await deletedProduct(productId)

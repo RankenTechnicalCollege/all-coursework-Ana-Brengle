@@ -16,11 +16,16 @@ export const auth = betterAuth({
     },
     user: {
         additionalFields: {
-            familyName: {
+            fullName: {
+                type: "string",
+                required: true
+            },
+            role: {
                 type: "string",
                 required: true
             }
         }
+
     }
 
 });

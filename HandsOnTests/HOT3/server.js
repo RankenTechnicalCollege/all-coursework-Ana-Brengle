@@ -33,7 +33,7 @@ app.use(express.static("frontend/dist"));
 
 app.all('/api/auth/*splat', toNodeHandler(auth))
 app.use('/api/products', productRouter)
-app.use('/api/users', userRouter)
+app.use('/api/user', userRouter)
 
 const port = process.env.PORT || 3000
 
