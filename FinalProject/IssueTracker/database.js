@@ -83,6 +83,14 @@ async function addedBug(bug) {
     return db.collection('bugs').insertOne(bug);
 }
 
+export const updateUserCreatedBugs = async (userId, title) => {
+  const db = await getDatabase();
+  await db.collection('user').updateOne(
+    {_id: new ObjectId(userId) },
+    { $push: { createdBugs: title } }
+  );
+};
+
 async function getUpdatedBug(id, title, stepsToReproduce, description, userId) {
     const db = await connectToDatabase();
     return db.collection('bugs').updateOne({_id: new ObjectId(id)}, {$set: {title: title, stepsToReproduce: stepsToReproduce, description: description, lastUpdated: new Date(Date.now()), lastUpdatedBy: userId}})
@@ -177,4 +185,4 @@ async function saveAuditLog(log) {
     await db.collection('edits').insertOne(log)
 }
 
-export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugId, addedBug, getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase, saveAuditLog};
+export { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, getAllBugs, getBugId, addedBug ,getUpdatedBug, classifyBug, assignBug, getClosedBug, getBugComments, getCommentsId, addCommentToBug, getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, getClient, getDatabase, saveAuditLog};

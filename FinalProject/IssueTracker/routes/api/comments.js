@@ -4,6 +4,7 @@ import debug from 'debug';
 import { addCommentSchema} from '../../validation/bugSchema.js';
 import { getBugComments, getCommentsId, addCommentToBug  } from '../../database.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
+import { hasPermission } from '../../middleware/hasPermissions.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { ObjectId } from 'mongodb';
@@ -12,7 +13,7 @@ router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
 
-router.get('/:bugId/comments', isAuthenticated, async(req,res) => {
+router.get('/:bugId/comments', isAuthenticated, hasPermission('CanViewData'), async(req,res) => {
    try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -36,7 +37,7 @@ router.get('/:bugId/comments', isAuthenticated, async(req,res) => {
     }
 });
 
-router.get('/:bugId/comments/:commentId', isAuthenticated, async(req, res) => {
+router.get('/:bugId/comments/:commentId', isAuthenticated, hasPermission('canViewData'), validId('bugId'), async(req, res) => {
    try {
      const id = req.params.bugId;
      const bug = await getBugIds(id);
@@ -61,7 +62,7 @@ router.get('/:bugId/comments/:commentId', isAuthenticated, async(req, res) => {
    } 
 });
 
-router.post('/:bugId/comments', isAuthenticated, validate(addCommentSchema), validId('bugId'),async(req,res) => {
+router.post('/:bugId/comments', isAuthenticated, hasPermission('canAddComment'), validate(addCommentSchema), validId('bugId'),async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id)

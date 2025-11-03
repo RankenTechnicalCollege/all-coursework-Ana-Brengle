@@ -2,8 +2,9 @@ import express from 'express';
 import debug from 'debug';
 const router = express.Router();
 import { addTestCaseSchema,updateTestCaseSchema } from '../../validation/bugSchema.js';
-import { getUserById,getBugIds,getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, saveAuditLog  } from '../../database.js';
+import { getUserById,getBugId,getBugTests, getTestsId, addTestCase, getUpdatedTestCase, deleteTestCase, saveAuditLog  } from '../../database.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
+import { hasPermission } from '../../middleware/hasPermissions.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { ObjectId } from 'mongodb';
@@ -12,10 +13,10 @@ router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
 
-router.get('/:bugId/tests',isAuthenticated, validId('bugId'), async(req,res) => {
+router.get('/:bugId/tests',isAuthenticated, hasPermission('canViewData'), validId('bugId'), async(req,res) => {
     try{
         const id = req.params.bugId;
-        const bug = await getBugIds(id);
+        const bug = await getBugId(id);
         
         if(!bug) {
             res.status(400).json({message: 'Bug not found'});
@@ -35,10 +36,10 @@ router.get('/:bugId/tests',isAuthenticated, validId('bugId'), async(req,res) => 
     }
 });
 
-router.get('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId') ,async(req,res) => {
+router.get('/:bugId/tests/:testId', isAuthenticated, hasPermission('canViewData'), validId('bugId'), validId('testId') ,async(req,res) => {
     try {
         const id = req.params.bugId;
-        const bug = await getBugIds(id);
+        const bug = await getBugId(id);
 
         if(!bug) {
             res.status(400).json({message: 'Bug not found'});
@@ -61,26 +62,23 @@ router.get('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('
 
 });
 
-router.post('/:bugId/tests', isAuthenticated, validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
+router.post('/:bugId/tests', isAuthenticated, hasPermission('canAddTestCase'), validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
     try{
         const { title, status} = req.body;
         const id = req.params.bugId;
-        const bug = await getBugIds(id)
-        const authorId = req.session.userId
+        const bug = await getBugId(id)
         if(!bug) {
              res.status(400).json({message: 'Bug not found'});
             return;
         }
-
-        const user = await getUserById(authorId);
+        const userId = req.session.userId
+        const user = await getUserById(userId);
         debugTest(user)
         if(!user) {
             res.status(400).json({message: 'User not found'});
             return;
         }
-        if(user.role !== 'Quality Analyst') {
-            return res.status(403).json({ message: 'Access denied. Only Quality Analysts can add test cases.' });
-        }
+        
 
         const testId = new ObjectId()
         const testCase = {
@@ -118,10 +116,10 @@ router.post('/:bugId/tests', isAuthenticated, validId('bugId'), validate(addTest
     }
 });
 
-router.patch('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
+router.patch('/:bugId/tests/:testId', isAuthenticated, hasPermission('canEditTestCase'), validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
     try {
         const id = req.params.bugId;
-        const bug = await getBugIds(id);
+        const bug = await getBugId(id);
         
         if(!bug) return res.status(400).json({message: `Bug not found`});
         
@@ -174,10 +172,10 @@ router.patch('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId
     }
 });
 
-router.delete('/:bugId/tests/:testId', isAuthenticated, validId('bugId'), validId('testId'),async(req,res) =>{
+router.delete('/:bugId/tests/:testId', isAuthenticated, hasPermission('canDeleteTestCase'), validId('bugId'), validId('testId'),async(req,res) =>{
     try {
         const bugId = req.params.bugId;
-        const bug = await getBugIds(bugId)
+        const bug = await getBugId(bugId)
 
         if(!bug) return res.status(400).json({message: "Bgg not found"});
 

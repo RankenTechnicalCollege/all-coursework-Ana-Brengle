@@ -1,6 +1,6 @@
 import { getDatabase } from "../database.js";
 
-export const hasPermissions = (permission) => {
+export const hasPermission = (permission) => {
     return async(req, res, next) => {
         try{
             const userRoles = req.user.role || [];
@@ -13,8 +13,8 @@ export const hasPermissions = (permission) => {
 
             const roleDocuments = await db.collection('role').find({ name: {$in: userRoles}}).toArray();
 
-            console.log(`User roles: ${userRoles}`);
-            console.log('Role documents from DB:', roleDocuments)
+            // console.log(`User roles: ${userRoles}`);
+            // console.log('Role documents from DB:', roleDocuments)
 
             const hasRequiredPermission = roleDocuments.some(roleDoc => {
                 return roleDoc.permissions && roleDoc.permissions[permission] === true;
@@ -32,3 +32,5 @@ export const hasPermissions = (permission) => {
         }
     }
 }
+
+

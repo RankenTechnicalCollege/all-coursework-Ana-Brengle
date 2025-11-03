@@ -30,7 +30,6 @@ const addCommentSchema = Joi.object({
 }).required();
 
 const addTestCaseSchema = Joi.object({
-  authorId: Joi.string().required(),
   title: Joi.string().required(),
   status: Joi.string().valid("passed", "failed").required()
 }).required()

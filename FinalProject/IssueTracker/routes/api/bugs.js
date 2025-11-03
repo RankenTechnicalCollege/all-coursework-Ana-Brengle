@@ -2,16 +2,17 @@ import express from 'express';
 import debug from 'debug';
 const router = express.Router();
 import { addBugSchema, updateBugSchema, classifyBugSchema, assignBugSchema, closeBugSchema} from '../../validation/bugSchema.js';
-import { getAllBugs,getBugId, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, saveAuditLog} from '../../database.js';
+import { getAllBugs,getBugId, addedBug, getUpdatedBug, classifyBug, getUserById, assignBug, getClosedBug, saveAuditLog, updateUserCreatedBugs} from '../../database.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
+import { hasPermission } from '../../middleware/hasPermissions.js';
 //import { ObjectId } from 'mongodb';
 const debugBug = debug('app:BugRouter');
 router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
-router.get('', isAuthenticated, async(req, res) => {
+router.get('', isAuthenticated, hasPermission('canViewData'),async(req, res) => {
     try{
         const {keywords, classification, minAge, maxAge, closed, page, limit, sortBy} = req.query;
 
@@ -59,7 +60,7 @@ router.get('', isAuthenticated, async(req, res) => {
     }
 });
 
-router.get('/:bugId', isAuthenticated,validId('bugId'), async(req, res) => {
+router.get('/:bugId', isAuthenticated, hasPermission("canViewData"), validId('bugId'), async(req, res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugId(id);
@@ -77,21 +78,22 @@ router.get('/:bugId', isAuthenticated,validId('bugId'), async(req, res) => {
 
 });
 
-router.post('/new', isAuthenticated, validate(addBugSchema),async(req,res) => {
+router.post('/new', isAuthenticated, hasPermission("canCreateBug"),validate(addBugSchema),async(req,res) => {
     try {
         const newBug = req.body;
         const author = req.user;
-        const authorId = author.id;
+
         if(!author) return res.status(400).json({message: 'Author not found'})
         if(!newBug.title) return res.status(400).json({message: 'Title is required'});
         if(!newBug.description) return res.status(400).json({message: 'Description is required'});
         if(!newBug.stepsToReproduce) return res.status(400).json({message: 'Steps to Reproduce is required'});
+
        
+        newBug.authorOfBug = `${author.givenName} ${author.familyName}`;
         newBug.createdOn = new Date(Date.now());
         newBug.classification = 'unclassified';
         newBug.closed = false;
         newBug.lastUpdated = new Date(Date.now());
-        newBug.authorOfBug = authorId;
         newBug.edits = [];
         newBug.comments = [];
         newBug.classifiedOn = null;
@@ -102,9 +104,11 @@ router.post('/new', isAuthenticated, validate(addBugSchema),async(req,res) => {
         newBug.fixInVersion = null;
         newBug.fixedOnDate = null;
         newBug.closedOn= null;
+      
  
         const result = await addedBug(newBug);
         debugBug(result)
+        await updateUserCreatedBugs(author.id, newBug.title);
         const log = {
             timestamp: new Date(Date.now()),
             col: 'bug',
@@ -114,7 +118,7 @@ router.post('/new', isAuthenticated, validate(addBugSchema),async(req,res) => {
         }
         await saveAuditLog(log)
          if(result.insertedId){
-            res.status(201).json({message: `Bug ${newBug.title} added successfully`})
+            res.status(201).json({message: `Bug "${newBug.title}" added successfully`})
         }else {
             res.status(404).json({message: "Error adding a Bug."})
         }
@@ -125,7 +129,7 @@ router.post('/new', isAuthenticated, validate(addBugSchema),async(req,res) => {
     }
 });
 
-router.patch('/:bugId', isAuthenticated, validId('bugId'), validate(updateBugSchema), async(req,res) => {
+router.patch('/:bugId', isAuthenticated, hasPermission(["canEditAnyBug","canEditIfAssignedTo","canEditMyBug"]), validId('bugId'), validate(updateBugSchema), async(req,res) => {
     try {
         const id = req.params.bugId;
         const oldBug = await getBugId(id);
@@ -188,7 +192,7 @@ router.patch('/:bugId', isAuthenticated, validId('bugId'), validate(updateBugSch
     }
 });
 
-router.patch('/:bugId/classify', isAuthenticated, validId('bugId'), validate(classifyBugSchema),async(req,res) => {
+router.patch('/:bugId/classify', isAuthenticated, hasPermission('canClassifyAnyBug'),validId('bugId'), validate(classifyBugSchema),async(req,res) => {
     try{
         const id = req.params.bugId;
         const bugToUpdate = req.body
@@ -235,7 +239,7 @@ router.patch('/:bugId/classify', isAuthenticated, validId('bugId'), validate(cla
     }
 });
 
-router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assignBugSchema),async(req,res) => {
+router.patch('/:bugId/assign', isAuthenticated, hasPermission(['canReassignAnyBug', 'canReassignIfAssignedTo']),validId('bugId'), validate(assignBugSchema),async(req,res) => {
     try {
        const id = req.params.bugId;
        const {assignedToUserId} = req.body;
@@ -282,7 +286,7 @@ router.patch('/:bugId/assign', isAuthenticated, validId('bugId'), validate(assig
     }
 });
 
-router.patch('/:bugId/close', isAuthenticated, validId('bugId'), validate(closeBugSchema), async(req,res) => {
+router.patch('/:bugId/close', isAuthenticated, hasPermission('canCloseAnyBug'),validId('bugId'), validate(closeBugSchema), async(req,res) => {
     try{
         const id = req.params.bugId
         const bugToClose = req.body;

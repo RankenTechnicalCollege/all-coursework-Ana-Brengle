@@ -3,7 +3,7 @@ import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDele
 import bcrypt from 'bcrypt';
 import { registerSchema, loginSchema, updateUserSchema } from '../../validation/userSchema.js';
 import { hasRole } from '../../middleware/hasRole.js';
-import { hasPermissions } from '../../middleware/hasPermissions.js';
+import { hasPermission } from '../../middleware/hasPermissions.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
@@ -14,7 +14,7 @@ router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('', isAuthenticated, hasPermissions('canViewData'), async (req, res) => {
+router.get('', isAuthenticated, hasPermission('canViewData'), async (req, res) => {
     try {
         const {keywords, role, maxAge, minAge, sortBy } = req.query;
         
@@ -60,10 +60,10 @@ router.get('', isAuthenticated, hasPermissions('canViewData'), async (req, res) 
     }
 });
 
-router.get('/:userId',isAuthenticated, validId('userId'), async (req, res) => { 
+router.get('/me',isAuthenticated, hasPermission('canViewData'), async (req, res) => { 
     try{
-        const userId = req.params.userId;
-        const user = await getUserById(userId);
+        const session = req.session;
+        const user = await getUserById(req.session.userId);
 
         if(user) {
             res.status(200).json(user);
@@ -167,7 +167,7 @@ router.get('/:userId',isAuthenticated, validId('userId'), async (req, res) => {
 //     }  
 // });
 
-router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (req,res) => {
+router.patch('/me', isAuthenticated, hasPermission('canEditAnyUser'), validId('userId'), validate(updateUserSchema), async (req,res) => {
     try{
         const userId = req.params.userId;
         const userToUpdate = req.body;
@@ -210,7 +210,7 @@ router.patch('/:userId', validId('userId'), validate(updateUserSchema), async (r
     }
 });
 
-router.delete('/:userId', validId('userId'), async (req,res) => {
+router.delete('/:userId', isAuthenticated, hasPermission("canEditAnyUser"), validId('userId'), async (req,res) => {
     try {
         const userId = req.params.userId;
         const deletedUser = await getDeletedUser(userId);
