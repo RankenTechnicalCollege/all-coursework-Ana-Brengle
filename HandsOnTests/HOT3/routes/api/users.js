@@ -1,18 +1,24 @@
 import express from 'express';
+const router = express.Router();
 import debug from 'debug';
+const debugUser = debug('app:User')
+import { hasRole } from '../../middleware/hasRole.js';
+import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
-import {  isAuthenticated } from '../../middleware/authentication.js';
-import { hasRole } from '../../middleware/hasRole.js';
+
+
 import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
-const debugUser = debug('app:User')
-const router = express.Router();
+
+
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("",  hasRole('admin'), async (req, res) =>{
+router.get("/",  isAuthenticated,hasRole("admin"), async (req, res) =>{
     try{
+
         const users = await getUsers();
+        
         if(!users || users.length === 0){
             res.status(404).json({message: "User not found"});
             return;
@@ -27,7 +33,7 @@ router.get("",  hasRole('admin'), async (req, res) =>{
     }
 })
 
-router.get("/:userId", isAuthenticated, hasRole('admin'), validId('userId'), async (req, res) =>{
+router.get("/:userId", isAuthenticated, hasRole("admin"), validId('userId'), async (req, res) =>{
     try{
         const userId = req.params.userId
         const user = await getUsers(userId)
@@ -44,9 +50,10 @@ router.get("/:userId", isAuthenticated, hasRole('admin'), validId('userId'), asy
     }
 })
 
-router.get("/me", isAuthenticated, async (req, res) =>{
+router.get("/me", isAuthenticated,async (req, res) =>{
     try{
-        const user = await getUserById(req.user.id);
+        const userId = req.user.id || req.user._id;
+        const user = await getUserById(userId);
 
         if(!user) return res.status(404).json({message: "User not found"});
         res.status(200).json(user);

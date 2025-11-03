@@ -6,7 +6,7 @@ const debugProducts = debug('app:Products');
 
 import { getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct } from '../../database.js';
 import { validate, validId } from '../../middleware/validator.js';
-import { isAuthenticated } from '../../middleware/authentication.js';
+import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { hasRole } from '../../middleware/hasRole.js';
 import { addProductSchema, updateProductSchema } from '../../validation/productsSchema.js';
 
@@ -79,7 +79,7 @@ router.get('/name/:productName', isAuthenticated, async (req, res) =>{
     }
 })
 
-router.get('/:productId',validId('productId'), isAuthenticated,async (req, res) =>{
+router.get('/:productId', isAuthenticated,validId('productId'),async (req, res) =>{
     try{
         const productId = req.params.productId;
         const product = await getProductId(productId)
@@ -96,7 +96,7 @@ router.get('/:productId',validId('productId'), isAuthenticated,async (req, res) 
     }
 })
 
-router.post('', hasRole('admin'), validate(addProductSchema),async (req, res) =>{
+router.post('', isAuthenticated, hasRole('admin'), validate(addProductSchema),async (req, res) =>{
     try {
         const newProduct = req.body
         if(!newProduct.name){
@@ -129,7 +129,7 @@ router.post('', hasRole('admin'), validate(addProductSchema),async (req, res) =>
     }
 })
 
-router.patch('/:productId', hasRole('admin'), validId('productId'), validate(updateProductSchema), async (req, res) =>{
+router.patch('/:productId', isAuthenticated, hasRole('admin'), validId('productId'), validate(updateProductSchema), async (req, res) =>{
     try {
         
         const productToUpdate = req.body;
@@ -182,7 +182,7 @@ router.patch('/:productId', hasRole('admin'), validId('productId'), validate(upd
     }
 })
 
-router.delete('/:productId', hasRole('admin'), validId('productId'), async (req, res) =>{
+router.delete('/:productId', isAuthenticated, hasRole('admin'), validId('productId'), async (req, res) =>{
     try {
         const productId = req.params.productId;
         const deleteProduct = await deletedProduct(productId)

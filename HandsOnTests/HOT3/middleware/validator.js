@@ -28,14 +28,14 @@ const validate = (schema) => (req, res, next) => {
   next();
 }
 
-const validId = (id) => {
+const validId = (userId) => {
   return (req,res,next) => {
     try {
-      req[id] = new ObjectId(req.params[id]);
+      req[id] = new ObjectId(req.params[userId]);
       return next();
     }
     catch (err) {
-      return res.status(400).json({error: `${id} is not a valid id`});
+      return res.status(400).json({error: `${userId} is not a valid id`});
     }
   }
 }

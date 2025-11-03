@@ -74,10 +74,6 @@ async function getUpdatedUser(userId, fullName, email, password) {
     return await db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {fullName: fullName, password: password, email: email, lastUpdatedOn: new Date()}});
 }
 
-async function getRoles(role) {
-    const db = await connectToDatabase();
-    return await db.collection('role').findOne({role: role})
-}
 
 
 async function getClient() {
@@ -91,4 +87,4 @@ async function getDatabase() {
     return await connectToDatabase();
 }
 
-export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, getDatabase, getUsers, getUserById, getRoles, getUpdatedUser}
+export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, getDatabase, getUsers, getUserById, getUpdatedUser}
