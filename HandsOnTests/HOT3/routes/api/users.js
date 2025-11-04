@@ -13,7 +13,7 @@ import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("/", hasRole("admin"), async (req, res) =>{
+router.get("/", hasRole('admin'), async (req, res) =>{
     try{
 
         const users = await getUsers();
