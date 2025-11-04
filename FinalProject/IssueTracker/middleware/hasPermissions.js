@@ -13,8 +13,8 @@ export const hasPermission = (permission) => {
 
             const roleDocuments = await db.collection('role').find({ name: {$in: userRoles}}).toArray();
 
-            // console.log(`User roles: ${userRoles}`);
-            // console.log('Role documents from DB:', roleDocuments)
+            console.log(`User roles: ${userRoles}`);
+            console.log('Role documents from DB:', roleDocuments)
 
             const hasRequiredPermission = roleDocuments.some(roleDoc => {
                 return roleDoc.permissions && roleDoc.permissions[permission] === true;

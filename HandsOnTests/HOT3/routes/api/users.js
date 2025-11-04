@@ -6,7 +6,7 @@ import { hasRole } from '../../middleware/hasRole.js';
 import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
-
+import { ObjectId } from 'mongodb';
 
 import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 
@@ -14,7 +14,7 @@ import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("/",  isAuthenticated,hasRole("admin"), async (req, res) =>{
+router.get("/", hasRole("admin"), async (req, res) =>{
     try{
 
         const users = await getUsers();
@@ -52,8 +52,7 @@ router.get("/:userId", isAuthenticated, hasRole("admin"), validId('userId'), asy
 
 router.get("/me", isAuthenticated,async (req, res) =>{
     try{
-        const userId = req.user.id || req.user._id;
-        const user = await getUserById(userId);
+       const user = await getUserById(req.session.userId)
 
         if(!user) return res.status(404).json({message: "User not found"});
         res.status(200).json(user);

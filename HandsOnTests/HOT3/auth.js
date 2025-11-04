@@ -21,7 +21,7 @@ export const auth = betterAuth({
                 required: true
             },
             role: {
-                type: "string",
+                type: "object",
                 required: true
             }
         }
