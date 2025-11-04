@@ -62,7 +62,6 @@ router.get('', isAuthenticated, hasPermission('canViewData'), async (req, res) =
 
 router.get('/me',isAuthenticated, hasPermission('canViewData'), async (req, res) => { 
     try{
-        const session = req.session;
         const user = await getUserById(req.session.userId);
 
         if(user) {
