@@ -1,10 +1,12 @@
 export const hasRole = (allowedRoles) => {
-    return async (req, res, next) => {
-        
-         const userRoles = req.user.role || [];
-        
+    return (req, res, next) => {
+         if (!req.user) {
+            return res.status(401).json({ error: "Unauthorized. No user logged in." });
+        }
+        const userRoles = req.user.role || [];
+
         if(!Array.isArray(userRoles) || userRoles.length === 0){
-            return res.status(403).json({error: "No roles assigned to user"});
+            return res.status(403).json({error: "No Roles assigned to user"});
         }
         const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
         const hasAllowedRole = userRoles.some(role => rolesArray.includes(role));

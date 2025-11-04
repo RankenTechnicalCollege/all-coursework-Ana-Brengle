@@ -24,20 +24,15 @@ router.get('', async (req, res) =>{
         if(category) filter.category = {$search: keywords};
 
 
-        if(minPrice) {
-            const minPriceValue = parseFloat(minPrice);
-            if(isNaN(minPriceValue)){
-                priceFilter.$gte = minPriceValue;
-            } 
-        }
+        if(minPrice || maxPrice) {
+            const priceFilter = {}
 
-        if(maxPrice) {
-            const maxPriceValue = parseFloat(maxPrice);
-            if(isNaN(maxPriceValue)){
-                priceFilter.$lte = maxPriceValue;
-            } 
-        }
+            if(minPrice) priceFilter.$gte = parseInt(minPrice);
+            if(maxPrice) priceFilter.$lte = parseInt(maxPrice);
+            debugProducts(priceFilter)
+            filter.price = priceFilter
 
+        }
         const sortOptions = {
             name: {name: 1},
             category: {category: 1, name: 1},
@@ -115,6 +110,8 @@ router.post('', isAuthenticated, hasRole('admin'), validate(addProductSchema),as
             res.status(400).json({message: 'Products Price is required'});
             return;
         }
+
+        newProduct.createdAt = new Date();
         const productToAdd = await addedProduct(newProduct)
         debugProducts(productToAdd);
 

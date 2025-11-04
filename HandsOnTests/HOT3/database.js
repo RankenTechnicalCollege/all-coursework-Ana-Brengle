@@ -61,7 +61,7 @@ async function deletedProduct(productId) {
 
 async function getUsers() {
     const db = await connectToDatabase();
-    return await db.collection("user").find({}).toArray();
+    return await db.collection('user').find({}).toArray();
 }
 
 async function getUserById(userId) {

@@ -34,8 +34,9 @@ const validId = (paramName) => {
       req[paramName] = new ObjectId(req.params[paramName]);
       return next();
     }
-    catch (err) {
-      return res.status(400).json({error: `${paramName} is not a valid id`});
+    catch (error) {
+      console.error( error);
+      return res.status(400).json({message: `${paramName} is not a valid id`});
     }
   }
 }
