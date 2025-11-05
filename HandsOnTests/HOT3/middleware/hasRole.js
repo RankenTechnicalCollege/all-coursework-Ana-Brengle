@@ -1,7 +1,9 @@
+import {getUserById} from "../database.js"
 export const hasRole = (allowedRoles) => {
-    return (req, res, next) => {
-         
-        const userRoles = (req.user && req.user.role) || [];
+    return async(req, res, next) => {
+        const userId = req.session.userId;
+        const user = await getUserById(userId)
+        const userRoles = user.role || [];
 
         if(!Array.isArray(userRoles) || userRoles.length === 0){
             return res.status(403).json({error: "No Roles assigned to user"});

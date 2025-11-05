@@ -1,6 +1,4 @@
 import { auth } from "../auth.js";
-
-
 export async function isAuthenticated(req, res, next) {
   try {
     const session = await auth.api.getSession({headers: req.headers});

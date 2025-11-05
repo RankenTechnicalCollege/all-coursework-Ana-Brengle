@@ -1,25 +1,30 @@
-import { MongoClient, ObjectId } from "mongodb";
 import * as dotenv from 'dotenv';
 
 dotenv.config();
-import debug from 'debug';
 
+import { MongoClient, ObjectId } from 'mongodb';
+import debug from 'debug';
 
 const debugDb = debug('app:Database');
 
+const newId = (str) => ObjectId.createFromHexString(str);
+
 let _db = null;
-let _client = null
+let _client = null;
+
+
 
 async function connectToDatabase() {
-    if(!_db){
-        const connectionString = process.env.MONGO_URI;
+    if(!_db) {
+        const dbUrl = process.env.MONGO_URI;
         const dbName = process.env.MONGO_DB_NAME;
         
-        const client = await MongoClient.connect(connectionString);
+        const client = await MongoClient.connect(dbUrl);
         _db = client.db(dbName);
-        //debugDb('Connected.');
+        debugDb('Connected.');
     }
     return _db;
+    
 }
 
 async function ping() {

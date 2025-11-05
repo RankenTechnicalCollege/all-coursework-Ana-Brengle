@@ -3,7 +3,6 @@ const router = express.Router();
 import debug from 'debug';
 const debugUser = debug('app:User')
 import { hasRole } from '../../middleware/hasRole.js';
-
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
 import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
@@ -13,7 +12,7 @@ import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("/", hasRole('admin'), async (req, res) =>{
+router.get("", hasRole('admin') ,async (req, res) =>{
     try{
 
         const users = await getUsers();
@@ -51,7 +50,7 @@ router.get("/:userId", isAuthenticated, hasRole("admin"), validId('userId'), asy
 
 router.get("/me", isAuthenticated,async (req, res) =>{
     try{
-
+    
        const user = await getUserById(req.session.userId);
 
         if(user) return res.status(200).json(user);
