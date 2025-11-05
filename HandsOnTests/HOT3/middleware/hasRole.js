@@ -1,8 +1,8 @@
 import {getUserById} from "../database.js"
 export const hasRole = (allowedRoles) => {
     return async(req, res, next) => {
-        const userId = req.session.userId;
-        const user = await getUserById(userId)
+      const userId = req.user.id; // from session.user
+      const user = await getUserById(userId);
         const userRoles = user.role || [];
 
         if(!Array.isArray(userRoles) || userRoles.length === 0){
