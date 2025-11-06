@@ -2,11 +2,12 @@ import express from 'express';
 const router = express.Router();
 import debug from 'debug';
 const debugUser = debug('app:User')
-import { hasRole } from '../../middleware/hasRole.js';
+import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
 import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
-import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
+import { hasRole } from '../../middleware/hasRole.js';
+
 
 
 router.use(express.json())
@@ -15,13 +16,13 @@ router.use(express.urlencoded({extended:false}));
 router.get("", hasRole('admin') ,async (req, res) =>{
     try{
 
-        const users = await getUsers();
+        const user = await getUsers();
         
-        if(!users || users.length === 0){
+        if(!user || user.length === 0){
             res.status(404).json({message: "User not found"});
             return;
         } else{
-             res.status(200).json(users);
+             res.status(200).json(user);
              return;
         }
 
@@ -29,12 +30,12 @@ router.get("", hasRole('admin') ,async (req, res) =>{
         console.error("Error loading users:", error);
         res.status(500).json({message: "Error uploading Users"})
     }
-})
+});
 
 router.get("/:userId", isAuthenticated, hasRole("admin"), validId('userId'), async (req, res) =>{
     try{
         const userId = req.params.userId
-        const user = await getUsers(userId)
+        const user = await getUserById(userId)
 
         if(!user) {
             res.status(404).json(user);
