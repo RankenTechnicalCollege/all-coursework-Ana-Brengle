@@ -9,7 +9,7 @@ export async function isAuthenticated(req, res, next) {
             })
         }
         req.user = session.user;
-        req.session = session.session
+        req.session = { userId: session.user._id };
         next();
     }catch (error){
         return res.status(401).json({

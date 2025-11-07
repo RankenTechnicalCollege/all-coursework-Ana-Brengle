@@ -92,4 +92,4 @@ async function getDatabase() {
     return await connectToDatabase();
 }
 
-export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, getDatabase, getUsers, getUserById, getUpdatedUser}
+export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, connectToDatabase, getDatabase, getUsers, getUserById, getUpdatedUser}

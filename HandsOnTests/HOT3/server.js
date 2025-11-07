@@ -13,8 +13,9 @@ import { productRouter } from "./routes/api/products.js";
 import { userRouter } from "./routes/api/users.js";
 
 import cors from'cors'
-import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth.js";
+import { toNodeHandler } from "better-auth/node";
+
 
 
 ping();

@@ -1,19 +1,19 @@
 import express from 'express';
-const router = express.Router();
 import debug from 'debug';
 const debugUser = debug('app:User')
+import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
+import { hasRole } from '../../middleware/hasRole.js';
 import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
-import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
-import { hasRole } from '../../middleware/hasRole.js';
 
 
 
+const router = express.Router();
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("", hasRole('admin') ,async (req, res) =>{
+router.get("", hasRole(['admin']) ,async (req, res) =>{
     try{
 
         const user = await getUsers();
@@ -52,7 +52,7 @@ router.get("/:userId", isAuthenticated, hasRole("admin"), validId('userId'), asy
 router.get("/me", isAuthenticated,async (req, res) =>{
     try{
     
-       const user = await getUserById(req.session.userId);
+       const user = await getUserById(req.session.id);
 
         if(user) return res.status(200).json(user);
         res.status(404).json({message: 'User not found'});

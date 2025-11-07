@@ -1,6 +1,8 @@
+
 export const hasRole = (allowedRoles) => {
     return (req, res, next) => {
-        const userRoles = req.user?.role || [];
+        try {
+            const userRoles = req.user.role || [];
 
         if(!Array.isArray(userRoles) || userRoles.length === 0){
             return res.status(403).json({error: "No Roles assigned to user"});
@@ -14,5 +16,10 @@ export const hasRole = (allowedRoles) => {
             });
         }
         next();
-    }
-}
+        } catch (error) {
+            console.error(error);
+        }
+
+        
+    };
+};
