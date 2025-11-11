@@ -6,14 +6,11 @@ import { hasRole } from '../../middleware/hasRole.js';
 import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
-
-
-
 const router = express.Router();
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
-router.get("", hasRole(['admin']) ,async (req, res) =>{
+router.get("",  isAuthenticated, hasRole('admin'),async (req, res) =>{
     try{
 
         const user = await getUsers();
@@ -32,7 +29,7 @@ router.get("", hasRole(['admin']) ,async (req, res) =>{
     }
 });
 
-router.get("/:userId", isAuthenticated, hasRole("admin"), validId('userId'), async (req, res) =>{
+router.get("/:userId", hasRole('admin'), isAuthenticated, validId('userId'), async (req, res) =>{
     try{
         const userId = req.params.userId
         const user = await getUserById(userId)

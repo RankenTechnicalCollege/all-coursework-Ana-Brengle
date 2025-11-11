@@ -126,7 +126,7 @@ router.post('', isAuthenticated, hasRole('admin'), validate(addProductSchema),as
     }
 })
 
-router.patch('/:productId', isAuthenticated, hasRole('admin'), validId('productId'), validate(updateProductSchema), async (req, res) =>{
+router.patch('/:productId', isAuthenticated,  hasRole('admin'),validId('productId'), validate(updateProductSchema), async (req, res) =>{
     try {
         
         const productToUpdate = req.body;
@@ -179,7 +179,7 @@ router.patch('/:productId', isAuthenticated, hasRole('admin'), validId('productI
     }
 })
 
-router.delete('/:productId', isAuthenticated, hasRole('admin'), validId('productId'), async (req, res) =>{
+router.delete('/:productId', hasRole('admin') , validId('productId'), async (req, res) =>{
     try {
         const productId = req.params.productId;
         const deleteProduct = await deletedProduct(productId)

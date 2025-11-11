@@ -26,13 +26,10 @@ export const auth = betterAuth({
                 required: true
             }, 
             role: {
-                type: "array",
-                of: "string",
-                required: true
+                type: "object",
+                required: false
             }
         }
     }
 
 });
-
-export default auth
