@@ -1,6 +1,6 @@
 export const hasRole = (allowedRoles) => {
     return (req, res, next) => {
-        if (!req.user) {
+         if (!req.user) {
             return res.status(401).json({ error: "User not authenticated" });
         }
         const userRoles = req.user.role || [];

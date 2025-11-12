@@ -1,11 +1,13 @@
+
 import './App.css'
+import CartList from './CartList';
 
 function App() {
 
 
   return (
     <>
-      <h1>Shopping Cart</h1>
+      <CartList />
       
     </>
   )

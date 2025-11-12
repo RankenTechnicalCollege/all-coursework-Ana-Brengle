@@ -46,13 +46,17 @@ router.get("/:userId", hasRole('admin'), isAuthenticated, validId('userId'), asy
     }
 })
 
-router.get("/me", isAuthenticated,async (req, res) =>{
+router.get("/me", isAuthenticated, validId('validId'), async (req, res) =>{
     try{
-    
-       const user = await getUserById(req.session.id);
+     const user = await getUserById(req.session.userId);
 
-        if(user) return res.status(200).json(user);
-        res.status(404).json({message: 'User not found'});
+        if(user) {
+            res.status(200).json(user);
+            return;
+        } else {
+            res.status(404).send('User not found')
+            return;
+        }
 
     } catch (error) {
         console.error("Error user not found:", error);

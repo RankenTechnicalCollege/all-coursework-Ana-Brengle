@@ -71,7 +71,7 @@ async function getUsers() {
 
 async function getUserById(userId) {
     const db = await connectToDatabase();
-    return await db.collection('user').findOne({_id: new ObjectId(userId)});
+    return db.collection('user').findOne({_id: new ObjectId(userId)})
 }
 
 async function getUpdatedUser(userId, fullName, email, password) {
@@ -89,7 +89,11 @@ async function getClient() {
 }
 
 async function getDatabase() {
-    return await connectToDatabase();
+    if (!_db) {
+        await connectToDatabase();
+    }
+    return _db;
+
 }
 
 export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, connectToDatabase, getDatabase, getUsers, getUserById, getUpdatedUser}

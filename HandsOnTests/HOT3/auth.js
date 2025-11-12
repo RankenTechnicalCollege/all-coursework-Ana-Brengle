@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { getClient, getDatabase } from "./database.js";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
 const client = await getClient();
 const db = await getDatabase();
@@ -26,8 +26,8 @@ export const auth = betterAuth({
                 required: true
             }, 
             role: {
-                type: "object",
-                required: false
+                type: "string",
+                required: true
             }
         }
     }
