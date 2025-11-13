@@ -47,7 +47,7 @@ router.get("/me", isAuthenticated, async (req, res) =>{
     }
 })
 
-router.get("/:userId", hasRole('admin'), isAuthenticated, validId('userId'), async (req, res) =>{
+router.get("/:userId",  isAuthenticated, hasRole('admin'),validId('userId'), async (req, res) =>{
     try{
         const userId = req.params.userId
         const user = await getUserById(userId)
