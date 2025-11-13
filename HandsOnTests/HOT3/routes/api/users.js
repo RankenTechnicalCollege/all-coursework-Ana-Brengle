@@ -29,6 +29,24 @@ router.get("",  isAuthenticated, hasRole('admin'),async (req, res) =>{
     }
 });
 
+router.get("/me", isAuthenticated, async (req, res) =>{
+    try{
+     const user = await getUserById(req.session.userId);
+
+        if(user) {
+            res.status(200).json(user);
+            return;
+        } else {
+            res.status(404).send('User not found')
+            return;
+        }
+
+    } catch (error) {
+        console.error("Error user not found:", error);
+        res.status(500).json({message: "Error Finding User"})
+    }
+})
+
 router.get("/:userId", hasRole('admin'), isAuthenticated, validId('userId'), async (req, res) =>{
     try{
         const userId = req.params.userId
@@ -46,23 +64,7 @@ router.get("/:userId", hasRole('admin'), isAuthenticated, validId('userId'), asy
     }
 })
 
-router.get("/me", isAuthenticated, validId('validId'), async (req, res) =>{
-    try{
-     const user = await getUserById(req.session.userId);
 
-        if(user) {
-            res.status(200).json(user);
-            return;
-        } else {
-            res.status(404).send('User not found')
-            return;
-        }
-
-    } catch (error) {
-        console.error("Error user not found:", error);
-        res.status(500).json({message: "Error Finding User"})
-    }
-})
 
 router.patch("/me", isAuthenticated, async (req, res) =>{
     try{
