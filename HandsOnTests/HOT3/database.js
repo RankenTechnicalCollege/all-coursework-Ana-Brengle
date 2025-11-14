@@ -76,7 +76,17 @@ async function getUserById(userId) {
 
 async function getUpdatedUser(userId, fullName, email, password) {
      const db = await connectToDatabase();
-    return await db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {fullName: fullName, password: password, email: email, lastUpdatedOn: new Date()}});
+    return await db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {fullName: fullName, email: email, lastUpdatedOn: new Date()}});
+}
+
+async function getAccount(userId) {
+    const db = await connectToDatabase();
+    return db.collection('account').findOne({userId: new ObjectId(userId)})
+}
+
+async function updatePassword(userId, password) {
+    const db = await connectToDatabase();
+    return await db.collection('account').updateOne({userId: new ObjectId(userId)}, {$set: {password: password, updatedAt: new Date()}});
 }
 
 
@@ -96,4 +106,4 @@ async function getDatabase() {
 
 }
 
-export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, connectToDatabase, getDatabase, getUsers, getUserById, getUpdatedUser}
+export  {ping, getProducts, getProductByName, getProductId, addedProduct, getUpdatedProduct, deletedProduct, getClient, connectToDatabase, getDatabase, getUsers, getUserById, getUpdatedUser, getAccount, updatePassword}

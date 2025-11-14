@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const addProductSchema = Joi.object({
+const newProductSchema = Joi.object({
     name: Joi.string().min(1).required(),
     description: Joi.string().min(1).required(),
     category: Joi.string().min(1).required(),
@@ -14,4 +14,4 @@ const updateProductSchema = Joi.object({
   price: Joi.number().min(0).optional()
 }).required();
 
-export {addProductSchema, updateProductSchema}
+export {newProductSchema, updateProductSchema}

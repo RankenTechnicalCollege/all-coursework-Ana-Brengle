@@ -8,7 +8,7 @@ import { getProducts, getProductByName, getProductId, addedProduct, getUpdatedPr
 import { validate, validId } from '../../middleware/validator.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { hasRole } from '../../middleware/hasRole.js';
-import { addProductSchema, updateProductSchema } from '../../validation/productsSchema.js';
+import { newProductSchema, updateProductSchema } from '../../validation/productsSchema.js';
 
 router.get('', async (req, res) =>{
     try{
@@ -21,7 +21,7 @@ router.get('', async (req, res) =>{
         const filter = {};
 
         if(keywords) filter.$text = {$search: keywords};
-        if(category) filter.category = {$search: keywords};
+        if(category) filter.category = category
 
 
         if(minPrice || maxPrice) {
@@ -91,7 +91,7 @@ router.get('/:productId', isAuthenticated,validId('productId'),async (req, res) 
     }
 })
 
-router.post('', isAuthenticated, hasRole('admin'), validate(addProductSchema),async (req, res) =>{
+router.post('', isAuthenticated, hasRole('admin'), validate(newProductSchema),async (req, res) =>{
     try {
         const newProduct = req.body
         if(!newProduct.name){

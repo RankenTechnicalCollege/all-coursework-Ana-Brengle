@@ -3,9 +3,11 @@ import debug from 'debug';
 const debugUser = debug('app:User')
 import {  isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { hasRole } from '../../middleware/hasRole.js';
-import { getUserById, getUpdatedUser, getUsers } from '../../database.js';
+import { getUserById, getUpdatedUser, getUsers, getAccount, updatePassword } from '../../database.js';
 import { validate, validId } from '../../middleware/validator.js';
 import {  updateUserSchema } from '../../validation/userSchema.js';
+import { hashPassword } from 'better-auth/crypto';
+
 const router = express.Router();
 router.use(express.json())
 router.use(express.urlencoded({extended:false}));
@@ -73,37 +75,50 @@ router.patch("/me", isAuthenticated, async (req, res) =>{
         if (!oldUser) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
         const userToUpdate = req.body;
-        let password;
-        let email;
-        let fullName;
-
-        if(userToUpdate.password && userToUpdate.password !== oldUser.password){
-            password = userToUpdate.password;
-        } else{
-            password = oldUser.password
+        const oldAccount = await getAccount(userId);
+        if (!oldAccount) {
+            return res.status(404).json({ message: 'Account not found' });
         }
+        
+       let fullName;
+       let email;
+       let password;
 
-        if(userToUpdate.email && userToUpdate.email!== oldUser.email){
-            email = userToUpdate.email;
-        } else{
-            email = oldUser.email
-        }
-
-        if(userToUpdate.fullName && userToUpdate.fullName!== oldUser.fullName){
+       if (userToUpdate.fullName) {
             fullName = userToUpdate.fullName;
-        } else{
-            fullName = oldUser.fullName
-        }
-        const updatedUser = await getUpdatedUser(userId, fullName, email, password)
-        debugUser(JSON.stringify(updatedUser))
-
-        if(updatedUser.modifiedCount === 1){
-            res.status(200).send(`User ${fullName} updated successfully`)
         } else {
+            fullName = oldUser.fullName;
+        }
+        if (userToUpdate.email) {
+            email = userToUpdate.email;
+        } else {
+            email = oldUser.email;
+        }
+        if (userToUpdate.password) {
+            password = userToUpdate.password;
+        } else {
+            password = oldAccount.password;
+        }
+
+        let finalPassword;
+        if (password === oldAccount.password) {
+            finalPassword = password;
+        } else {
+            finalPassword = await hashPassword(password);
+        }
+
+        const updatedUser = await getUpdatedUser(userId, fullName, email)
+        debugUser(JSON.stringify(updatedUser))
+        if(updatedUser.modifiedCount === 0){
             res.status(404).send(`User not updated.`)
         }
+        const updatedPassword= await updatePassword(userId, finalPassword)
+        debugUser(JSON.stringify(updatedPassword))  
+        if(updatedPassword.modifiedCount === 0){
+            res.status(404).send(`Password not updated.`)
+        } 
+        res.status(200).json({message: `User ${userId} updated successfully.`})
 
     } catch (error) {
         console.error("Error updating user:", error);
