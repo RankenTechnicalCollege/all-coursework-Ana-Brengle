@@ -68,7 +68,7 @@ router.get("/:userId",  isAuthenticated, hasRole('admin'),validId('userId'), asy
 
 
 
-router.patch("/me", isAuthenticated, async (req, res) =>{
+router.patch("/me", isAuthenticated, validate(updateUserSchema), async (req, res) =>{
     try{
         const userId = req.user.id;
         const oldUser = await getUserById(userId);
