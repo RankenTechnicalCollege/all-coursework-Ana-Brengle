@@ -11,6 +11,8 @@
   --font-size-md: 15px;
   --font-size-3xl: 34x;
 
+  --text-mini: 8px;
+
 }
 @layer base {
   body {
