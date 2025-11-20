@@ -2,7 +2,10 @@
 @import 'tailwindcss';
 
 
+.dark {
 
+  --color-purple: #b96ce6;
+}
 @theme {
   --color-purple: #b96ce6;
   --font-display: "Permanent Marker", cursive; 
@@ -15,10 +18,56 @@
 
 }
 @layer base {
-  body {
-    @apply  dark:bg-slate-900 text-white
+ body {
+    @apply bg-white dark:bg-slate-900 text-white
   }
   h1 {
-    @apply mb-2 text-xl font-mono
+    @apply mb-2 text-3xl font-bold
+  }
+  h2 {
+    @apply mb-1 text-xl font-semibold
+  }
+  a {
+    @apply underline text-blue-500 hover:text-blue-800 transition decoration-wavy underline-offset-8
+  }
+  .btn {
+    @apply px-4 py-2 rounded-lg hover:duration-300 hover:delay-50 hover:transition hover:opacity-80 disabled:bg-slate-400/30 hover:disabled:opacity-100
+  }
+  .btn:hover {
+    @apply duration-300 delay-50 transition opacity-80
+  }
+  .btn-primary {
+    @apply bg-blue-600 text-white
+  }
+  .btn-secondary {
+    @apply bg-slate-800 text-white
+  }
+  input, select {
+    @apply p-1 mb-1 border border-slate-300 outline-none rounded-sm
+  }
+  input[type="text"] {
+    @apply placeholder:italic disabled:bg-slate-100
+  }
+  input[type="checkbox"] {
+    @apply p-2 accent-purple-500 mr-1 mb-0 mt-0.5
+  }
+  label {
+    @apply text-sm text-slate-700 font-medium leading-4
+  }
+  select {
+    @apply pr-8
+  }
+  .Select {
+    @apply inline-block border rounded cursor-pointer transition border-slate-300 outline-none w-32
+  }
+  .Select .child {
+    @apply px-2 py-1
+  }
+  .Select ul li {
+    @apply hover:bg-slate-100
   }
 }
+
+
+
+
