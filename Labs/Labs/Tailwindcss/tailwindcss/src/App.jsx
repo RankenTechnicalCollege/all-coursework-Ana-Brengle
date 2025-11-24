@@ -107,28 +107,26 @@ function App() {
         <h1 className='opacity-50'>Hello World</h1>
         <h1 className='opacity-25'>Hello World</h1>
       </div>
-      <div className='m-10'>
-        <input type="button" value="Hover" className='bg-blue-500 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-red-500 skew-6' />
-        <input type="button" value="Hover" className='bg-blue-500 hover:animate-spin' />
-        <input type="button" value="Hover" className='bg-blue-500 hover:animate-ping origin-top-left rotate-90' />
-        <input type="button" value="Hover" className='bg-blue-500 hover:animate-bounce origin-bottom -rotate-12' />
-        <input type="button" value="Hover" className='bg-blue-500 hover:animate-pulse rotate-45' />
+      <div className="grid grid-cols-5 gap-4 mt-10">
+        <button className="bg-blue-500 w-full py-2 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-red-500 skew-6">Hover</button>
+        <button className="bg-blue-500 w-full py-2 hover:animate-spin">HELLO</button>
+        <button className="bg-blue-500 w-full py-2 hover:animate-ping origin-top-left rotate-90">HELLO</button>
+        <button className="bg-blue-500 w-full py-2 hover:animate-bounce origin-bottom -rotate-12">HELLO</button>
+        <button className="bg-blue-500 w-full py-2 hover:animate-pulse rotate-45">HELLO</button>
       </div>
-
-
        <div className='dark:my-72'>
-        <h1>This is a title</h1>
-        <h2>This is a subtitle</h2>
-        <p className='text-base'>This is a paragraph</p>
-        <a href="https://insideranken.org/ICS/">This is an anchor</a>
+          <h1>TITLE</h1>
+          <h2>TITLE</h2>
+          <p className='text-base'>This is a paragraph</p>
+          <a href="https://insideranken.org/ICS/">This is an anchor</a>
         <div className='my-4'>
-          <input type="button" value="This is a primary button" className="btn btn-primary" />
+          <input type="button" value="primary button" className="btn btn-primary" />
         </div>
         <div className='my-4'>
-          <input type="button" value="This is a secondary button" className="btn btn-secondary" />
+          <input type="button" value="secondary button" className="btn btn-secondary" />
         </div>
         <div className='my-4'>
-          <input disabled type="button" value="This is a primary button" className="btn btn-primary" />
+          <input disabled type="button" value="primary button" className="btn btn-primary" />
         </div>
         <div>
           <input type="text" name="textbox" id="txtInput" placeholder='E-mail' />
@@ -167,8 +165,8 @@ function App() {
             </div>
           )}
         </div>
-        <h1>This is another title</h1>
-        <h2>This is another subtitle</h2>
+        <h1>TITLE</h1>
+        <h2>TITLE</h2>
       </div>
      </div>
     </>

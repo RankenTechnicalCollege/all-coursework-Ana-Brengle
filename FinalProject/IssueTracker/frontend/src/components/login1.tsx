@@ -1,0 +1,96 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+
+
+interface Login1Props {
+  heading?: string;
+  logo: {
+    url: string;
+    src: string;
+    alt: string;
+    title?: string;
+  };
+  buttonText?: string;
+  googleText?: string;
+  signupText?: string;
+  signupUrl?: string;
+}
+
+const Login1 = ({
+  heading = "Login",
+  logo = {
+    url: "https://www.shadcnblocks.com",
+    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-wordmark.svg",
+    alt: "logo",
+    title: "shadcnblocks.com",
+  },
+  buttonText = "Login",
+  signupText = "Need an account?",
+  signupUrl = "https://shadcnblocks.com",
+}: Login1Props) => {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const {signIn} = authClient;
+  const [error, setError] = useState<string | null>(null);
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  // Handle login logic here
+  console.log("logging with",email, password);
+}
+
+  return (
+    <section className="bg-muted h-screen">
+      <div className="flex h-full items-center justify-center">
+        {/* Logo */}
+        <div className="flex flex-col items-center gap-6 lg:justify-start">
+          <a href={logo.url}>
+            <img
+              src={logo.src}
+              alt={logo.alt}
+              title={logo.title}
+              className="h-10 dark:invert"
+            />
+          </a>
+          <form onSubmit={handleSubmit} className="min-w-sm border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-4 rounded-md border px-6 py-8 shadow-md">
+          (error && (<div className="text-red-500 text-sm mb-2">{error}</div>))
+            {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
+            <Input
+              type="email"
+              placeholder="Email"
+              className="text-sm"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              className="text-sm"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Button type="submit" className="w-full">
+              {buttonText}
+            </Button>
+          </form>
+          <div className="text-muted-foreground flex justify-center gap-1 text-sm">
+            <p>{signupText}</p>
+            <a
+              href={signupUrl}
+              className="text-primary font-medium hover:underline"
+            >
+              Sign up
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export { Login1 };

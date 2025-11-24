@@ -63,7 +63,7 @@ export default function CartList(){
             {items.map(item => 
                 <div className="grid grid-cols-3 mb-5" key={item.id}>
                     <div className="col-span-1">
-                        <input type="text"  className={item.name.length > 0 ? "border-6 border-stone-900 rounded-sm px-1 bg-stone-50" : "border-5 border-red-400 rounded-sm px-1 bg-red-50"} value={item.name} onChange={(evt) => onNameChange(evt, item)}/>
+                        <input type="text"  className="border-6 border-stone-900 rounded-sm px-1 bg-stone-50" value={item.name} onChange={(evt) => onNameChange(evt, item)}/>
                     </div>
                     <div className="">
                         <span className="">Qty: {item.quantity}</span>
