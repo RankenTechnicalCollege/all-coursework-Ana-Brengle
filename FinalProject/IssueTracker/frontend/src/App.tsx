@@ -2,6 +2,7 @@ import './App.css'
 import { LoginForm } from '@/components/login-form'
 import { authClient } from '@/lib/auth-client'
 import { Button } from './components/ui/button';
+import { Hero1 } from '@/components/hero1';
 
 function App() {
   const {data: session, isPending} = authClient.useSession();
@@ -15,13 +16,15 @@ function App() {
          < LoginForm/>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <>
       <h1> Welcome, {session.user.email}</h1>
-      <Button variant="default" onClick={() => authClient.signOut }>Logout</Button>
+       <Hero1 heading="Hi user" description='Issue tracker' image={{src:"react.svg", alt:"React Logo"}}/> 
+      <Button variant="default" onClick={() => authClient.signOut() }>Logout</Button>
+      
     </>
   )
 }

@@ -32,6 +32,7 @@ export function LoginForm({
     e.preventDefault();
     // Handle login logic here 
     console.log("Logging in with",email, password);
+    
     const result = loginSchema.safeParse({email,password});
       if(!result.success) {
         setError(result.error.issues[0].message);
