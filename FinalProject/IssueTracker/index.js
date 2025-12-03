@@ -10,8 +10,15 @@ import { testRouter } from './routes/api/tests.js';
 import cors from 'cors'
 import { toNodeHandler } from 'better-auth/node';
 import {auth} from './auth.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -26,6 +33,10 @@ app.use('/api/users', userRouter);
 app.use('/api/bugs', bugRouter);
 app.use('/api/bugs', commentRouter);
 app.use('/api/bugs', testRouter);
+
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+});
 
 app.listen(port,() =>{
     debugServer(`Server is now running on port http://localhost:${port}`);

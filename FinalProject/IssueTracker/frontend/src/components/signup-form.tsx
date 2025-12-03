@@ -22,8 +22,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
 import signupSchema from "@/schemas/signupSchema"
-import { P } from "node_modules/better-auth/dist/index-BzgT8cQd.d.mts"
-import { useState, type FormEvent } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import z from "zod"
 
@@ -51,7 +50,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       return;
     }
 
-   if (!givenName || !familyName || !email || !password || !confirmPassword) {
+   if (!givenName || !familyName || !email || !password || !confirmPassword || !role) {
       setErrors({ root: "Please fill in all required fields." });
       setIsSubmitting(false);
       return;
@@ -64,16 +63,16 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     email,
     password,
     confirmPassword,
-    role
+    role,
   }
   console.log("submitting: ", payload)
 
   try {
     const validated = signupSchema.parse(payload);
-    const fullName = `${validated.givenName} ${validated.familyName}`;
+
 
     const {data: result, error} = await authClient.signUp.email({
-      name: fullName,
+      name: validated.givenName,
       password: validated.password,
       email: validated.email
     },
@@ -83,6 +82,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       typeof ctx.body === 'string' ? JSON.parse(ctx.body) : ctx.body;
       const updatedBody = {
         ...bodyData,
+        givenName: validated.givenName,
+        familyName: validated.familyName,
         role: [validated.role]
       };
 
@@ -134,7 +135,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="firstname">Given Name</FieldLabel>
+              <FieldLabel htmlFor="givenName">Given Name</FieldLabel>
               <Input 
                 id="givenName"
                 type="text" 
@@ -148,7 +149,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               )}
             </Field>
             <Field>
-              <FieldLabel htmlFor="lastname"> Family Name</FieldLabel>
+              <FieldLabel htmlFor="lastName"> Family Name</FieldLabel>
               <Input 
                 id="familyName" 
                 type="text" 
@@ -163,19 +164,18 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <Field>
             <FieldLabel htmlFor="role">Role</FieldLabel>
-              <Select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              >
-                <option value="">Select a role</option>
-                <option value="Developer">Developer</option>
-                <option value="Business Analyst">Business Analyst</option>
-                <option value="Quality Analyst">Quality Analyst</option>
-                <option value="Product Manager">Product Manager</option>
-                <option value="Technical Manager">Technical Manager</option>
-              </select>
+              <Select value={role} onValueChange={setRole} >
+                <SelectTrigger id="role" className="w-[180px]">
+                  <SelectValue placeholder="Developer, Business Analyst, QA ect..."/>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Developer">Developer</SelectItem>
+                  <SelectItem value="Business Analyst">Business Analyst</SelectItem>
+                  <SelectItem value="Quality Analyst">Quality Analyst</SelectItem>
+                  <SelectItem value="Product Manager">Product Manager</SelectItem>
+                  <SelectItem value="Technical Manager">Technical Manager</SelectItem>
+                </SelectContent>
+              </Select>
               {errors.role && (
                 <FieldDescription className="text-destructive">
                   {errors.role}
@@ -200,7 +200,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" required onChange={(e)}/>
+              <Input id="password" type="password" required onChange={(e) => setPassword(e.target.value)}/>
               <FieldDescription>
                 Must be at least 8 characters long.
               </FieldDescription>
@@ -209,12 +209,12 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
-              <Input id="confirm-password" type="password" required />
+              <Input id="confirm-password" type="password" onChange={(e) => setConfirmPassword(e.target.value)} required />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
             <FieldGroup>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit" disabled={isSubmitting}>Create Account</Button>
                 <Button variant="outline" type="button">
                   Sign up with Google
                 </Button>

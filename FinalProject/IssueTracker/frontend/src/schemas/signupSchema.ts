@@ -6,7 +6,7 @@ const signupSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
-    role: z.array(z.enum(['Developer', 'Business Analyst', 'Quality Analyst', 'Product Manager', 'Technical Manager']))
+    role: z.enum(['Developer', 'Business Analyst', 'Quality Analyst', 'Product Manager', 'Technical Manager'])
     
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
