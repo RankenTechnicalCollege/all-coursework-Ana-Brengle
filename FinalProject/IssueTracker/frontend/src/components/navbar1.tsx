@@ -25,6 +25,23 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { useNavigate, Link } from "react-router-dom";
+import { authClient } from "@/lib/auth-client";
+import type { Session } from "better-auth/types";
+
+interface ExtendedUser {
+  id: string,
+  email: string,
+  givenName: string,
+  role: string[],
+  image?: string,
+  createdAt?: Date,
+  updatedAt?: Date
+}
+interface ExtendedSession extends Omit<Session, 'user'> {
+  user: ExtendedUser
+}
+
 interface MenuItem {
   title: string;
   url: string;
@@ -137,6 +154,15 @@ const Navbar1 = ({
     signup: { title: "Sign up", url: "/signup" },
   },
 }: Navbar1Props) => {
+  const {data:session, isPending} = authClient.useSession();
+  const navigate = useNavigate();
+
+  const extendedSession = session as ExtendedSession | null
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    navigate("/")
+  }
   return (
     <section className="py-4">
       <div className="container">
@@ -144,7 +170,7 @@ const Navbar1 = ({
         <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
+            <Link to={logo.url} className="flex items-center gap-2">
               <img
                 src={logo.src}
                 className="max-h-8 dark:invert"
@@ -153,7 +179,7 @@ const Navbar1 = ({
               <span className="text-lg font-semibold tracking-tighter">
                 {logo.title}
               </span>
-            </a>
+            </Link>
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
@@ -162,27 +188,38 @@ const Navbar1 = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.title}</a>
-            </Button>
-            <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.title}</a>
-            </Button>
+          <div className="flex items-center gap-3">
+            {isPending ? (
+              <span className="text-sm">Loading....</span>
+            ): extendedSession? (
+              <>
+              <span className="text-sm font-medium">
+                Welcome, {extendedSession.user.givenName || extendedSession.user.email}</span>
+                <Button variant="outline" size="sm"  onClick={handleSignOut}>Sign Out</Button>
+                </>
+            ): (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={auth.login.url}>{auth.login.title}</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
-
         {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
+            <Link to={logo.url} className="flex items-center gap-2">
               <img
                 src={logo.src}
                 className="max-h-8 dark:invert"
                 alt={logo.alt}
               />
-            </a>
+            </Link >
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -192,13 +229,13 @@ const Navbar1 = ({
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
+                    <Link to={logo.url} className="flex items-center gap-2">
                       <img
                         src={logo.src}
                         className="max-h-8 dark:invert"
                         alt={logo.alt}
                       />
-                    </a>
+                    </Link >
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-6 p-4">
@@ -210,14 +247,32 @@ const Navbar1 = ({
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
 
-                  <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <a href={auth.login.url}>{auth.login.title}</a>
-                    </Button>
-                    <Button asChild>
-                      <a href={auth.signup.url}>{auth.signup.title}</a>
-                    </Button>
-                  </div>
+                <div className="flex items-center gap-3">
+                  {isPending ? (
+                    <span className="text-sm">Loading....</span>
+                  ): extendedSession ? (
+                    <>
+                        <div className="border-b pb-3">
+                          <p className="text-sm font-medium">
+                            {extendedSession.user.givenName || extendedSession.user.email}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {extendedSession.user.email}
+                          </p>
+                        </div>
+                        <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline">
+                          <Link to={auth.login.url}>{auth.login.title}</Link>
+                        </Button>
+                        <Button asChild>
+                          <Link to={auth.signup.url}>{auth.signup.title}</Link>
+                        </Button>
+                      </>
+                    )}
+                  </div>  
                 </div>
               </SheetContent>
             </Sheet>
@@ -273,17 +328,17 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <a key={item.title} href={item.url} className="text-md font-semibold">
+    <Link key={item.title} to={item.url} className="text-md font-semibold">
       {item.title}
-    </a>
+    </Link >
   );
 };
 
 const SubMenuLink = ({ item }: { item: MenuItem }) => {
   return (
-    <a
+    <Link
       className="hover:bg-muted hover:text-accent-foreground flex min-w-80 select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none transition-colors"
-      href={item.url}
+      to={item.url}
     >
       <div className="text-foreground">{item.icon}</div>
       <div>
@@ -294,7 +349,7 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
           </p>
         )}
       </div>
-    </a>
+    </Link >
   );
 };
 
