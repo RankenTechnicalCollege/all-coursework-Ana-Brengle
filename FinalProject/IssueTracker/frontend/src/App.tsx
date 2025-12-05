@@ -8,6 +8,7 @@ import { Navbar1 } from '@/components/navbar1'
 import { SignupForm } from '@/components/signup-form';
 import { Footer2 } from '@/components/footer2';
 import { LandingPage } from '@/components/landing-page';
+import UserList from './components/userList';
 
 
 
@@ -22,6 +23,7 @@ function App() {
         <Route index element={<LandingPage/>}/>
         <Route path='/login' element={<LoginForm/>} />
         <Route path='/signup' element={<SignupForm/>} />
+        <Route path='/UserList' element={<UserList /> } />
       </Routes>
       <Footer2/>
       

@@ -1,6 +1,6 @@
 "use client";
 
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import { Biohazard, Book, BookCheck, BookMinus, BugIcon, BugOff, BugPlay, FilePenLine, Menu, MessageCirclePlus, MessagesSquare, ShieldPlus, SquareChevronRight, Sunset, Trees, UserPen, UserRound, Zap } from "lucide-react";
 
 import {
   Accordion,
@@ -29,6 +29,14 @@ import { useNavigate, Link } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
 import type { Session } from "better-auth/types";
 
+interface MenuItem {
+  title: string;
+  url: string;
+  description?: string;
+  icon?: React.ReactNode;
+  items?: MenuItem[];
+  requiredRole?: string | string[]
+}
 interface ExtendedUser {
   id: string,
   email: string,
@@ -40,14 +48,6 @@ interface ExtendedUser {
 }
 interface ExtendedSession extends Omit<Session, 'user'> {
   user: ExtendedUser
-}
-
-interface MenuItem {
-  title: string;
-  url: string;
-  description?: string;
-  icon?: React.ReactNode;
-  items?: MenuItem[];
 }
 
 interface Navbar1Props {
@@ -80,73 +80,124 @@ const Navbar1 = ({
   menu = [
     { title: "Home", url: "#" },
     {
-      title: "Products",
+      title: "Users",
       url: "#",
       items: [
         {
-          title: "Blog",
+          title: "All Users",
           description: "The latest industry news, updates, and info",
-          icon: <Book className="size-5 shrink-0" />,
+          icon: <UserRound className="size-5 shrink-0" />,
           url: "#",
         },
         {
-          title: "Company",
+          title: "Edit User",
           description: "Our mission is to innovate and empower the world",
-          icon: <Trees className="size-5 shrink-0" />,
+          icon: <UserPen className="size-5 shrink-0" />,
           url: "#",
+          requiredRole: ["Production Manager"]
         },
-        {
-          title: "Careers",
-          description: "Browse job listing and discover our workspace",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Support",
-          description:
-            "Get in touch with our support team or visit our community forums",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "#",
-        },
+        // {
+        //   title: "Careers",
+        //   description: "Browse job listing and discover our workspace",
+        //   icon: <Sunset className="size-5 shrink-0" />,
+        //   url: "#",
+        // },
+        // {
+        //   title: "Support",
+        //   description:
+        //     "Get in touch with our support team or visit our community forums",
+        //   icon: <Zap className="size-5 shrink-0" />,
+        //   url: "#",
+        // },
       ],
     },
     {
-      title: "Resources",
+      title: "Bugs",
       url: "#",
       items: [
         {
-          title: "Help Center",
+          title: "View Bugs",
           description: "Get all the answers you need right here",
-          icon: <Zap className="size-5 shrink-0" />,
+          icon: <BugIcon className="size-5 shrink-0" />,
           url: "#",
         },
         {
-          title: "Contact Us",
+          title: "Create Bugs",
           description: "We are here to help you with any questions you have",
-          icon: <Sunset className="size-5 shrink-0" />,
+          icon: <SquareChevronRight className="size-5 shrink-0" />,
           url: "#",
+          requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager", "Technical Manager"]
         },
         {
-          title: "Status",
+          title: "Edit Bug",
           description: "Check the current status of our services and APIs",
-          icon: <Trees className="size-5 shrink-0" />,
+          icon: <BugPlay className="size-5 shrink-0" />,
           url: "#",
+          requiredRole: ["Product Manager"]
         },
         {
-          title: "Terms of Service",
+          title: "Close Bug",
           description: "Our terms and conditions for using our services",
-          icon: <Book className="size-5 shrink-0" />,
+          icon: <BugOff className="size-5 shrink-0" />,
           url: "#",
+          requiredRole: ["Product Manager"]
         },
       ],
     },
     {
-      title: "Pricing",
+      title: "Comments",
       url: "#",
+      items: [
+        {
+          title: "View Comments",
+          description: "Get all the answers you need right here",
+          icon: <MessagesSquare className="size-5 shrink-0" />,
+          url: "#",
+          requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager"]
+        },
+        {
+          title: "Add Comments",
+          description: "Get all the answers you need right here",
+          icon: <MessageCirclePlus className="size-5 shrink-0" />,
+          url: "#",
+          requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager"]
+        }
+
+      ]
     },
     {
-      title: "Blog",
+      title: "Test Cases",
       url: "#",
+      items: [
+        {
+          title: "View Test Cases",
+          description: "Get all the answers you need right here",
+          icon: <Biohazard className="size-5 shrink-0" />,
+          url: "#",
+          requiredRole: ["Quality Analyst"]
+        },
+        {
+          title: "Add Test Cases",
+          description: "Get all the answers you need right here",
+          icon: <ShieldPlus className="size-5 shrink-0" />,
+          url: "#",
+          requiredRole: ["Quality Analyst"]
+        },
+        {
+          title: "Edit Test Cases",
+          description: "Get all the answers you need right here",
+          icon: <FilePenLine className="size-5 shrink-0" />,
+          url: "#",
+          requiredRole: ["Quality Analyst"]
+        },
+        {
+          title: "Delete Test Cases",
+          description: "Get all the answers you need right here",
+          icon: <BookMinus className="size-5 shrink-0" />,
+          url: "#",
+          requiredRole: ["Quality Analyst"]
+        }
+      ]
     },
   ],
   auth = {
@@ -158,6 +209,18 @@ const Navbar1 = ({
   const navigate = useNavigate();
 
   const extendedSession = session as ExtendedSession | null
+
+  const hasRole = (requiredRole?: string | string[]) => {
+    if (!requiredRole || !extendedSession?.user?.role) return true;
+    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    return roles.some((role) => extendedSession.user.role.includes(role));
+  };
+
+  // Filter menu items based on user roles
+  const filteredMenu = menu.filter((item) => {
+    if (!extendedSession && item.requiredRole) return false;
+    return hasRole(item.requiredRole);
+  });
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -183,7 +246,7 @@ const Navbar1 = ({
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
+                  {filteredMenu.map((item) => renderMenuItem(item, extendedSession))}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
@@ -244,7 +307,7 @@ const Navbar1 = ({
                     collapsible
                     className="flex w-full flex-col gap-4"
                   >
-                    {menu.map((item) => renderMobileMenuItem(item))}
+                    {filteredMenu.map((item) => renderMobileMenuItem(item, extendedSession))}
                   </Accordion>
 
                 <div className="flex items-center gap-3">
@@ -283,13 +346,22 @@ const Navbar1 = ({
   );
 };
 
-const renderMenuItem = (item: MenuItem) => {
+const renderMenuItem = (item: MenuItem, session: ExtendedSession | null) => {
   if (item.items) {
+    const filteredSubItems = item.items.filter((subItem) => {
+      if (!session && subItem.requiredRole) return false;
+      if (!subItem.requiredRole) return true;
+      const roles = Array.isArray(subItem.requiredRole) ? subItem.requiredRole : [subItem.requiredRole];
+      return roles.some((role) => session?.user?.role?.includes(role));
+    });
+
+    // Don't render menu item if no sub-items are visible
+    if (filteredSubItems.length === 0) return null;
     return (
       <NavigationMenuItem key={item.title}>
         <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent className="bg-popover text-popover-foreground">
-          {item.items.map((subItem) => (
+          {filteredSubItems.map((subItem) => (
             <NavigationMenuLink asChild key={subItem.title} className="w-80">
               <SubMenuLink item={subItem} />
             </NavigationMenuLink>
@@ -311,15 +383,25 @@ const renderMenuItem = (item: MenuItem) => {
   );
 };
 
-const renderMobileMenuItem = (item: MenuItem) => {
+const renderMobileMenuItem = (item: MenuItem, session: ExtendedSession | null) => {
   if (item.items) {
+     const filteredSubItems = item.items.filter((subItem) => {
+      if (!session && subItem.requiredRole) return false;
+      if (!subItem.requiredRole) return true;
+      const roles = Array.isArray(subItem.requiredRole) ? subItem.requiredRole : [subItem.requiredRole];
+      return roles.some((role) => session?.user?.role?.includes(role));
+    });
+
+    // Don't render menu item if no sub-items are visible
+    if (filteredSubItems.length === 0) return null;
+
     return (
       <AccordionItem key={item.title} value={item.title} className="border-b-0">
         <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline">
           {item.title}
         </AccordionTrigger>
         <AccordionContent className="mt-2">
-          {item.items.map((subItem) => (
+          {filteredSubItems.map((subItem) => (
             <SubMenuLink key={subItem.title} item={subItem} />
           ))}
         </AccordionContent>
