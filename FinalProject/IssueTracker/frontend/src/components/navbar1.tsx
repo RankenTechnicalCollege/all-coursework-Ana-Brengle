@@ -1,6 +1,6 @@
 "use client";
 
-import { Biohazard, Book, BookCheck, BookMinus, BugIcon, BugOff, BugPlay, FilePenLine, Menu, MessageCirclePlus, MessagesSquare, ShieldPlus, SquareChevronRight, Sunset, Trees, UserPen, UserRound, Zap } from "lucide-react";
+import { Biohazard, BookMinus, BugIcon, BugOff, BugPlay, FilePenLine, Menu, MessageCirclePlus, MessagesSquare, ShieldPlus, SquareChevronRight, UserPen, UserRound, } from "lucide-react";
 
 import {
   Accordion,
@@ -75,7 +75,7 @@ const Navbar1 = ({
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
     alt: "logo",
-    title: "Shadcnblocks.com",
+    title: "GLITCH",
   },
   menu = [
     { title: "Home", url: "#" },
@@ -87,7 +87,7 @@ const Navbar1 = ({
           title: "All Users",
           description: "The latest industry news, updates, and info",
           icon: <UserRound className="size-5 shrink-0" />,
-          url: "#",
+          url: "/userList",
         },
         {
           title: "Edit User",

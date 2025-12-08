@@ -1,67 +1,63 @@
-import { Button } from "@/components/ui/button";
+//import { Button } from "@/components/ui/button";
 
 import {
   Card,
+  CardAction,
   //CardAction,
-  CardContent,
-  //CardDescription,
-  CardFooter,
+  //CardContent,
+  CardDescription,
+  //CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import axios from 'axios'
 import { useEffect, useState } from "react";
+import {  type User } from "./userListItem";
 import { useNavigate } from "react-router-dom";
 
-interface User {
-    id: string,
-    fullName: string,
-    email: string,
-}
 
 
 
 export default function UserList() {
-    const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate()
+
 
     useEffect(() => {
         const fetchUsers = async () => {
             try{
-                const res = await axios.get("api/users");
-                setUsers(res.data);
+               const response = await axios.get(`${import.meta.env.VITE_API_URL}/users`);
+                setUsers(response.data);
+                setLoading(false);
             } catch (err) {
-                console.error("Failed to fetch users: ", err)
-            } finally{
-                setLoading(false)
+                setError('Failed to fetch users');
+                setLoading(false);
+                console.error('Error fetching users:', err);
             }
         }
         fetchUsers()
     }, [])
     if (loading) return <div className="p-4">Loading users...</div>;
+     if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <>
-    <div className="p-4 space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Users</h2>
-
-      <div className="grid gap-4">
+      <div className="p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {users.map((user) => (
-          <Card key={user.id}>
+          <Card
+            key={user.id}
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate(`/users/${user.id}`)}
+          >
             <CardHeader>
-              <CardTitle>{user.fullName}</CardTitle>
+              <CardTitle>{user.givenName} {user.familyName}</CardTitle>
+              <CardDescription>{user.role.join(", ")}</CardDescription>
+              <CardAction>
+              </CardAction>
             </CardHeader>
-
-            <CardContent>
-              <p>Email: {user.email}</p>
-            </CardContent>
-
-            <CardFooter>
-              <Button onClick={() => navigate(`/users/${user.id}/edit`)}>
-                Edit
-              </Button>
-            </CardFooter>
           </Card>
         ))}
       </div>

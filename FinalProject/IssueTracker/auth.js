@@ -28,7 +28,11 @@ export const auth = betterAuth({
             familyName: {
                 type: "string",
                 required: true
-            }, 
+            },
+            // fullName: {
+            //     type: "string",
+            //     required: true
+            // }, 
             createdBugs: {
                 type: "object",
                 required: true,
