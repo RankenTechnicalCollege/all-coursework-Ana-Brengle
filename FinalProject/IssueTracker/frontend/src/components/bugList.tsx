@@ -12,25 +12,24 @@ import {
 } from "@/components/ui/card"
 import axios from 'axios'
 import { useEffect, useState } from "react";
-import {  type UsersList } from "@/components/types/interfaces";
 import { useNavigate } from "react-router-dom";
+import { type BugsList} from "@/components/types/interfaces";
 
 
 
 
-
-export default function UserList() {
-    const [users, setUsers] = useState<UsersList[]>([]);
+export default function BugList() {
+    const [bugs, setBugs] = useState<BugsList[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate()
 
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchBugs = async () => {
             try{
-               const response = await axios.get(`${import.meta.env.VITE_API_URL}/users`);
-                setUsers(response.data);
+               const response = await axios.get(`${import.meta.env.VITE_API_URL}/bugs`);
+                setBugs(response.data);
                 setLoading(false);
             } catch (err) {
                 setError('Failed to fetch users');
@@ -38,7 +37,7 @@ export default function UserList() {
                 console.error('Error fetching users:', err);
             }
         }
-        fetchUsers()
+        fetchBugs()
     }, [])
     if (loading) return <div className="p-4">Loading users...</div>;
      if (error) return <div className="text-red-500">{error}</div>;
@@ -47,15 +46,15 @@ export default function UserList() {
     <>
       <div className="p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {users.map((user) => (
+        {bugs.map((bug) => (
           <Card
-            key={user.id}
+            key={bug.id}
             className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate(`/users/${user.id}`)}
+            onClick={() => navigate(`/bugs/${bug.id}`)}
           >
             <CardHeader>
-              <CardTitle>{user.givenName}</CardTitle>
-              <CardDescription>{user.role.join(", ")}</CardDescription>
+              <CardTitle>{bug.title}</CardTitle>
+              <CardDescription>{bug.status}</CardDescription>
               <CardAction>
               </CardAction>
             </CardHeader>

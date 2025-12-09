@@ -11,7 +11,8 @@ import { LandingPage } from '@/components/landing-page';
 import UserList from '@/components/userList';
 import {ToastContainer, } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { UserListItem1 } from '@/components/userListItem';
+import BugList from '@/components/bugList';
+
 
 
 
@@ -35,7 +36,8 @@ function App() {
         <Route path='/login' element={<LoginForm/>} />
         <Route path='/signup' element={<SignupForm/>} />
         <Route path='/userList' element={<UserList /> } />
-        <Route path="/users/:id" element={<UserListItem1 />} />
+        <Route path='/bugList' element={<BugList /> } />
+
       </Routes>
       <Footer2/>
       

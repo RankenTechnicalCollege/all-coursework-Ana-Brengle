@@ -1,8 +1,8 @@
 'use client'
-import { Button } from "@/components/ui/button"
+//import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
+  //CardAction,
   CardContent,
   CardDescription,
   //CardFooter,
@@ -16,127 +16,97 @@ import {
 } from "@/components/ui/collapsible"
 //import { Input } from "@/components/ui/input"
 //import { Label } from "@/components/ui/label"
-import { useNavigate, useParams } from "react-router-dom"
+import {  useParams } from "react-router-dom"
 import { useState, useEffect} from "react"
 import { ChevronDown } from "lucide-react"
 import axios from "axios"
+import type { SingleUser } from "@/components/types/interfaces"
 
-
-
- export interface User{
-    id: string;
-    name: string;
-    email: string;
-    givenName: string;
-    familyName: string;
-    role: string[];
-    createdBugs: string[];
-    assignedBugs: string[];
-    }
-interface UserListItemsProps {
-   user?: User
-}
-
-const UserListItem1 =({user: initialUser} : UserListItemsProps) => {
-    const { id } = useParams()
-    const navigate = useNavigate()
-    const [user, setUser] = useState<User | null>(initialUser || null)
+const UserItem  = () => {
+  const { _id } = useParams()
+  const [user, setUser] = useState<SingleUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [isOpen, setIsOpen] = useState(false)
-   const [isOpenAssigned, setIsOpenAssigned] = useState(false)
+  useEffect(() => {
+    if (!_id) return
 
-    useEffect(() => {
-    if (!user && id) {
-      const fetchUser = async () => {
-        try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/users/${id}`)
-          setUser(response.data)
-        } catch (err) {
-          setError("Failed to fetch user")
-          console.error(err)
-        } finally {
-          setLoading(false)
-        }
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get<SingleUser>(`${import.meta.env.VITE_API_URL}/users/${_id}`)
+        console.log("Single user API response:", response.data)
+        setUser(response.data)
+      } catch (err) {
+        console.error("Error fetching user:", err)
+        setError("Failed to fetch user")
+      } finally {
+        setLoading(false)
       }
-      fetchUser()
-    } else {
-      setLoading(false)
     }
-  }, [id, user])
+
+    fetchUser()
+  }, [_id])
 
   if (loading) return <div className="p-4">Loading user...</div>
-  if (error) return <div className="p-4 text-red-500">{error}</div>
+  if (error) return <div className="text-red-500 p-4">{error}</div>
   if (!user) return <div className="p-4">User not found</div>
-    
-   return (
-    <>
-    <Card>
-        <CardHeader>
-            <CardTitle>{user?.givenName} {user?.familyName}</CardTitle>
-            <CardAction>
-                <Button variant="link" onClick={() => navigate(`/users/${user?.id}/edit`)}>Edit</Button>
-            </CardAction>
-            <CardDescription>{user?.role.join(", ")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div className="flex gap-4">
-                {/* Created Bugs */}
-                <div className="flex-1">
-                    <h4 className="text-sm font-semibold mb-1">Created Bugs</h4>
-                    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                        <ChevronDown
-                            className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                        />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="flex flex-col gap-2 mt-2">
-                        {user?.createdBugs.length ? (
-                        user.createdBugs.map((bug, idx) => (
-                            <div key={idx} className="rounded-md border px-4 py-2 font-mono text-sm">
-                            {bug}
-                            </div>
-                        ))
-                        ) : (
-                        <div className="text-gray-400 text-sm">No created bugs</div>
-                        )}
-                    </CollapsibleContent>
-                    </Collapsible>
-                </div>
-                </div>
 
-                {/* Assigned Bugs */}
-                <div className="flex-1">
-                    <h4 className="text-sm font-semibold mb-1">Assigned Bugs</h4>
-                    <Collapsible open={isOpenAssigned} onOpenChange={setIsOpenAssigned}>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                        <ChevronDown
-                            className={`transition-transform ${isOpenAssigned ? 'rotate-180' : ''}`}
-                        />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="flex flex-col gap-2 mt-2">
-                        {user?.assignedBugs.length ? (
-                        user.assignedBugs.map((bug, idx) => (
-                            <div key={idx} className="rounded-md border px-4 py-2 font-mono text-sm">
-                            {bug}
-                            </div>
-                        ))
-                        ) : (
-                        <div className="text-gray-400 text-sm">No assigned bugs</div>
-                        )}
-                </CollapsibleContent>
-                </Collapsible>
-            </div>
+  return (
+    <Card className="p-4">
+      <CardHeader>
+        <CardTitle className="text-2xl">{user.givenName} {user.familyName}</CardTitle>
+        <CardDescription>
+          <div><strong>ID:</strong> {user.id}</div>
+          <div><strong>Email:</strong> {user.email}</div>
+          <div><strong>Roles:</strong> {user.role.join(", ")}</div>
+        </CardDescription>
+      </CardHeader>
 
-        </CardContent>
+      <CardContent className="flex flex-col md:flex-row gap-4 mt-4">
+        {/* Created Bugs */}
+        <Collapsible>
+          <CollapsibleTrigger className="flex justify-between items-center w-full px-4 py-2 bg-gray-100 rounded-md cursor-pointer">
+            Created Bugs
+            <ChevronDown className="ml-2" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-2 border rounded-md mt-1 max-h-64 overflow-y-auto">
+            {user.createdBugs.length === 0 ? (
+              <p className="text-gray-500">No created bugs</p>
+            ) : (
+              <ul className="list-disc list-inside">
+                {user.createdBugs.map((bug, idx) => (
+                  <li key={idx}>{bug}</li>
+                ))}
+              </ul>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Assigned Bugs */}
+        <Collapsible>
+          <CollapsibleTrigger className="flex justify-between items-center w-full px-4 py-2 bg-gray-100 rounded-md cursor-pointer">
+            Assigned Bugs
+            <ChevronDown className="ml-2" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-2 border rounded-md mt-1 max-h-64 overflow-y-auto">
+            {user.assignedBugs.length === 0 ? (
+              <p className="text-gray-500">No assigned bugs</p>
+            ) : (
+              <ul className="list-disc list-inside">
+                {user.assignedBugs.map((bug, idx) => (
+                  <li key={idx}>{bug}</li>
+                ))}
+              </ul>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+      </CardContent>
     </Card>
-    </>
-   )
+  )
 }
 
-export {UserListItem1}
+
+export { UserItem };
+
+
+

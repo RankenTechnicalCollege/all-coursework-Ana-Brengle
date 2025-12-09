@@ -119,7 +119,7 @@ const Navbar1 = ({
           title: "View Bugs",
           description: "Get all the answers you need right here",
           icon: <BugIcon className="size-5 shrink-0" />,
-          url: "#",
+          url: "/bugList",
         },
         {
           title: "Create Bugs",
