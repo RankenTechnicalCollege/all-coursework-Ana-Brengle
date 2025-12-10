@@ -75,7 +75,7 @@ const Navbar1 = ({
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
     alt: "logo",
-    title: "GLITCH",
+    title: "BUG TRACKER",
   },
   menu = [
     { title: "Home", url: "#" },

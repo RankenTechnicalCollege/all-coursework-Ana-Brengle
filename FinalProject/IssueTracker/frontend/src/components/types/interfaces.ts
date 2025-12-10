@@ -9,11 +9,10 @@ export interface UserListProps {
 }
 //////////////////////////////////////////
 export interface SingleUser{
+    _id: string;
     id: string;
     name: string;
     email: string;
-    givenName: string;
-    familyName: string;
     role: string[];
     createdBugs: string[];
     assignedBugs: string[];
