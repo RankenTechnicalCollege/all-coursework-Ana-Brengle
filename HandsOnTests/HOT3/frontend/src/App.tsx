@@ -6,39 +6,46 @@ import { AppSidebar } from '@/components/app-sidebar'
 
 import { Header } from '@/components/Header'
 import { Route, Routes, Navigate, useNavigate } from 'react-router-dom'
-import { LoginForm } from './components/login-form'
+import { LoginForm } from '@/components/login-form'
 import { useState, useEffect } from 'react'
+import { SignupForm } from '@/components/signup-form'
 
 function App() {
   const [user, setUser] = useState<null | { fullName: string; email: string }>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const res = await fetch('http://localhost:2023/api/users/me', {
-          credentials: 'include',
-        })
+  const loadUser = async () => {
+    try {
+      const res = await fetch("http://localhost:2023/api/users/me", {
+        credentials: "include",
+      });
 
-        if (!res.ok) {
-          setUser(null)
-          navigate('/login')
-          return
+      if (!res.ok) {
+        setUser(null);
+        if (window.location.pathname !== "/signup") {
+          navigate("/login");
         }
+        return;
+      }
 
-        const data = await res.json()
-        setUser({
-          fullName: data.fullName || data.name || 'Unknown User',
-          email: data.email || 'unknown@example.com',
-        })
-      } catch (err) {
-        console.error('Error loading user:', err)
-        setUser(null)
-        navigate('/login')
+      const data = await res.json();
+      setUser({
+        fullName: data.fullName || data.name || "Unknown User",
+        email: data.email || "unknown@example.com",
+      });
+    } catch (err) {
+      console.error("Error loading user:", err);
+      setUser(null);
+      if (window.location.pathname !== "/signup") {
+        navigate("/login");
       }
     }
-    loadUser()
-  }, [navigate])
+  };
+
+  loadUser();
+}, [navigate]);
+
   const isLoggedIn = !!user
 
   return (
@@ -58,7 +65,7 @@ function App() {
       ) : (
         <Routes>
           <Route path="/login" element={<LoginForm />} />
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="/signup" element={< SignupForm/>} />
         </Routes>
       )}
 

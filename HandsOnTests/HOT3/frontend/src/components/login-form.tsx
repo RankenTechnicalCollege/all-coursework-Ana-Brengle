@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { authClient } from "@/lib/auth-client"
 import loginSchema from "@/schemas/loginSchema"
 
@@ -103,7 +103,7 @@ export function LoginForm({
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Don&apos;t have an account? <Link to='/signup'>Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
