@@ -16,8 +16,8 @@ export default function ProductTable() {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-    const [viewDialogOpen, setViewDialogOpen] = useState(false)
-    const [editDialogOpen, setEditDialogOpen] = useState(false)
+    const [viewProductOpen, setViewProductOpen] = useState(false)
+    const [editProductOpen, setEditProductOpen] = useState(false)
 
     const [keywords, setKeywords] = useState("");
     const [category, setCategory] = useState("");
@@ -69,67 +69,67 @@ useEffect(() => {
 return(
         <>
         <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <input
-          type="text"
-          placeholder="Search by name"
-          value={keywords}
-          onChange={(e) => setKeywords(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 items-center">
+                <input
+                type="text"
+                placeholder="Search by name"
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                className="border rounded px-3 py-2"
+                />
 
-        <input
-          type="number"
-          placeholder="Min Price"
-          value={minPrice}
-          onChange={(e) => setMinPrice(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
+                <input
+                type="number"
+                placeholder="Min Price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="border rounded px-3 py-2"
+                />
 
-        <input
-          type="number"
-          placeholder="Max Price"
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-          className="border rounded px-3 py-2"
-        />
+                <input
+                type="number"
+                placeholder="Max Price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="border rounded px-3 py-2"
+                />
 
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Sort By" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="price">Price</SelectItem>
-            <SelectItem value="createdAt">Newest</SelectItem>
-          </SelectContent>
-        </Select>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="price">Price</SelectItem>
+                    <SelectItem value="createdAt">Newest</SelectItem>
+                </SelectContent>
+                </Select>
 
-        <Button onClick={fetchProducts}>
-          <Search className="w-4 h-4 mr-2" />
-          Search
-        </Button>
+                <Button onClick={fetchProducts}>
+                <Search className="w-4 h-4 mr-2" />
+                Search
+                </Button>
 
-        <Button variant="outline" onClick={resetFilters}>
-          <X className="w-4 h-4 mr-2" />
-          Reset
-        </Button>
+                <Button variant="outline" onClick={resetFilters}>
+                <X className="w-4 h-4 mr-2" />
+                Reset
+                </Button>
 
-        <Button variant="secondary" onClick={fetchProducts}>
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh
-        </Button>
-      </div>
+                <Button variant="secondary" onClick={fetchProducts}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+                </Button>
+            </div>
 
-      {/* Table */}
-      {loading ? (
-        <p>Loading products...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <DataTable columns={columns} data={data} />
-          )}
+            {/* Table */}
+            {loading ? (
+                <p>Loading products...</p>
+            ) : error ? (
+                <p className="text-red-500">{error}</p>
+            ) : (
+                <DataTable columns={columns} data={data} />
+                )}
         </div>
             </>
         )

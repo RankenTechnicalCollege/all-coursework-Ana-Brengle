@@ -24,12 +24,12 @@ interface Hero1Props {
 }
 
 const Hero1 = ({
-  badge = "✨ Your Website Builder",
-  heading = "Blocks Built With Shadcn & Tailwind",
+  badge = "✨Hands on Test 3",
+  heading = "Products",
   description = "Finely crafted components built with React, Tailwind and Shadcn UI. Developers can copy and paste these blocks directly into their project.",
   buttons = {
     primary: {
-      text: "Discover all components",
+      text: "Log In",
       url: "https://www.shadcnblocks.com",
     },
     secondary: {
