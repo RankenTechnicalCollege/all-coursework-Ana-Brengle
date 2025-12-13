@@ -15,6 +15,11 @@ import { userRouter } from "./routes/api/users.js";
 import cors from'cors'
 import { auth } from "./auth.js";
 import { toNodeHandler } from "better-auth/node";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 
@@ -38,6 +43,9 @@ app.use('/api/users', userRouter)
 app.use('/api/products', productRouter)
 
 
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+});
 
 
 app.listen(port,() => {

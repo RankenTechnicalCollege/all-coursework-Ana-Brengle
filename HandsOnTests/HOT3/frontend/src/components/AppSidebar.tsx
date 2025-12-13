@@ -13,26 +13,23 @@ import {
 } from "@/components/ui/sidebar"
 
 //import { Button } from "@/components/ui/button"
-import { useSidebar } from "@/components/ui/sidebar"
-import {  BarcodeIcon, LogInIcon } from "lucide-react"
+//import { useSidebar } from "@/components/ui/sidebar"
+import {  BarcodeIcon} from "lucide-react"
 import {APP_SIDEBAR} from '@/constants'
-import { useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Avatar } from "@/components/ui/avatar"
-import { AvatarImage } from "@radix-ui/react-avatar"
-import { UserMenu } from "./UserMenu"
+
+
+import { UserMenu } from "@/components/UserMenu"
+
+
 
 export const AppSidebar = () => {
-    const { toggleSidebar} = useSidebar()
-  useEffect(() => {
-    toggleSidebar()
-  }, [toggleSidebar])
+
     return (
         <Sidebar variant="floating" collapsible="icon">
             <SidebarHeader className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-start items-center">
-                    <SidebarMenu>
+                    <SidebarMenu >
                     <SidebarMenuItem>
-                        <Button onClick={toggleSidebar}><BarcodeIcon/></Button>
+                        <BarcodeIcon className="bg-stone-500 rounded size-7"/>
                     </SidebarMenuItem>
                     </SidebarMenu>
             </SidebarHeader>
@@ -54,7 +51,8 @@ export const AppSidebar = () => {
                    </SidebarMenu>
                 </SidebarGroupContent>
                 </SidebarGroup>
-                {/* Primary */}
+
+                {/* Secondary*/}
                 <SidebarGroup className="mt-auto">
                 <SidebarGroupContent>
                      <SidebarMenu>
@@ -78,25 +76,7 @@ export const AppSidebar = () => {
             <SidebarFooter className="border-t">
                 <SidebarMenu>
                     <SidebarMenuItem className="p-2">
-                        <div className="flex justify-between  items-start gap-2">
-                            <div className="grid grid-cols-[max-content_minmax(0, 1fr)] items-center gap-2">
-                                <div className="relative inline-flex items-center">
-                                    <Avatar className=" relative size-15">
-                                        <AvatarImage className=''src={APP_SIDEBAR.curProfile.src}/>
-                                    </Avatar>
-                                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500"></span>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-semibold">
-                                        {APP_SIDEBAR.curProfile.name}
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground truncate">{APP_SIDEBAR.curProfile.email}</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="icon-sm"><LogInIcon/></Button>
-                        </div>
                         <UserMenu/>
-
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
