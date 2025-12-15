@@ -5,6 +5,7 @@ import {accountSchema} from "@/schemas/productSchema"
 import { ZodError} from "zod";
 import { useNavigate } from "react-router-dom";
 
+
 interface AccountDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,6 +14,7 @@ interface AccountDialogProps {
 export default function Account({ isOpen, onClose }: AccountDialogProps){
     const [email, setEmail] = useState('')
     const [name, setName] = useState('')
+    const [loading, setLoading] = useState(false);
      const navigate = useNavigate();
 
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -23,13 +25,17 @@ export default function Account({ isOpen, onClose }: AccountDialogProps){
 
     useEffect(() => {
         if (!isOpen) return;
+
         const fetchUser = async () => {
+          setLoading(true)
             try {
                 const response = await api.get('/users/me')
                 setName(response.data.name);
                 setEmail(response.data.email);
             } catch {
                 toast.error("Failed to load account info");
+            } finally {
+              setLoading(false)
             }
         }
         fetchUser()
@@ -41,7 +47,7 @@ export default function Account({ isOpen, onClose }: AccountDialogProps){
 
      const formData = {
     email: email,
-    name: name,
+    fullName: name,
     }
     try {
       const validatedData = accountSchema.parse(formData);
@@ -77,7 +83,10 @@ export default function Account({ isOpen, onClose }: AccountDialogProps){
           &times;
         </button>
         <h2 className="text-xl font-bold mb-4">Edit Account</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {loading ? (
+          <p>Loading info</p>
+        ): (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-1">Name</label>
             <input
@@ -115,6 +124,9 @@ export default function Account({ isOpen, onClose }: AccountDialogProps){
             </button>
           </div>
         </form>
+
+        )}
+        
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ export const hasRole = (allowedRoles) => {
         }
         const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
         const hasAllowedRole = userRoles.some(role => rolesArray.includes(role));
-
+         
         if(!hasAllowedRole){
             return res.status(403).json({
                 error: `Access denied. Required role(s): ${rolesArray.join(', ')}`

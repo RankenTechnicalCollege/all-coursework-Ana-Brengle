@@ -20,14 +20,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductEditor } from "./editProduct";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AddProduct } from "./AddProduct";
 
 
 interface Product {
     _id: string
-    productId: string
     name: string;
     category: string;
     description: string;
@@ -39,6 +38,7 @@ function ProductDisplay(){
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
      const [addOpen, setAddOpen] = useState(false);
+     //const navigate = useNavigate();
 
     const [keywords, setKeywords] = useState('');
     const [category, setCategory] = useState('');
@@ -61,8 +61,8 @@ function ProductDisplay(){
       const params = new URLSearchParams();
       if (keywords) params.append('keywords', keywords);
       if (category) params.append('category', category);
-      if (minPrice) params.append('minPrice', minPrice);
-      if (maxPrice) params.append('maxPrice', maxPrice);
+      if (minPrice) params.append('minPrice', Number(minPrice).toString());
+      if (maxPrice) params.append('maxPrice', Number(maxPrice).toString());
       if (sortBy) params.append('sortBy', sortBy);
 
       const response = await api.get<Product[]>(`http://localhost:2023/api/products?${params.toString()}`);
@@ -78,8 +78,9 @@ function ProductDisplay(){
   useEffect(() => {
     fetchProducts();
   }, []);
+  
 
-    const handleDelete = async () => {
+    const handleDelete = async (productId: string) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this product?"
     );
@@ -88,7 +89,7 @@ function ProductDisplay(){
 
     try {
      
-      await api.delete(`products/${productId}`);
+      await api.delete(`/products/${productId}`);
       toast.success("Product deleted successfully");
       fetchProducts()
     } catch (error) {
@@ -163,6 +164,7 @@ function ProductDisplay(){
                 productId={product._id}
                 showError={console.error}
                 showSuccess={console.log}
+                refresh={fetchProducts}
                 />
               <Button
                 variant="destructive"

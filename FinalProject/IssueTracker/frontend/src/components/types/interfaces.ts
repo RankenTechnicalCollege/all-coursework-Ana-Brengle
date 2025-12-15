@@ -1,44 +1,60 @@
-export interface UsersList{
-    id: string;
-    givenName: string;
-    role: string[]
 
-}
-export interface UserListProps {
-   users: UsersList[]
-}
-//////////////////////////////////////////
-export interface SingleUser{
-    _id: string;
+export interface User{
     id: string;
     name: string;
     email: string;
     role: string[];
     createdBugs: string[];
     assignedBugs: string[];
+    fullName: string
 }
-export interface SingleUserProps {
-   user: SingleUser
-}
+
 
 /////////////BUGS//////////// 
 
-export interface BugsList {
-    id: string,
-    title: string,
-    status: string
-}
-export interface BugsListProps{
-    bugs: BugsList[]
-}
-export interface SingleBug {
-    id: string,
-    title: string,
-    description: string,
-    stepsToReproduce: string
+export interface Bug {
+  id?: string;
+  bugId?: string;
+  title?: string;
+  description?: string;
+  stepsToReproduce?: string;
+  authorOfBug?: string;
+  statusLabel?: string;
+  status?: boolean;
+  assignedUser?: string;
+  assignedUserName?: string;
+  assignedTo?: string;
+  comments?: Comment[];
+  testCases?: TestCase[];
+  createdAt?: string;
+  lastUpdated?: string;
+  classification?: string;
+  fixInVersion?: string;
+  fixedOnDate?: string;
+  closedOn?: string;
+  workHoursLogged?: string
 }
 
-export interface SingleBugProps {
-    bug: SingleBug
-}
+export interface TestCase  {
+  title?: string;
+  status?: 'pass' | 'fail';
+};
 
+export interface Comment  {
+  authorName?: string;
+  text?: string
+};
+
+export interface SearchFilters {
+  id?: string;
+  keywords?: string;
+  classification?: string;
+  role?: string;
+  closed?: boolean;
+  minAge?: number;
+  maxAge?: number;
+  pageNum?: number;
+  pageSize?: number;
+  sortBy?: 'newest' | 'oldest' | 'title' | 'classification' | 'assignedTo' | 'createdBy' | 'role'; // Sorting options
+
+}

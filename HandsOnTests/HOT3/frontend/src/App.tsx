@@ -29,8 +29,9 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route path="users" element={<UserMenu />} />
           <Route path="products" element={<ProductDisplay />} />
+           <Route path="/ProductDisplay" element={<ProductDisplay />} />
           {/* Default child route for "/" */}
-          <Route index element={<div>Welcome Home!</div>} />
+          {/* <Route index element={<div>Welcome Home!</div>} /> */}
         </Route>
       </Routes>
     </>

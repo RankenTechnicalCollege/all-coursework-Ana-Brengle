@@ -1,27 +1,7 @@
 import {type ColumnDef} from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-
-type Bug = {
-    _id: string
-  id?: string
-  bugId?: string
-  title?: string
-  description?: string
-  stepsToReproduce?: string
-  authorOfBug?: string
-  createdOn: string
-  classification: string
-  closed: boolean
-  lastUpdated: string
-  edits: string[],
-  comments: string[]
-  classifiedOn: Date
-  assignedToUserName: string
-  assignedToUserId: string
-  testCases: string[]
-  closedOn: string
-}
+import { SingleBug } from '../types/interfaces'
 
 export const columns = (
   onView: (bug: Bug) => void,   // For viewing bug details
@@ -65,7 +45,7 @@ export const columns = (
       header: "Classification",
       cell: ({row}) => {
         const classification = row.getValue('classification') as string
-        return<span>{classification || "open"}</span>
+        return<span>{classification || "unclassified"}</span>
       }
     },
     {

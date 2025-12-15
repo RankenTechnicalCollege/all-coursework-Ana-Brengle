@@ -154,7 +154,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                   <SelectValue placeholder="Select Role"/>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
               {errors.role && (

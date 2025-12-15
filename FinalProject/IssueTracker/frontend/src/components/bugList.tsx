@@ -1,4 +1,4 @@
-//import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 import {
   Card,
@@ -13,7 +13,8 @@ import {
 import axios from 'axios'
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { type BugsList} from "@/components/types/interfaces";
+import { type BugsList} from "@/components/types/interfaces"
+import { Edit2, Trash2 } from "lucide-react";
 
 
 
@@ -24,23 +25,6 @@ export default function BugList() {
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate()
 
-
-    useEffect(() => {
-        const fetchBugs = async () => {
-            try{
-               const response = await axios.get(`${import.meta.env.VITE_API_URL}/bugs`);
-                setBugs(response.data);
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to fetch users');
-                setLoading(false);
-                console.error('Error fetching users:', err);
-            }
-        }
-        fetchBugs()
-    }, [])
-    if (loading) return <div className="p-4">Loading users...</div>;
-     if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <>

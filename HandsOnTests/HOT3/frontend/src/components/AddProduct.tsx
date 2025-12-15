@@ -5,12 +5,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useState,} from "react"
+
+
 
 interface AddProductProps {
   open: boolean
@@ -22,21 +25,22 @@ export function AddProduct({ open, onOpenChange, onSave}: AddProductProps) {
     const [loading, setLoading] = useState(false)
 
 
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setLoading(true)
-
+        const form = e.currentTarget;
         const formData = new FormData(e.currentTarget)
 
         try {
-            await api.post("products", {
+            await api.post("/products", {
                 name:formData.get("name"),
                 description: formData.get("description"),
                 price: Number(formData.get("price")),
                 category: formData.get("category"),
 
             })
-            e.currentTarget.reset()
+            form.reset();
             onSave()
             onOpenChange(false)
         } catch (error) {
@@ -51,6 +55,9 @@ export function AddProduct({ open, onOpenChange, onSave}: AddProductProps) {
             <DialogHeader>
             <DialogTitle>Add Product</DialogTitle>
         </DialogHeader>
+        <DialogDescription>
+      Fill out the form to add a new product.
+    </DialogDescription>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Product Name</Label>

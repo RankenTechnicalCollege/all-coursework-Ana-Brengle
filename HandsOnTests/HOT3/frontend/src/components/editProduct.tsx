@@ -1,5 +1,6 @@
+"use client"
 import { useState,useEffect } from "react";
-import { useNavigate} from "react-router-dom";
+
 import {z} from "zod";
 import {productSchema} from "@/schemas/productSchema";
 import api from "@/lib/api";
@@ -32,7 +33,7 @@ import {
 } from "@/components/ui/select";
 
 interface Product {
-  productId: string;
+  _id: string;
   name: string
   description: string
   price: number
@@ -42,10 +43,11 @@ interface ProductEditorProps {
   productId: string;
   showError: (message: string) => void;
   showSuccess: (message: string) => void;
+  refresh?: () => void;
 }
 
-export function ProductEditor({productId, showError, showSuccess}: ProductEditorProps) {
-  const navigate = useNavigate();
+export function ProductEditor({productId, showError, showSuccess, refresh}: ProductEditorProps) {
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -102,7 +104,8 @@ export function ProductEditor({productId, showError, showSuccess}: ProductEditor
       });
       await api.patch(`/products/${productId}`, validatedData);
       showSuccess("product updated successfully");
-      navigate("/ProductDisplay");
+      refresh?.()
+      setOpen(false)
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

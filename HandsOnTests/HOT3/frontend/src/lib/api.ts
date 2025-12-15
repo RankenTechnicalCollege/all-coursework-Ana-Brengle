@@ -9,7 +9,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const { response } = error;
+    const { response, request } = error;
 
     if (response) {
       // Handle 401 Unauthorized (Not logged in)
@@ -18,7 +18,14 @@ api.interceptors.response.use(
         if (!toast.isActive('auth-error')) {
           toast.error(errorMessage, { toastId: 'auth-error', position: 'bottom-right' });
         }
-      }
+      } else if (request) {
+      // No response received (network error or HTML returned)
+      toast.error("Server did not respond with JSON. Check API URL or server status.", {
+        position: 'bottom-right',
+        toastId: 'network-error'
+      });
+      console.error("Response was not JSON. Received:", request.responseText);
+    }
 
       // Handle 403 Forbidden (Logged in but no permission)
       if (response.status === 403) {

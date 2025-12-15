@@ -1,13 +1,15 @@
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import axios, {AxiosError} from "axios"
+import  {AxiosError} from "axios"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "./ui/button"
+import api from "@/lib/api"
 
 interface User {
   id: string
@@ -35,8 +37,8 @@ export default function UserMenu() {
       setLoading(true)
       setError(null)
 
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/users/${searchId}`
+      const response = await api.get(
+        `users/${searchId}`
       )
 
       if (response.data && (response.data.id || response.data._id)) {
@@ -95,6 +97,7 @@ export default function UserMenu() {
             <CardHeader>
               <CardTitle>{user.fullName}</CardTitle>
               <CardDescription>{user.role}</CardDescription>
+              <CardContent>{user.email}</CardContent>
             </CardHeader>
           </Card>
       )}

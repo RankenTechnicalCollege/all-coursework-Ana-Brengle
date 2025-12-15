@@ -6,7 +6,7 @@ export const productSchema = z.object({
   price: z.number().positive("Price must be greater than 0"),
 });
 export const accountSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  fullName: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
 });
 

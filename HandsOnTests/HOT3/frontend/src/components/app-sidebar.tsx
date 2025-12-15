@@ -18,6 +18,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useEffect,useState } from "react"
+import api from "@/lib/api"
 
 
 // This is sample data.
@@ -67,26 +68,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const res = await fetch("http://localhost:2023/api/users/me", {
-          credentials: "include",
-        })
+  const res = await api.get("http://localhost:2023/api/users/me", {
+    withCredentials: true,
+  });
 
-        if (!res.ok) {
-          navigate("/login")
-          return
-        }
+  const data = res.data;
 
-        const data = await res.json()
-        setUser({
-          fullName: data.fullName || data.name || "Unknown User",
-          email: data.email || "unknown@example.com",
-          role: data.role || [],
-        })
-        //setUser(data)
-      } catch (err) {
-        console.error("Error loading user:", err)
-        navigate("/login")
-      }
+  setUser({
+    fullName: data.fullName || data.name || "Unknown User",
+    email: data.email || "unknown@example.com",
+    role: data.role || [],
+  });
+
+} catch (err) {
+  console.error("Error loading user:", err);
+  navigate("/login");
+}
     }
 
     loadUser()
