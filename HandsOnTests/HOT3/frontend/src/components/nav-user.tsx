@@ -1,6 +1,6 @@
 "use client"
 import {
-  CircleUser,
+  UserPen,
   ChevronsUpDown,
 
   LogOut,
@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/sidebar"
 import { useNavigate} from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
+import Account from "./UserEdit"
+import { useState } from "react"
 
 export function NavUser({
 
@@ -41,6 +43,7 @@ export function NavUser({
     role: string[]
   }
 }) {
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const navigate = useNavigate();
   const { isMobile } = useSidebar()
   const initials = user.fullName
@@ -58,6 +61,7 @@ export function NavUser({
   }
 
   return (
+    <>
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
@@ -97,9 +101,9 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser />
-                View Profile
+              <DropdownMenuItem onClick={() => setIsAccountOpen(true)}>
+                <UserPen />
+                Edit Profile
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -112,5 +116,8 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
+    <Account isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
+    </>
+    
   )
 }

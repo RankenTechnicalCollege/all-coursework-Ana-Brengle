@@ -1,78 +1,103 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuShortcut
-} from "@/components/ui/dropdown-menu"
-import { LogOutIcon} from "lucide-react"
-import { APP_SIDEBAR } from "@/constants"
-import { Avatar, AvatarImage } from "@/components/ui/avatar"
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import axios, {AxiosError} from "axios"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "./ui/button"
 
-
-interface UserMenuProps {
-    profile?: { src: string }
+interface User {
+  id: string
+  fullName: string
+  role?: string
+  email?: string
 }
 
-export const UserMenu = ({ profile = APP_SIDEBAR.allProfiles[0] }: UserMenuProps) => {
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger>
-                <div className="relative">
-                    <Avatar className="relative w-10 h-10">
-                        <AvatarImage className=''src={profile.src}/>
-                    </Avatar>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500"></div>
-                </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="right" align="end" className="w-60">
-                <DropdownMenuGroup>
-                    {APP_SIDEBAR.userMenu.itemsPrimary.map((item) => (
-                        <DropdownMenuItem key={item.title}>
-                            <item.Icon className="mr-2 h-4 w-4"/><span>{item.title}</span>
-                            {item.kbd && (
-                                <DropdownMenuShortcut>{item.kbd}</DropdownMenuShortcut>
-                            )
-                            }
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuGroup>
+export default function UserMenu() {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [searchId, setSearchId] = useState("")
+  const [searched, setSearched] = useState(false)
+  const navigate = useNavigate()
 
-                <DropdownMenuSeparator/>
-                <DropdownMenuRadioGroup value={APP_SIDEBAR.curProfile.email} className="space-y-1">
-                    <DropdownMenuLabel>Switch Account</DropdownMenuLabel>
-                    {APP_SIDEBAR.allProfiles.map((profile) => (
-                        <DropdownMenuRadioItem key={profile.email} value={profile.email} className="data-[state=checked] : bg-secondary">
-                            <div className="relative inline-flex items-center">
-                                    <Avatar className="relative size-13 rounded">
-                                        <AvatarImage className=''src={profile.src}/>
-                                    </Avatar>
-                                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500"></span>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-semibold">
-                                        {profile.name}
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground truncate">{profile.email}</p>
-                                </div>
-                        </DropdownMenuRadioItem>
-                    ))}
-                    <DropdownMenuItem asChild>
-                        <Button variant='outline' size='sm' className="w-full">
-                            <LogOutIcon/>Sign Out 
-                        </Button>
+  const fetchUserById = async () => {
+    if (!searchId.trim()) {
+      setError("Please enter a user ID")
+      setUser(null)
+      return
+    }
 
-                    </DropdownMenuItem>
-                </DropdownMenuRadioGroup>
+    try {
+      setLoading(true)
+      setError(null)
 
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/users/${searchId}`
+      )
 
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-} 
+      if (response.data && (response.data.id || response.data._id)) {
+      const fetchedUser: User = {
+        id: response.data.id || response.data._id,
+        fullName: response.data.fullName,
+        role: response.data.role,
+        email: response.data.email,
+      } 
+        setUser(fetchedUser)
+        setError(null)
+    }else {
+        setUser(null)
+       setError("User not found")
+     }
+      
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>
+      setError(
+        axiosError.response?.data?.message || axiosError.message || "User not found"
+      )
+      setUser(null)
+    } finally {
+      setLoading(false)
+      setSearched(true)
+    }
+  }
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Search user by ID"
+          value={searchId}
+          onChange={(e) => setSearchId(e.target.value)}
+          className="border rounded px-3 py-2 flex-1"
+        />
+        <Button className="border rounded px-3 py-2 bg-gray-200 hover:bg-gray-300" onClick={fetchUserById}>
+          Search
+        </Button>
+        <Button className="border rounded px-3 py-2 bg-gray-200 hover:bg-gray-300"onClick={() => {
+            setSearchId("")
+            setUser(null)
+            setError(null)
+            setSearched(false)
+          }}>Clear</Button>
+      </div>
+      {loading && <div>Loading user...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+      {!loading && searched && !error && !user && searchId && (
+        <div className="text-gray-500">User not found</div>
+      )}
+      {user && (
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`/users/${user.id}`)}>
+            <CardHeader>
+              <CardTitle>{user.fullName}</CardTitle>
+              <CardDescription>{user.role}</CardDescription>
+            </CardHeader>
+          </Card>
+      )}
+    </div>
+  )
+}

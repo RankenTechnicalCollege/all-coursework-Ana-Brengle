@@ -1,74 +1,38 @@
-import { SidebarProvider, SidebarInset} from '@/components/ui/sidebar'
-import './App.css'
-//import  {AppSidebar}  from '@/components/AppSidebar'
-
-import { AppSidebar } from '@/components/app-sidebar'
-
-import { Header } from '@/components/Header'
-import { Route, Routes, Navigate, useNavigate } from 'react-router-dom'
+import { Route, Routes} from 'react-router-dom'
 import { LoginForm } from '@/components/login-form'
-import { useState, useEffect } from 'react'
-import { SignupForm } from '@/components/signup-form'
 
+import AppLayout from './components/applayout/app-layout'
+import UserMenu from './components/UserMenu'
+
+import ProductDisplay from './components/ProductDisplay'
+import { SignupForm } from './components/signup-form'
+import {ToastContainer, } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 function App() {
-  const [user, setUser] = useState<null | { fullName: string; email: string }>(null)
-  const navigate = useNavigate()
 
-  useEffect(() => {
-  const loadUser = async () => {
-    try {
-      const res = await fetch("http://localhost:2023/api/users/me", {
-        credentials: "include",
-      });
+  // function showError(message: string) {
+  //   toast(message, {type: 'error', position: 'bottom-right'})
+  // }
 
-      if (!res.ok) {
-        setUser(null);
-        if (window.location.pathname !== "/signup") {
-          navigate("/login");
-        }
-        return;
-      }
-
-      const data = await res.json();
-      setUser({
-        fullName: data.fullName || data.name || "Unknown User",
-        email: data.email || "unknown@example.com",
-      });
-    } catch (err) {
-      console.error("Error loading user:", err);
-      setUser(null);
-      if (window.location.pathname !== "/signup") {
-        navigate("/login");
-      }
-    }
-  };
-
-  loadUser();
-}, [navigate]);
-
-  const isLoggedIn = !!user
-
+  // function showSuccess(message: string) {
+  //   toast(message, {type: 'success', position: 'bottom-right'})
+  // }
   return (
     <>
-{isLoggedIn ? (
-        <SidebarProvider defaultOpen={false}>
-          <AppSidebar />
-          <SidebarInset>
-            <Header />
-            <Routes>
-              <Route path="/users" element={<div>Users Page</div>} />
-              <Route path="/products" element={<div>Products Page</div>} />
-              <Route path="*" element={<Navigate to="/users" />} />
-            </Routes>
-          </SidebarInset>
-        </SidebarProvider>
-      ) : (
-        <Routes>
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/signup" element={< SignupForm/>} />
-        </Routes>
-      )}
+     <ToastContainer />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignupForm />} />
 
+        {/* Protected routes using layout */}
+        <Route path="/" element={<AppLayout />}>
+          <Route path="users" element={<UserMenu />} />
+          <Route path="products" element={<ProductDisplay />} />
+          {/* Default child route for "/" */}
+          <Route index element={<div>Welcome Home!</div>} />
+        </Route>
+      </Routes>
     </>
   )
 }

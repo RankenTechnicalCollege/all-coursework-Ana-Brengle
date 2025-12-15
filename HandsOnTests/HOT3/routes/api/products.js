@@ -15,13 +15,13 @@ router.get('', async (req, res) =>{
         const {keywords, category, maxPrice, minPrice, sortBy} = req.query;
 
         const pageNum = parseInt(req.query.pageNum) || 1;
-        const pageSize = parseInt(req.query.pageSize) || 5;
+        const pageSize = parseInt(req.query.pageSize) || 100;
         const skip = (pageNum - 1) * pageSize;
 
         const filter = {};
 
-        if(keywords) filter.$text = {$search: keywords};
-        if(category) filter.category = category
+        if(keywords) filter.name = { $regex: keywords, $options: 'i' };
+        if(category) filter.category = { $regex: `^${category}$`, $options: 'i' };
 
 
         if(minPrice || maxPrice) {
@@ -179,7 +179,7 @@ router.patch('/:productId', isAuthenticated,  hasRole('admin'),validId('productI
     }
 })
 
-router.delete('/:productId', hasRole('admin') , validId('productId'), async (req, res) =>{
+router.delete('/:productId', isAuthenticated, hasRole('admin') , validId('productId'), async (req, res) =>{
     try {
         const productId = req.params.productId;
         const deleteProduct = await deletedProduct(productId)

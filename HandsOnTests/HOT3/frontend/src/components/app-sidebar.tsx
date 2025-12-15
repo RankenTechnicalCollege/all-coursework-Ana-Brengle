@@ -45,110 +45,20 @@ const data = {
   //   },
   // ],
   navMain: [
-    {
-      title: "Users",
-      url: "/users",
-      icon: UserIcon,
-      isActive: true,
-      items: [
-        {
-          title: "Get Users",
-          url: "#",
-        },
-        // {
-        //   title: "Starred",
-        //   url: "#",
-        // },
-        // {
-        //   title: "Settings",
-        //   url: "#",
-        // },
-      ],
-    },
-    {
-      title: "Products",
-      url: "/products",
-      icon: ShoppingBasket,
-      items: [
-        {
-          title: "Get Products",
-          url: "#",
-        },
-        // {
-        //   title: "Explorer",
-        //   url: "#",
-        // },
-        // {
-        //   title: "Quantum",
-        //   url: "#",
-        // },
-      ],
-    },
-    // {
-    //   title: "Documentation",
-    //   url: "#",
-    //   icon: BookOpen,
-    //   items: [
-    //     {
-    //       title: "Introduction",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Get Started",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Tutorials",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Changelog",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: Settings2,
-    //   items: [
-    //     {
-    //       title: "General",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Team",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Billing",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Limits",
-    //       url: "#",
-    //     },
-//     //   ],
-//     },
-//   ],
-//   projects: [
-//     {
-//       name: "Design Engineering",
-//       url: "#",
-//       icon: Frame,
-//     },
-//     {
-//       name: "Sales & Marketing",
-//       url: "#",
-//       icon: PieChart,
-//     },
-//     {
-//       name: "Travel",
-//       url: "#",
-//       icon: Map,
-//     },
- ],
- }
+  {
+    title: "Users",
+    url: "/users",
+    icon: UserIcon,
+    isActive: true,
+  },
+  {
+    title: "Products",
+    url: "/products",
+    icon: ShoppingBasket,
+  },
+],
+}
+  
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = useState<null | { fullName: string; email: string; role: string[] }>(null)
@@ -172,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           email: data.email || "unknown@example.com",
           role: data.role || [],
         })
-        setUser(data)
+        //setUser(data)
       } catch (err) {
         console.error("Error loading user:", err)
         navigate("/login")

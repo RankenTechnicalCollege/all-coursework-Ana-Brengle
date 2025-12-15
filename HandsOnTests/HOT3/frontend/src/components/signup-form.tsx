@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -15,16 +16,14 @@ import {
 import {
   Select,
   SelectContent,
-
   SelectItem,
-
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client";
 import { useNavigate, Link } from "react-router-dom";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import {z} from "zod";
 import signupSchema from "@/schemas/signUpSchema";
 
@@ -32,48 +31,76 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [role, setRole] = useState("")
+  const [role, setRole] = useState<string>("")
+  const [fullName, setFullName] = useState<string>("")
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrors({});
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      fullName: formData.get("fullName") as string,
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirmPassword") as string,
-      email: formData.get("email") as string,
-      role,
-    };
+   if (password !== confirmPassword) {
+      setErrors({ root: "Passwords do not match" });
+      setIsSubmitting(false);
+      return;
+    }
 
-    try {
-      // Validate data with Zod
-      const validated = signupSchema.parse(data);
+   if (!fullName|| !email || !password || !confirmPassword || !role) {
+      setErrors({ root: "Please fill in all required fields." });
+      setIsSubmitting(false);
+      return;
+    }
 
-      // Call backend API via authClient
-      const { data: result, error } = await authClient.signUp.email(
-        {
-          email: validated.email,
-          name: validated.fullName,
-          password: validated.password,
-        },
-        {
-          onRequest: (ctx) => {
-            const bodyData = typeof ctx.body === "string" ? JSON.parse(ctx.body) : ctx.body;
-            ctx.body = JSON.stringify({ ...bodyData, role: [validated.role] });
-            return ctx;
-          },
-        }
-      );
 
-      if (error) throw new Error(error.message || "Registration failed");
+  const payload = {
+    fullName,
+    email,
+    password,
+    confirmPassword,
+    role,
+  }
+  console.log("submitting: ", payload)
 
-      console.log("Registration successful!", result);
-      navigate("/"); // Redirect to home
-    } catch (error) {
-      console.error("Registration error:", error);
+  try {
+    const validated = signupSchema.parse(payload);
+
+
+    const {data: result, error} = await authClient.signUp.email({
+      name: validated.fullName,
+      password: validated.password,
+      email: validated.email
+    },
+    {
+      onRequest: (ctx) => {
+      const bodyData = 
+      typeof ctx.body === 'string' ? JSON.parse(ctx.body) : ctx.body;
+      const updatedBody = {
+        ...bodyData,
+        fullName: validated.fullName,
+        role: [validated.role]
+      };
+
+      ctx.body = JSON.stringify(updatedBody)
+      return ctx
+    } 
+  })
+   if (error) {
+        throw new Error(error.message || "Registration failed");
+      }
+
+      console.log("Registration successful:", result);
+
+      // Better Auth automatically sets session cookies
+      // Redirect to home page after successful registration
+      navigate("/");
+
+  } catch (error) {
+    console.error("Registration error:", error);
+
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
         error.issues.forEach((issue) => {
@@ -83,12 +110,15 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         });
         setErrors(fieldErrors);
       } else {
-        setErrors({ root: error instanceof Error ? error.message : "Registration failed" });
+        setErrors({
+          root: error instanceof Error ? error.message : "Registration failed",
+        });
       }
     } finally {
       setIsSubmitting(false);
-    }
-  };
+
+  }
+  } 
   
   return (
     <Card {...props}>
@@ -107,20 +137,24 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 id="fullName"
                 type="text" 
                 placeholder="John Doe"
-                name="name"
+                name="fullName"
+                onChange={(e) =>setFullName(e.target.value)} 
+                required 
               />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
+              {errors.fullName && (
+                <p className="text-sm text-destructive">{errors.fullName}</p>
               )}
             </Field>
             <Field>
             <FieldLabel htmlFor="role">Role</FieldLabel>
-              <Select value={role} onValueChange={setRole} >
+              <Select 
+                value={role} 
+                onValueChange={setRole} >
                 <SelectTrigger id="role" className="w-[180px]">
-                  <SelectValue placeholder="Developer, Business Analyst, QA ect..."/>
+                  <SelectValue placeholder="Select Role"/>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Developer">Admin</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
               {errors.role && (
@@ -137,6 +171,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 type="email"
                 placeholder="m@example.com"
                 name="email"
+                onChange={(e) =>setEmail(e.target.value)}
                 required
               />
               {errors.email && (
@@ -149,7 +184,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" name="password" required />
+              <Input id="password" type="password" onChange={(e) => setPassword(e.target.value)} required />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password}</p>
               )}
@@ -161,7 +196,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
-              <Input id="confirm-password" type="password" name="confirmPassword" required />
+              <Input id="confirm-password" type="password" onChange={(e) => setConfirmPassword(e.target.value)} required />
               {errors.confirmPassword && (
                 <p className="text-sm text-destructive">{errors.confirmPassword}</p>
               )}
@@ -188,3 +223,4 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     </Card>
   )
 }
+
