@@ -45,16 +45,28 @@ export interface Comment  {
   text?: string
 };
 
-export interface SearchFilters {
+export interface BugSearchFilters {
   id?: string;
   keywords?: string;
   classification?: string;
+  closed?: boolean;
+  minAge?: number;
+  maxAge?: number;
+  pageNum?: number;
+  pageSize?: number;
+  sortBy?: 'newest' | 'oldest' | 'title' | 'classification' | 'assignedTo' | 'createdBy';
+
+}
+
+export interface UserSearchFilters {
+  id?: string;
+  keywords?: string;
   role?: string;
   closed?: boolean;
   minAge?: number;
   maxAge?: number;
   pageNum?: number;
   pageSize?: number;
-  sortBy?: 'newest' | 'oldest' | 'title' | 'classification' | 'assignedTo' | 'createdBy' | 'role'; // Sorting options
+  sortBy?: 'name' | 'role' | 'newest' | 'oldest';
 
 }

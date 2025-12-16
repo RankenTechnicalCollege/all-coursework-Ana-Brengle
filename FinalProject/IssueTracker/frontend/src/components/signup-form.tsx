@@ -30,8 +30,7 @@ import z from "zod"
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
   const navigate = useNavigate();
-  const [givenName, setGivenName] = useState<string>('')
-  const [familyName, setFamilyName] = useState<string>('')
+  const [fullName, setFullName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -50,7 +49,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       return;
     }
 
-   if (!givenName || !familyName || !email || !password || !confirmPassword || !role) {
+   if (!fullName|| !email || !password || !confirmPassword || !role) {
       setErrors({ root: "Please fill in all required fields." });
       setIsSubmitting(false);
       return;
@@ -58,8 +57,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
 
   const payload = {
-    givenName,
-    familyName,
+    fullName,
     email,
     password,
     confirmPassword,
@@ -72,7 +70,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
 
     const {data: result, error} = await authClient.signUp.email({
-      name: validated.givenName,
+      name: validated.fullName,
       password: validated.password,
       email: validated.email
     },
@@ -82,8 +80,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       typeof ctx.body === 'string' ? JSON.parse(ctx.body) : ctx.body;
       const updatedBody = {
         ...bodyData,
-        givenName: validated.givenName,
-        familyName: validated.familyName,
+        fullName: validated.fullName,
         role: [validated.role]
       };
 
@@ -135,33 +132,20 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="givenName">Given Name</FieldLabel>
+              <FieldLabel htmlFor="fullName">Given Name</FieldLabel>
               <Input 
-                id="givenName"
+                id="fullName"
                 type="text" 
                 placeholder="John" 
-                value={givenName} 
-                onChange={(e) =>setGivenName(e.target.value)} 
+                value={fullName} 
+                onChange={(e) =>setFullName(e.target.value)} 
                 required 
               />
               {errors.givenName && (
-                <p className="text-sm text-destructive">{errors.givenName}</p>
+                <p className="text-sm text-destructive">{errors.fullName}</p>
               )}
             </Field>
-            <Field>
-              <FieldLabel htmlFor="lastName"> Family Name</FieldLabel>
-              <Input 
-                id="familyName" 
-                type="text" 
-                placeholder="Doe"
-                value={familyName} 
-                onChange={(e) =>setFamilyName(e.target.value)} 
-                required
-              />
-              {errors.familyName && (
-                <p className="text-sm text-destructive">{errors.familyName}</p>
-              )}
-            </Field>
+            
             <Field>
             <FieldLabel htmlFor="role">Role</FieldLabel>
               <Select value={role} onValueChange={setRole} >

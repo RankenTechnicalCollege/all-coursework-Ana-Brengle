@@ -1,7 +1,7 @@
 "use client";
 
-import { Biohazard, BookMinus, BugIcon, BugOff, BugPlay, FilePenLine, Menu, MessageCirclePlus, MessagesSquare, ShieldPlus, SquareChevronRight, UserPen, UserRound, } from "lucide-react";
-
+import {  BugIcon,Menu, UserRound, EllipsisVertical, LogOutIcon} from "lucide-react";
+import { Spinner } from "@/components/ui/spinner"
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +24,20 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Avatar,
+  AvatarFallback,
+} from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 import { useNavigate, Link } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
@@ -40,13 +54,13 @@ interface MenuItem {
 interface ExtendedUser {
   id: string,
   email: string,
-  givenName: string,
+  fullName: string,
   role: string[],
   image?: string,
   createdAt?: Date,
   updatedAt?: Date
 }
-interface ExtendedSession extends Omit<Session, 'user'> {
+export interface ExtendedSession extends Omit<Session, 'user'> {
   user: ExtendedUser
 }
 
@@ -88,14 +102,14 @@ const Navbar1 = ({
           description: "The latest industry news, updates, and info",
           icon: <UserRound className="size-5 shrink-0" />,
           url: "/userList",
-        },
-        {
-          title: "Edit User",
-          description: "Our mission is to innovate and empower the world",
-          icon: <UserPen className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Production Manager"]
-        },
+        }
+        // {
+        //   title: "Edit User",
+        //   description: "Our mission is to innovate and empower the world",
+        //   icon: <UserPen className="size-5 shrink-0" />,
+        //   url: "#",
+        //   requiredRole: ["Production Manager"]
+        // },
         // {
         //   title: "Careers",
         //   description: "Browse job listing and discover our workspace",
@@ -121,84 +135,84 @@ const Navbar1 = ({
           icon: <BugIcon className="size-5 shrink-0" />,
           url: "/bugList",
         },
-        {
-          title: "Create Bugs",
-          description: "We are here to help you with any questions you have",
-          icon: <SquareChevronRight className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager", "Technical Manager"]
-        },
-        {
-          title: "Edit Bug",
-          description: "Check the current status of our services and APIs",
-          icon: <BugPlay className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Product Manager"]
-        },
-        {
-          title: "Close Bug",
-          description: "Our terms and conditions for using our services",
-          icon: <BugOff className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Product Manager"]
-        },
+        // {
+        //   title: "Create Bugs",
+        //   description: "We are here to help you with any questions you have",
+        //   icon: <SquareChevronRight className="size-5 shrink-0" />,
+        //   url: "#",
+        //   requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager", "Technical Manager"]
+        // },
+        // {
+        //   title: "Edit Bug",
+        //   description: "Check the current status of our services and APIs",
+        //   icon: <BugPlay className="size-5 shrink-0" />,
+        //   url: "#",
+        //   requiredRole: ["Product Manager"]
+        // },
+        // {
+        //   title: "Close Bug",
+        //   description: "Our terms and conditions for using our services",
+        //   icon: <BugOff className="size-5 shrink-0" />,
+        //   url: "#",
+        //   requiredRole: ["Product Manager"]
+        // },
       ],
     },
-    {
-      title: "Comments",
-      url: "#",
-      items: [
-        {
-          title: "View Comments",
-          description: "Get all the answers you need right here",
-          icon: <MessagesSquare className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager"]
-        },
-        {
-          title: "Add Comments",
-          description: "Get all the answers you need right here",
-          icon: <MessageCirclePlus className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager"]
-        }
+    // {
+    //   title: "Comments",
+    //   url: "#",
+    //   items: [
+    //     {
+    //       title: "View Comments",
+    //       description: "Get all the answers you need right here",
+    //       icon: <MessagesSquare className="size-5 shrink-0" />,
+    //       url: "#",
+    //       requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager"]
+    //     },
+    //     {
+    //       title: "Add Comments",
+    //       description: "Get all the answers you need right here",
+    //       icon: <MessageCirclePlus className="size-5 shrink-0" />,
+    //       url: "#",
+    //       requiredRole: ["Developer", "Business Analyst", "Quality Analyst", "Product Manager"]
+    //     }
 
-      ]
-    },
-    {
-      title: "Test Cases",
-      url: "#",
-      items: [
-        {
-          title: "View Test Cases",
-          description: "Get all the answers you need right here",
-          icon: <Biohazard className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Quality Analyst"]
-        },
-        {
-          title: "Add Test Cases",
-          description: "Get all the answers you need right here",
-          icon: <ShieldPlus className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Quality Analyst"]
-        },
-        {
-          title: "Edit Test Cases",
-          description: "Get all the answers you need right here",
-          icon: <FilePenLine className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Quality Analyst"]
-        },
-        {
-          title: "Delete Test Cases",
-          description: "Get all the answers you need right here",
-          icon: <BookMinus className="size-5 shrink-0" />,
-          url: "#",
-          requiredRole: ["Quality Analyst"]
-        }
-      ]
-    },
+    //   ]
+    // },
+    // {
+    //   title: "Test Cases",
+    //   url: "#",
+    //   items: [
+    //     {
+    //       title: "View Test Cases",
+    //       description: "Get all the answers you need right here",
+    //       icon: <Biohazard className="size-5 shrink-0" />,
+    //       url: "#",
+    //       requiredRole: ["Quality Analyst"]
+    //     },
+    //     {
+    //       title: "Add Test Cases",
+    //       description: "Get all the answers you need right here",
+    //       icon: <ShieldPlus className="size-5 shrink-0" />,
+    //       url: "#",
+    //       requiredRole: ["Quality Analyst"]
+    //     },
+    //     {
+    //       title: "Edit Test Cases",
+    //       description: "Get all the answers you need right here",
+    //       icon: <FilePenLine className="size-5 shrink-0" />,
+    //       url: "#",
+    //       requiredRole: ["Quality Analyst"]
+    //     },
+    //     {
+    //       title: "Delete Test Cases",
+    //       description: "Get all the answers you need right here",
+    //       icon: <BookMinus className="size-5 shrink-0" />,
+    //       url: "#",
+    //       requiredRole: ["Quality Analyst"]
+    //     }
+    //   ]
+    // },
   ],
   auth = {
     login: { title: "Login", url: "/login" },
@@ -253,14 +267,64 @@ const Navbar1 = ({
           </div>
           <div className="flex items-center gap-3">
             {isPending ? (
-              <span className="text-sm">Loading....</span>
-            ): extendedSession? (
+              <span className="text-sm"><Spinner/></span>
+            ): extendedSession ? (
               <>
-              <span className="text-sm font-medium">
-                Welcome, {extendedSession.user.givenName || extendedSession.user.email}</span>
-                <Button variant="outline" size="sm"  onClick={handleSignOut}>Sign Out</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="flex items-center gap-2 p-1 rounded-lg hover:bg-muted">
+                    <Avatar className="h-8 w-8 rounded-lg grayscale">
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-medium">{extendedSession.user.fullName}</span>
+                      <span className="text-muted-foreground truncate text-xs">
+                        {extendedSession.user.email}
+                      </span>
+                    </div>
+                    <EllipsisVertical className="ml-auto size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  side="bottom"
+                  align="end"
+                  className="w-56 bg-background border border-border rounded-md shadow-md p-2"
+                >
+                  <DropdownMenuLabel className="p-0 font-normal">
+                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                      <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                      </Avatar>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">{extendedSession.user.fullName}</span>
+                        <span className="text-muted-foreground truncate text-xs">
+                          {extendedSession.user.email}
+                        </span>
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <UserRound className="mr-2" />
+                      Account
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOutIcon className="mr-2" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {/* <span className="text-sm font-medium">
+                Welcome, {extendedSession.user.fullName}</span>
+                <Button variant="outline" size="sm"  onClick={handleSignOut}><LogOut/>Sign Out</Button> */}
                 </>
-            ): (
+            ) : (
               <>
                 <Button asChild variant="outline" size="sm">
                   <Link to={auth.login.url}>{auth.login.title}</Link>
@@ -312,12 +376,12 @@ const Navbar1 = ({
 
                 <div className="flex items-center gap-3">
                   {isPending ? (
-                    <span className="text-sm">Loading....</span>
+                    <span className="text-sm"><Spinner/></span>
                   ): extendedSession ? (
                     <>
                         <div className="border-b pb-3">
                           <p className="text-sm font-medium">
-                            {extendedSession.user.givenName || extendedSession.user.email}
+                            {extendedSession.user.fullName || extendedSession.user.email}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {extendedSession.user.email}

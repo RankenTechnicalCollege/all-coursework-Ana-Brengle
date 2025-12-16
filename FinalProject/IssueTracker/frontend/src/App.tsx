@@ -8,10 +8,10 @@ import { Navbar1 } from '@/components/navbar1'
 import { SignupForm } from '@/components/signup-form';
 import { Footer2 } from '@/components/footer2';
 import { LandingPage } from '@/components/landing-page';
-import UserList from '@/components/userList';
+import UserList from './components/userList';
 import {ToastContainer, } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import BugList from '@/components/bugList';
+import BugList from './components/BugList';
 
 
 
@@ -36,7 +36,7 @@ function App() {
         <Route path='/login' element={<LoginForm/>} />
         <Route path='/signup' element={<SignupForm/>} />
         <Route path='/userList' element={<UserList /> } />
-        <Route path='/bugList' element={<BugList /> } />
+        {/* //<Route path='/bugList' element={<BugList /> } /> */}
 
       </Routes>
       <Footer2/>
