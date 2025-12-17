@@ -17,6 +17,8 @@ import api from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { UserItem } from "./UserItem";
+import { Search } from "lucide-react";
+import { UserEditDialog } from "./UserEdit";
 
 export default function UserList() {
   const [users, setUsers] = useState<User[]>([]);
@@ -30,6 +32,15 @@ export default function UserList() {
   const [maxAge, setMaxAge] = useState("");
   const [sortBy, setSortBy] = useState("name");
 
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string>("")
+
+  const handleEditClick = (userId: string) => {
+    setSelectedUserId(userId)
+    setEditDialogOpen(true)
+  }
+
+
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -37,8 +48,8 @@ export default function UserList() {
       const params = new URLSearchParams();
       if (keywords) params.append("keywords", keywords);
       if (role && role !== "all") params.append("role", role);
-      if (minAge) params.append("minAge", minAge);
-      if (maxAge) params.append("maxAge", maxAge);
+      if (minAge) params.append("minAge", Number(minAge).toString());
+      if (maxAge) params.append("maxAge", Number(maxAge).toString());
       if (sortBy) params.append("sortBy", sortBy);
 
       const response = await api.get(`/users?${params.toString()}`);
@@ -55,23 +66,28 @@ export default function UserList() {
     fetchUsers();
   }, []);
 
+  
+    useEffect(() => {
+    fetchUsers();
+  }, [keywords, minAge, maxAge]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [role,sortBy]);
+
+
    const handleSearch = () => {
     fetchUsers();
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, [role, sortBy])
 
-
-  if (loading) return <div className="p-4">Loading users...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
 
    return (
     <div className="space-y-6">
       <Card>
         <CardContent className="space-y-4">
           <div className="flex w-full max-w-sm items-center space-x-2">
+            <Search/>
             <Input
               placeholder="Search users..."
               value={keywords}
@@ -79,15 +95,16 @@ export default function UserList() {
             />
             <Button onClick={handleSearch}>Search</Button>
           </div>
-          <Select onValueChange={setRole} defaultValue="all">
+          <Select value={role} onValueChange={setRole}>
             <SelectTrigger>
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="developer">Developer</SelectItem>
-              <SelectItem value="tester">Tester</SelectItem>
+              <SelectItem value="business analyst">Business Analyst</SelectItem>
+              <SelectItem value="quality analyst">Quality Analyst</SelectItem>
+              <SelectItem value="product manager">Product Manager</SelectItem>
+              <SelectItem value="technical manager">Technical Manager</SelectItem>
             </SelectContent>
           </Select>
           <div className="flex space-x-2">
@@ -104,12 +121,12 @@ export default function UserList() {
               onChange={(e) => setMaxAge(e.target.value)}
             />
           </div>
-          <Select onValueChange={setSortBy} defaultValue="name">
+          <Select onValueChange={setSortBy} value={sortBy}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Given Name</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
               <SelectItem value="role">Role</SelectItem>
               <SelectItem value="newest">Newest</SelectItem>
               <SelectItem value="oldest">Oldest</SelectItem>
@@ -132,12 +149,17 @@ export default function UserList() {
           {users.map((user) => (
             <Card key={user._id}>
               <CardContent className="pt-6">
-                <UserItem user={user} currentUser={user}/>
+                <UserItem user={user} currentUser={user} onEdit={() => handleEditClick(user._id)}/>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+      <UserEditDialog
+        userId={selectedUserId}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 }

@@ -87,7 +87,7 @@ router.post('/:bugId/tests', isAuthenticated, hasPermission('canAddTestCase'), v
             status: status,
             testAuthor: {
                 id: user._id,
-                name: `${user.givenName}`
+                name: `${user.fullName}`
             },
             createdOn: new Date(),
             lastUpdated: new Date()
@@ -156,7 +156,7 @@ router.patch('/:bugId/tests/:testId', isAuthenticated, hasPermission('canEditTes
         }
         testAuthor = {
             id: author.id,
-            name: `${author.givenName} ${author.familyName}`
+            name: `${author.fullName}`
         }
         log.update.push({field: "testAuthor", oldValue: oldTest.testAuthor, newValue: updateTest.testAuthor});
 

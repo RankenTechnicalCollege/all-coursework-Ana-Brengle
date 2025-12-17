@@ -1,19 +1,19 @@
 
 export interface User{
-    id: string;
-    name: string;
+    _id: string;
     email: string;
     role: string[];
     createdBugs: string[];
     assignedBugs: string[];
     fullName: string
+    permissions: Permissions;
 }
 
 
 /////////////BUGS//////////// 
 
 export interface Bug {
-  id?: string;
+  _id?: string;
   bugId?: string;
   title?: string;
   description?: string;
@@ -21,52 +21,40 @@ export interface Bug {
   authorOfBug?: string;
   statusLabel?: string;
   status?: boolean;
+  createdOn: string
   assignedUser?: string;
   assignedUserName?: string;
   assignedTo?: string;
-  comments?: Comment[];
-  testCases?: TestCase[];
+  comments?: string[];
+  testCases?: string[];
   createdAt?: string;
   lastUpdated?: string;
   classification?: string;
   fixInVersion?: string;
   fixedOnDate?: string;
   closedOn?: string;
-  workHoursLogged?: string
+  workHoursLogged?: string[]
 }
 
-export interface TestCase  {
-  title?: string;
-  status?: 'pass' | 'fail';
-};
-
-export interface Comment  {
-  authorName?: string;
-  text?: string
-};
-
-export interface BugSearchFilters {
-  id?: string;
-  keywords?: string;
-  classification?: string;
-  closed?: boolean;
-  minAge?: number;
-  maxAge?: number;
-  pageNum?: number;
-  pageSize?: number;
-  sortBy?: 'newest' | 'oldest' | 'title' | 'classification' | 'assignedTo' | 'createdBy';
-
+export interface Permissions {
+  canEditAnyUser: boolean;
+  canViewData: boolean;
+  canAssignRoles: boolean;
+  canCreateBug: boolean;
+  canEditAnyBug: boolean;
+  canCloseAnyBug: boolean;
+  canClassifyAnyBug: boolean;
+  canReassignAnyBug: boolean;
+  canEditMyBug: boolean;
+  canEditIfAssignedTo: boolean;
+  canReassignIfAssignedTo: boolean;
+  canBeAssignedTo: boolean;
+  canLogHours: boolean;
+  canApplyFixInVersion: boolean;
+  canAssignVersionDate: boolean;
+  canAddComment: boolean;
+  canAddTestCase: boolean;
+  canEditTestCase: boolean;
+  canDeleteTestCase: boolean;
 }
 
-export interface UserSearchFilters {
-  id?: string;
-  keywords?: string;
-  role?: string;
-  closed?: boolean;
-  minAge?: number;
-  maxAge?: number;
-  pageNum?: number;
-  pageSize?: number;
-  sortBy?: 'name' | 'role' | 'newest' | 'oldest';
-
-}

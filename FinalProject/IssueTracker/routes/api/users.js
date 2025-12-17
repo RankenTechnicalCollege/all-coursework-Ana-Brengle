@@ -24,7 +24,7 @@ router.get('', isAuthenticated, hasPermission('canViewData'), async (req, res) =
 
         const filter = {};
 
-        if(keywords) filter.$text = {$search: keywords};
+        if(keywords) filter.fullName = {$regex: keywords, options: 'i'};
         if (role) filter.role = role;
 
         if(minAge || maxAge) {
@@ -39,13 +39,12 @@ router.get('', isAuthenticated, hasPermission('canViewData'), async (req, res) =
         }
 
         const sortOptions = {
-            familyName: { familyName: 1, givenName: 1, createdAt: 1 },
-            role: { role: 1, givenName: 1, familyName: 1, createdAt: 1 },
+            fullName: { fullName: 1 },
+            role: { role: 1,fullName: 1, createdAt: 1 },
             newest: { createdAt: -1 },
             oldest: { createdAt: 1 },
-            givenName: { givenName: 1, familyName: 1, createdAt: 1 }
         }
-         const sort = sortOptions[sortBy] || sortOptions['givenName']
+         const sort = sortOptions[sortBy] || sortOptions['fullName']
         const users = await getUsers(filter,pageSize,skip, sort)
         if(!users){
             res.status(400).json({message: "User not found"});
@@ -174,8 +173,7 @@ router.patch('/me', isAuthenticated, hasPermission('canEditAnyUser'), validId('u
 
         let password = null;
         let fullName = null;
-        let givenName = null;
-        let familyName = null;
+
         let role = null;
 
         if(!prevUser) {
@@ -190,12 +188,10 @@ router.patch('/me', isAuthenticated, hasPermission('canEditAnyUser'), validId('u
             password = await bcrypt.hash(userToUpdate.password, 10)
         }
 
-        givenName = userToUpdate.givenName || prevUser.givenName;
-        familyName = userToUpdate.familyName || prevUser.familyName;
-        fullName = userToUpdate.fullName || `${givenName} ${familyName}`;
+        fullName = userToUpdate.fullName || prevUser.fullName;
         role = userToUpdate.role || prevUser.role;
 
-        const updatedUser = await getUpdatedUser(userId, password, fullName,givenName,familyName,role);
+        const updatedUser = await getUpdatedUser(userId, password, fullName,role);
         debugUser(updatedUser);
         if(updatedUser.modifiedCount === 1){
             res.status(200).send(`User ${userId} updated successfully`)
@@ -208,6 +204,8 @@ router.patch('/me', isAuthenticated, hasPermission('canEditAnyUser'), validId('u
         res.status(500).json({message: "Error Updating User"})
     }
 });
+
+
 
 router.delete('/:userId', isAuthenticated, hasPermission("canEditAnyUser"), validId('userId'), async (req,res) => {
     try {

@@ -55,9 +55,9 @@ async function getUserByEmail(email) {
     
 }
 
-async function getUpdatedUser(userId, password, givenName, familyName, fullName, role) {
+async function getUpdatedUser(userId, password,fullName, role) {
     const db = await connectToDatabase();
-    return db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {password: password, fullName: fullName, givenName: givenName, familyName: familyName, role: role, lastUpdated: new Date()}})
+    return db.collection('user').updateOne({_id: new ObjectId(userId)}, {$set: {password: password, fullName: fullName,role: role, lastUpdated: new Date()}})
 }
 
 async function getDeletedUser(userId) {

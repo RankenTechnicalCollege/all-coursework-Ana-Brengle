@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RefreshCcw } from "lucide-react";
-
+import { Search, RefreshCcw } from "lucide-react";
+//import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -21,7 +21,7 @@ import api from "@/lib/api";
 import { Spinner } from "./ui/spinner";
 import { BugItem } from "./BugItem";
 
-
+import EditBugDialog from "./BugEdit";
 
 
 
@@ -38,33 +38,36 @@ export default function BugList() {
     const [maxAge, setMaxAge] = useState<number | undefined>();
     const [closed, setClosed] = useState(false);
     const [sortBy, setSortBy] = useState('newest')
-    const [assignedBugs, setAssignedBugs] = useState('')
+    //const [assignedBugs, setAssignedBugs] = useState('')
+    const [selectedBug, setSelectedBug] = useState<Bug | null>(null);
+
+     const [dialogOpen, setDialogOpen] = useState(false);
 
     const fetchBugs = async () => {
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
     try {
       const params = new URLSearchParams();
+
       if (keywords) params.append("keywords", keywords);
-      if (minAge) params.append("minAge", minAge.toString());
-      if (maxAge) params.append("maxAge", maxAge.toString());
+      if (classification && classification !== "all") params.append("classification", classification);
+      if (minAge !== undefined) params.append("minAge", minAge.toString());
+      if (maxAge !== undefined) params.append("maxAge", maxAge.toString());
+      if (closed) params.append("closed", "true");
+      else params.append("closed", "false");
       if (sortBy) params.append("sortBy", sortBy);
-      if (assignedBugs) params.append('assignedToMe', assignedBugs)
+      //if (assignedBugs) params.append("assignedToMe", assignedBugs);
 
-      const response = await api.get(
-        `/bugs?${params.toString()}`
-      );
-
+      const response = await api.get(`/bugs?${params.toString()}`);
       setBugs(response.data);
     } catch (err) {
-      setError("Failed to fetch users");
-      console.error("Error fetching users:", err);
+      setError("Failed to fetch bugs");
+      console.error("Error fetching bugs:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchBugs();
   }, []);
@@ -72,7 +75,7 @@ export default function BugList() {
   useEffect(() => {
   const fetchCurrentUser = async () => {
     try {
-      const response = await api.get("/me");
+      const response = await api.get("/bugs");
       setCurrentUser(response.data);
     } catch (err) {
       console.error("Failed to fetch current user", err);
@@ -82,12 +85,10 @@ export default function BugList() {
   fetchCurrentUser();
 }, []);
 
-  // Handle manual search trigger
   const handleSearch = () => {
     fetchBugs();
   };
 
-  // Auto-fetch on filter changes (optional, but good UX for selects)
   useEffect(() => {
     fetchBugs();
   }, [classification, sortBy, closed]);
@@ -96,81 +97,97 @@ export default function BugList() {
     setKeywords('')
     setClassification('')
     setClosed(false)
-    setSortBy('')
-    setSortBy('')
-    setAssignedBugs('')
+    setSortBy('newest')
+    setMinAge(undefined);
+    setMaxAge(undefined);
+
+    //setAssignedBugs('')
 
     fetchBugs()
   }
+ 
 
-
+const handleEditClick = (bug: Bug) => {
+  setSelectedBug(bug);
+  setDialogOpen(true);
+};
 
 
   return (
     <>
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 p-4 bg-muted/50 rounded-lg">
-        <div className="flex w-full max-w-sm items-center space-x-2">
-          <Input
-            type="text"
-            placeholder="Search bugs..."
-            value={keywords}
-            onChange={(e) => setKeywords(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          />
-          <Button onClick={handleSearch}>Search</Button>
-        </div>
-        <Button variant="outline" onClick={clear}>
-          <RefreshCcw className="h-4 w-4 mr-1" />
-          Refresh
-        </Button>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Classification</Label>
-            <Select value={classification} onValueChange={setClassification}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Classified</SelectItem>
-                <SelectItem value="customer">Unclassified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Min Age (days)</Label>
+        <div className="flex flex-col gap-4 p-4 bg-muted/50 rounded-lg">
+          <div className="flex w-full max-w-sm items-center space-x-2">
             <Input
-              type="number"
-              placeholder="Min Age"
-              value={minAge}
-              onChange={(e) => setMinAge(e.target.value ? Number(e.target.value) : undefined)}
+              type="text"
+              placeholder="Search bugs..."
+              value={keywords}
+              onChange={(e) => setKeywords(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
+            <Button onClick={handleSearch}>
+              <Search className="mr-2 h-4 w-4" /> Search
+            </Button>
           </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Max Age (days)</Label>
-            <Input
-              type="number"
-              placeholder="Max Age"
-              value={maxAge}
-              onChange={(e) => setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Sort By</Label>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="role">Role</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
+          <Button variant="outline" onClick={clear}>
+            <RefreshCcw className="h-4 w-4 mr-1" /> Refresh
+          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Classification */}
+            <div className="space-y-2">
+              <Label>Classification</Label>
+              <Select value={classification} onValueChange={setClassification}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="UI">UI</SelectItem>
+                  <SelectItem value="Backend">Backend</SelectItem>
+                  <SelectItem value="Performance">Performance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Min Age (days)</Label>
+              <Input
+                type="number"
+                placeholder="Min Age"
+                value={minAge}
+                onChange={(e) => setMinAge(e.target.value ? Number(e.target.value) : undefined)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Age (days)</Label>
+              <Input
+                type="number"
+                placeholder="Max Age"
+                value={maxAge}
+                onChange={(e) => setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
+              />
+            </div>
+            <div className="flex items-center space-x-2 mt-6">
+              {/* <Checkbox checked={closed} onChange={(e) => setClosed(e.target.checked)} /> */}
+              <Label>Include Closed</Label>
+            </div>
+            <div className="space-y-2">
+              <Label>Sort By</Label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="title">Title</SelectItem>
+                  <SelectItem value="classification">Classification</SelectItem>
+                  <SelectItem value="assignedTo">Assigned To</SelectItem>
+                  <SelectItem value="createdBy">Reported By</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
-      </div>
       {loading ? (
         <div><Spinner/> Loading Bugs.....</div>
       ) : error ? (
@@ -180,7 +197,9 @@ export default function BugList() {
           {bugs.map((bug) => (
             <Card key={bug._id}>
               <CardContent className="pt-6">
-                <BugItem bug={bug} currentUser={currentUser}/>
+                <BugItem bug={bug}
+                  currentUser={currentUser}
+                  onEdit={handleEditClick}/>
               </CardContent>
             </Card>
           ))}
@@ -188,8 +207,14 @@ export default function BugList() {
         </div>
       )}
     </div>
-
-
+      {selectedBug && (
+      <EditBugDialog
+        bug={selectedBug}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSave={() => {}}
+      />
+)}
     </>
   );
 }

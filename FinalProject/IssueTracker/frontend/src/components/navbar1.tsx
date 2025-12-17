@@ -307,12 +307,13 @@ const Navbar1 = ({
 
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/user" className="flex items-center gap-2">
                       <UserRound className="mr-2" />
                       Account
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOutIcon className="mr-2" />

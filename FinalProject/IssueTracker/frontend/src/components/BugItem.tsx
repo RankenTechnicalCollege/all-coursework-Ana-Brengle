@@ -5,11 +5,12 @@ import { Pencil } from "lucide-react";
 
 interface BugProps {
   bug: Bug
-currentUser: { _id: string; role?: string[] } | null;
+ currentUser: { _id: string; role?: string[] } | null;
+ onEdit: (bug: Bug) => void;
 }
 
 
-const BugItem = ({bug, currentUser}: BugProps) => {
+const BugItem = ({bug, currentUser, onEdit }: BugProps) => {
     const navigate = useNavigate()
 
     const DisplayBug = () => {
@@ -33,20 +34,23 @@ const BugItem = ({bug, currentUser}: BugProps) => {
       >
         <h3 className="font-semibold">{DisplayBug()}</h3>
         <p className="text-sm text-muted-foreground">
-          {bug.classification}
+          {bug.classification || "Unclassified"}
         </p>
       </div>
       {canEdit() && (
         <Button
           variant="outline"
           size="icon"
-          onClick={() => navigate(`/bug/${bug._id}/edit`)}
+          aria-label="Edit Bug"
+          onClick={() => onEdit(bug)}
         >
           <Pencil className="h-4 w-4" />
         </Button>
       )}
-      <div className="text-sm text-gray-500">{bug._id || "No ID"}</div>
-      <div className="text-sm text-gray-500">{bug.description || "No Description"}</div>
+      <div className="flex flex-col text-sm text-gray-500">
+        <span>{bug._id || "No ID"}</span>
+        <span>{bug.description || "No Description"}</span>
+      </div>
     </div>
   )
 }

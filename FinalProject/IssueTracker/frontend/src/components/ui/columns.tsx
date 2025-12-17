@@ -1,76 +1,107 @@
-// import {type ColumnDef} from '@tanstack/react-table'
-// import { Button } from '@/components/ui/button'
-// import { Checkbox } from '@/components/ui/checkbox'
-// import { SingleBug } from '../types/interfaces'
+"use client";
 
-// export const columns = (
-//   onView: (bug: Bug) => void,   // For viewing bug details
-//   onEdit: (bug: Bug) => void    // For editing bug
-// ): ColumnDef<Bug>[] => [
-//   {
-//     id: "select",
-//     header: ({table}) => (
-//         <Checkbox checked={table.getIsAllRowsSelected()}
-//         onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
-//         aria-label='Select All' />
-//     ),
-//     cell: ({row}) => (
-//         <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)}
-//         aria-label='Select Row'
-//         /> 
-//     ),
-//     enableSorting: false,
-//     enableHiding: false
-//   },
-//     {
-//       accessorKey: 'title',
-//       header: "Title",
-//       cell: ({row}) => {
-//         const bugTitle = row.getValue('title') as string
-//         return<span>{bugTitle || "Unassigned"}</span>
-//       }
-//     },
-//     {
-//       accessorKey: 'bugId',
-//       header: "Bug Id",
-//       cell: ({row}) => {
-//         const bugId = row.original._id
-//         return (
-//           <button onClick={() => onView(row.original)} className='text-blue-600 hover:text-blue-800 hover:underline font-mono '>{bugId}</button>
-//         )
-//       }
-//     },
-//     {
-//       accessorKey: 'classification',
-//       header: "Classification",
-//       cell: ({row}) => {
-//         const classification = row.getValue('classification') as string
-//         return<span>{classification || "unclassified"}</span>
-//       }
-//     },
-//     {
-//       accessorKey: 'authorOfBug',
-//       header: "Bug author",
-//       cell: ({row}) => {
-//         const bugAuthor = row.getValue('authorOfBug') as string
-//         return<span>{bugAuthor || "Unknown"}</span>
-//       }
-//     },
-//     {
-//       accessorKey: 'assignedToUserName',
-//       header: "Assigned To",
-//       cell: ({row}) => {
-//         const assignedToUserName = row.getValue('assignedToUserName') as string
-//         return<span>{assignedToUserName || "Unassigned"}</span>
-//       }
-//     },
-//     {
-//       accessorKey: 'edit',
-//       header: "Edit Bug",
-//       cell: ({row}) => {
-//         return (
-//           <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>Edit</Button>
-//         )
-//       }
-//     }
-//   ]
+import { type ColumnDef } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { Bug } from "../types/interfaces";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { EllipsisVertical } from "lucide-react";
+
+export const columns = (
+  onView?: (bug: Bug) => void,
+  onEdit?: (bug: Bug) => void,
+): ColumnDef<Bug>[] => [
+  /* ---- Select column ---- */
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) =>
+          table.toggleAllPageRowsSelected(!!value)
+        }
+        aria-label="Select All"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select Row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+
+  /* ---- Bug ID ---- */
+  {
+    accessorKey: "bugId",
+    header: "Bug ID",
+    cell: ({ row }) => <span>{row.original.bugId || row.original._id || "N/A"}</span>,
+  },
+
+  /* ---- Title ---- */
+  {
+    accessorKey: "title",
+    header: "Title",
+    cell: ({ row }) => <span>{row.original.title || "Unassigned"}</span>,
+  },
+
+  /* ---- Status ---- */
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) =>
+      row.original.status ? (
+        <Badge variant="secondary">Closed</Badge>
+      ) : (
+        <Badge variant="outline">Open</Badge>
+      ),
+  },
+
+  /* ---- Author ---- */
+  {
+    accessorKey: "authorOfBug",
+    header: "Author",
+    cell: ({ row }) => <span>{row.original.authorOfBug || "Unknown"}</span>,
+  },
+
+  /* ---- Actions (Ellipsis Dropdown) ---- */
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <EllipsisVertical className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-36">
+          {onView && (
+            <DropdownMenuItem onClick={() => onView(row.original)}>
+              View
+            </DropdownMenuItem>
+          )}
+          {onEdit && (
+            <DropdownMenuItem onClick={() => onEdit(row.original)}>
+              Edit
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+];

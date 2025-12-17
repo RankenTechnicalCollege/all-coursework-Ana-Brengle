@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import loginSchema from "@/schemas/loginSchema"
+import { Link } from "react-router-dom"
 
 export function LoginForm({
   className,
@@ -115,7 +116,7 @@ export function LoginForm({
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Don&apos;t have an account? <Link to="/signup">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

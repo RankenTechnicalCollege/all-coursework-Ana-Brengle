@@ -132,7 +132,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="fullName">Given Name</FieldLabel>
+              <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
               <Input 
                 id="fullName"
                 type="text" 
@@ -141,7 +141,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 onChange={(e) =>setFullName(e.target.value)} 
                 required 
               />
-              {errors.givenName && (
+              {errors.fullName && (
                 <p className="text-sm text-destructive">{errors.fullName}</p>
               )}
             </Field>
@@ -153,11 +153,11 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                   <SelectValue placeholder="Developer, Business Analyst, QA ect..."/>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Developer">Developer</SelectItem>
-                  <SelectItem value="Business Analyst">Business Analyst</SelectItem>
-                  <SelectItem value="Quality Analyst">Quality Analyst</SelectItem>
-                  <SelectItem value="Product Manager">Product Manager</SelectItem>
-                  <SelectItem value="Technical Manager">Technical Manager</SelectItem>
+                  <SelectItem value="developer">Developer</SelectItem>
+                  <SelectItem value="business analyst">Business Analyst</SelectItem>
+                  <SelectItem value="quality analyst">Quality Analyst</SelectItem>
+                  <SelectItem value="product manager">Product Manager</SelectItem>
+                  <SelectItem value="technical manager">Technical Manager</SelectItem>
                 </SelectContent>
               </Select>
               {errors.role && (

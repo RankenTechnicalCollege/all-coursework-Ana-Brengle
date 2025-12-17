@@ -89,7 +89,7 @@ router.post('/new', isAuthenticated, hasPermission("canCreateBug"),validate(addB
         if(!newBug.stepsToReproduce) return res.status(400).json({message: 'Steps to Reproduce is required'});
 
        
-        newBug.authorOfBug = `${author.givenName} ${author.familyName}`;
+        newBug.authorOfBug = `${author.fullName}`;
         newBug.createdOn = new Date(Date.now());
         newBug.classification = 'unclassified';
         newBug.closed = false;

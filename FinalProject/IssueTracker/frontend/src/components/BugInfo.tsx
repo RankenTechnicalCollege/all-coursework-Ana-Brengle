@@ -1,141 +1,134 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetDescription,
   SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 
-import  type { Bug } from "./types/interfaces";
+import api from "@/lib/api"; // Your API helper
+import type { Bug } from "./types/interfaces";
+import { toast } from "react-toastify";
 
-interface BugProps {
-  bug: Bug;
+interface BugSheetProps {
+  bugId: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onCloseBug?: (bugId: string) => void;
 }
 
-export function BugSheet({ bug }: BugProps) {
+const BugSheet = ({ bugId, onCloseBug }: BugSheetProps) => {
+  const [bug, setBug] = useState<Bug | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch the bug data
+  useEffect(() => {
+    const fetchBug = async () => {
+      try {
+        const res = await api.get(`/bugs/${bugId}`);
+        setBug(res.data);
+      } catch (err) {
+        console.error("Failed to fetch bug:", err);
+        toast.error("Failed to load bug data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBug();
+  }, [bugId]);
+
+  const handleCloseBug = async () => {
+    if (!bug) return;
+    try {
+      await api.patch(`/bugs/${bug._id}`, { statusLabel: "closed" });
+      console.log("Bug closed successfully!");
+      setBug({ ...bug, statusLabel: "closed" });
+      if (onCloseBug && bug._id) onCloseBug(bug._id);
+    } catch (err) {
+      console.error("Failed to close bug:", err);
+      toast.error("Failed to close bug");
+    }
+  };
+
+  if (loading) return <p>Loading bug details...</p>;
+  if (!bug) return <p>Bug not found</p>;
+
   return (
     <Sheet>
-      <SheetContent position="right" size="lg">
+      <SheetTrigger asChild>
+        <Button>View Bug Details</Button>
+      </SheetTrigger>
+
+      <SheetContent className="flex flex-col">
         <SheetHeader>
-          <SheetTitle>{bug.title}</SheetTitle>
-          <SheetDescription>Details for the bug report</SheetDescription>
+          <SheetTitle>Bug Information</SheetTitle>
+          <SheetDescription>
+            Detailed information and status of the selected bug
+          </SheetDescription>
         </SheetHeader>
-        <div className="space-y-4 mt-4">
-          <div>
-            <h4 className="font-semibold">Description</h4>
-            <p>{bug.description}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold">Steps to Reproduce</h4>
-            <p>{bug.stepsToReproduce}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold">Author</h4>
-            <p>{bug.authorOfBug}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold">Classification</h4>
-            <p>{bug.classification}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold">Status</h4>
-            <p>{bug.closedOn ? "Closed" : "Open"}</p>
-          </div>
 
-          <div>
-            <h4 className="font-semibold">Created On</h4>
-            <p>{new Date(bug.createdOn).toLocaleString()}</p>
-          </div>
+        <Separator />
 
-          <div>
-            <h4 className="font-semibold">Last Updated</h4>
-            <p>{new Date(bug.lastUpdated).toLocaleString()}</p>
-          </div>
-
-          {bug.assignedUserName && (
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex flex-col gap-4">
             <div>
-              <h4 className="font-semibold">Assigned To</h4>
-              <p>{bug.assignedUserName}</p>
+              <h4 className="mb-2 text-sm font-semibold">Title</h4>
+              <p className="text-sm text-muted-foreground">{bug.title}</p>
             </div>
-          )}
-
-          <div>
-            <h4 className="font-semibold">Test Cases</h4>
-            {bug.testCases.length > 0 ? (
-              <ul className="list-disc ml-5">
-                {bug.testCases.map((tc, idx) => (
-                  <li key={idx}>{tc}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>None</p>
-            )}
-          </div>
-
-          <div>
-            <h4 className="font-semibold">Work Hours Logged</h4>
-            {bug.workHoursLogged.length > 0 ? (
-              <ul className="list-disc ml-5">
-                {bug.workHoursLogged.map((wh, idx) => (
-                  <li key={idx}>{wh}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>None</p>
-            )}
-          </div>
-
-          <div>
-            <h4 className="font-semibold">Fix Version</h4>
-            <p>{bug.fixInVersion || "Not assigned"}</p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold">Fixed On</h4>
-            <p>{bug.fixedOnDate ? new Date(bug.fixedOnDate).toLocaleString() : "Not fixed"}</p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold">Closed On</h4>
-            <p>{bug.closedOn ? new Date(bug.closedOn).toLocaleString() : "Not closed"}</p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold">Comments</h4>
-            {bug.comments.length > 0 ? (
-              <ul className="list-disc ml-5">
-                {bug.comments.map((c, idx) => (
-                  <li key={idx}>{c}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No comments yet</p>
-            )}
-          </div>
-
-          <div>
-            <h4 className="font-semibold">Edits</h4>
-            {bug.edits.length > 0 ? (
-              <ul className="list-disc ml-5">
-                {bug.edits.map((e, idx) => (
-                  <li key={idx}>{e}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No edits</p>
-            )}
+            <div>
+              <h4 className="mb-2 text-sm font-semibold">Description</h4>
+              <p className="text-sm text-muted-foreground">{bug.description}</p>
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-semibold">Steps to Reproduce</h4>
+              <p className="text-sm text-muted-foreground">{bug.stepsToReproduce}</p>
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-semibold">Status</h4>
+              <p className="text-sm text-muted-foreground">{bug.statusLabel}</p>
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-semibold">Classification</h4>
+              <p className="text-sm text-muted-foreground">{bug.classification}</p>
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-semibold">Assigned To</h4>
+              <p className="text-sm text-muted-foreground">{bug.assignedUser ?? "Unassigned"}</p>
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-semibold">Author</h4>
+              <p className="text-sm text-muted-foreground">{bug.authorOfBug ?? "Unknown"}</p>
+            </div>
           </div>
         </div>
 
-        <SheetFooter className="mt-6">
-          <Button variant="secondary">Close</Button>
+        <Separator />
+
+        <SheetFooter className="flex flex-col gap-2">
+          <Button className="w-full" variant="outline">
+            Add Comment
+          </Button>
+          <Button className="w-full">Edit Bug</Button>
+          <Button
+            className="w-full"
+            variant="destructive"
+            onClick={handleCloseBug}
+            disabled={bug.statusLabel === "closed"}
+          >
+            Close Bug
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   );
-}
+};
+
+export default BugSheet;
