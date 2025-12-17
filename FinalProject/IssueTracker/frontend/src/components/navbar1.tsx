@@ -1,6 +1,6 @@
 "use client";
 
-import {  BugIcon,Menu, UserRound, EllipsisVertical, LogOutIcon} from "lucide-react";
+import {  BugIcon,Menu, UserRound, EllipsisVertical, LogOutIcon, LogOut} from "lucide-react";
 import { Spinner } from "@/components/ui/spinner"
 import {
   Accordion,
@@ -388,7 +388,7 @@ const Navbar1 = ({
                             {extendedSession.user.email}
                           </p>
                         </div>
-                        <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
+                        <Button variant="outline" onClick={handleSignOut}> <LogOut/>Sign Out</Button>
                       </>
                     ) : (
                       <>

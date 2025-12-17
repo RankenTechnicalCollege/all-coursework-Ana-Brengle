@@ -33,6 +33,7 @@ import api from "@/lib/api"
 import { toast } from "react-toastify"
 import type { Bug, User } from "./types/interfaces"
 import { useState,useEffect } from "react"
+import { Ban, Download } from "lucide-react"
 
 const availableRoles = [
   "Developer",
@@ -45,37 +46,42 @@ interface UserEditDialogProps {
   userId: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  currentUser?: User | null 
 }
 
 const UserEditDialog:  React.FC<UserEditDialogProps> = ({
   userId,
   open,
   onOpenChange,
-}) =>
-    {const [fullName, setFullName] = useState<string>("")
+  currentUser,
+}) => {
+  const [fullName, setFullName] = useState<string>("")
   const [email, setEmail] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
   const [roles, setRoles] = useState<string[]>([])
   const [assignedBugs, setAssignedBugs] = useState<string[]>([])
   const [bugsList, setBugsList] = useState<Bug[]>([])
   const [loading, setLoading] = useState<boolean>(false)
 
-  // Fetch user and bugs data
+  const isSelf = currentUser && currentUser._id === userId
+  const canEditAnyUser = (currentUser?.permissions?.canEditAnyUser ?? false) || isSelf
+  const canAssignRoles = currentUser?.permissions?.canAssignRoles ?? false
+  const canReassignAnyBug = currentUser?.permissions?.canReassignAnyBug ?? false
+
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!userId) return
+      if (!userId || !canEditAnyUser) return
       try {
         setLoading(true)
 
         const userResponse = await api.get<User>(`/users/${userId}`)
         const user = userResponse.data
-        setFullName(user.fullName)
-        setEmail(user.email)
-        setRoles(user.role || [])
-        setAssignedBugs(user.assignedBugs || [])
+        setFullName(user.fullName ?? "")
+        setEmail(user.email ?? "")
+        setRoles(user.role ?? [])
+        setAssignedBugs(user.assignedBugs ?? [])
 
         const bugsResponse = await api.get<Bug[]>("/bugs")
-        setBugsList(bugsResponse.data || [])
+        setBugsList(bugsResponse.data ?? [])
       } catch (error) {
         console.error(error)
         toast.error("Failed to load user data", { position: "bottom-right" })
@@ -83,12 +89,13 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
         setLoading(false)
       }
     }
-
     fetchUserData()
-  }, [userId])
+  }, [userId, canEditAnyUser])
+  
+   if(!canEditAnyUser) return null
 
-  // Toggle role selection
   const handleRoleToggle = (role: string) => {
+    if (!canAssignRoles) return
     if (roles.includes(role)) {
       setRoles(roles.filter((r) => r !== role))
     } else {
@@ -96,34 +103,28 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
     }
   }
 
-  // Toggle bug selection
-//   const handleBugSelect = (bugId: string) => {
-//     if (assignedBugs.includes(bugId)) {
-//       setAssignedBugs(assignedBugs.filter((b) => b !== bugId))
-//     } else {
-//       setAssignedBugs([...assignedBugs, bugId])
-//     }
-//   }
-
-  // Save changes
   const handleSaveChanges = async () => {
     try {
       const userData: Partial<User> = {
         fullName,
         email,
-        role: roles,
-        assignedBugs,
+      }
+      if (canAssignRoles) {
+        userData.role = roles
+      }
+      if (canReassignAnyBug) {
+        userData.assignedBugs = assignedBugs
       }
 
-      await api.put(`/users/${userId}`, userData)
+      await api.patch(`/users/${userId}`, userData)
       toast.success("User updated successfully", { position: "bottom-right" })
+      onOpenChange(false)
     } catch (error) {
       console.error(error)
       toast.error("Failed to save user changes", { position: "bottom-right" })
     }
   }
 
-    
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,7 +135,7 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
             Edit a user's name, email, password and roles. Also assign bugs to user. 
           </DialogDescription>
         </DialogHeader>
-        <form className="mt-6 space-y-6">
+        <form  onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }} className="mt-6 space-y-6">
           <FieldGroup className="space-y-4">
             <Field>
               <FieldLabel>Full Name</FieldLabel>
@@ -151,14 +152,6 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
                 disabled={loading}/>
             </Field>
             <FieldSeparator />
-            <Field>
-              <FieldLabel>Password</FieldLabel>
-              <Input  className="w-full"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading} />
-            </Field>
             <FieldSeparator />
             <Field>
               <FieldLabel>Roles</FieldLabel>
@@ -168,8 +161,8 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
                     <Checkbox
                       id={role}
                       checked={roles.includes(role)}
-                      onChange={() => handleRoleToggle(role)}
-                      disabled={loading}
+                      onCheckedChange={() => handleRoleToggle(role)}
+                      disabled={!canAssignRoles || loading}
                     />
                     <Label htmlFor={role}>{role}</Label>
                   </div>
@@ -179,7 +172,8 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
             <FieldSeparator />
             <Field>
               <FieldLabel>Assign Bugs to User: </FieldLabel>
-              <MultiSelect values={assignedBugs} onValuesChange={setAssignedBugs}>
+              <MultiSelect values={assignedBugs} 
+              onValuesChange={canReassignAnyBug ? setAssignedBugs : () => {}}>
                 <MultiSelectTrigger>
                     <MultiSelectValue placeholder="Select Bugs...."/>
                 </MultiSelectTrigger>
@@ -197,9 +191,9 @@ const UserEditDialog:  React.FC<UserEditDialogProps> = ({
           </FieldGroup>
           <DialogFooter className="flex justify-end gap-3 mt-4">
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline"><Ban />Cancel</Button>
             </DialogClose>
-            <Button type="button" onClick={handleSaveChanges}>Save changes</Button>
+            <Button type="button" onClick={handleSaveChanges}><Download />Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 
 interface BugProps {
   bug: Bug
- currentUser: { _id: string; role?: string[] } | null;
+ currentUser?: { _id: string; role?: string[] } | null;
  onEdit: (bug: Bug) => void;
 }
 

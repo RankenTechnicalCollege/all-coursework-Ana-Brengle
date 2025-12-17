@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, RefreshCcw } from "lucide-react";
-//import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -26,7 +26,6 @@ import EditBugDialog from "./BugEdit";
 
 
 export default function BugList() {
-    const [currentUser, setCurrentUser] = useState<{ _id: string; role?: string[] } | null>(null);
     const [bugs, setBugs] = useState<Bug[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -48,15 +47,12 @@ export default function BugList() {
       setError(null);
     try {
       const params = new URLSearchParams();
-
       if (keywords) params.append("keywords", keywords);
       if (classification && classification !== "all") params.append("classification", classification);
       if (minAge !== undefined) params.append("minAge", minAge.toString());
       if (maxAge !== undefined) params.append("maxAge", maxAge.toString());
-      if (closed) params.append("closed", "true");
-      else params.append("closed", "false");
+      params.append("closed", closed ? "true" : "false");
       if (sortBy) params.append("sortBy", sortBy);
-      //if (assignedBugs) params.append("assignedToMe", assignedBugs);
 
       const response = await api.get(`/bugs?${params.toString()}`);
       setBugs(response.data);
@@ -70,28 +66,14 @@ export default function BugList() {
 
   useEffect(() => {
     fetchBugs();
-  }, []);
+  }, [classification, sortBy, closed]);
 
-  useEffect(() => {
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await api.get("/bugs");
-      setCurrentUser(response.data);
-    } catch (err) {
-      console.error("Failed to fetch current user", err);
-      setCurrentUser(null);
-    }
-  };
-  fetchCurrentUser();
-}, []);
 
   const handleSearch = () => {
     fetchBugs();
   };
 
-  useEffect(() => {
-    fetchBugs();
-  }, [classification, sortBy, closed]);
+
 
   const clear = () => {
     setKeywords('')
@@ -100,9 +82,6 @@ export default function BugList() {
     setSortBy('newest')
     setMinAge(undefined);
     setMaxAge(undefined);
-
-    //setAssignedBugs('')
-
     fetchBugs()
   }
  
@@ -141,10 +120,9 @@ const handleEditClick = (bug: Bug) => {
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="UI">UI</SelectItem>
-                  <SelectItem value="Backend">Backend</SelectItem>
-                  <SelectItem value="Performance">Performance</SelectItem>
+                  <SelectItem value="classified">Classified</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="unapproved">Unapproved</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -167,7 +145,7 @@ const handleEditClick = (bug: Bug) => {
               />
             </div>
             <div className="flex items-center space-x-2 mt-6">
-              {/* <Checkbox checked={closed} onChange={(e) => setClosed(e.target.checked)} /> */}
+              <Checkbox checked={closed} onCheckedChange={(val) => setClosed(Boolean(val))} />
               <Label>Include Closed</Label>
             </div>
             <div className="space-y-2">
@@ -198,7 +176,6 @@ const handleEditClick = (bug: Bug) => {
             <Card key={bug._id}>
               <CardContent className="pt-6">
                 <BugItem bug={bug}
-                  currentUser={currentUser}
                   onEdit={handleEditClick}/>
               </CardContent>
             </Card>

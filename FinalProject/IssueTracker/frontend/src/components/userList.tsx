@@ -20,7 +20,8 @@ import { UserItem } from "./UserItem";
 import { Search } from "lucide-react";
 import { UserEditDialog } from "./UserEdit";
 
-export default function UserList() {
+
+export default function UserList({ currentUser }: { currentUser?: User | null }) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +48,7 @@ export default function UserList() {
     try {
       const params = new URLSearchParams();
       if (keywords) params.append("keywords", keywords);
-      if (role && role !== "all") params.append("role", role);
+      if (role && role !== "all") params.append("role", role.toLowerCase());
       if (minAge) params.append("minAge", Number(minAge).toString());
       if (maxAge) params.append("maxAge", Number(maxAge).toString());
       if (sortBy) params.append("sortBy", sortBy);
@@ -93,7 +94,7 @@ export default function UserList() {
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
             />
-            <Button onClick={handleSearch}>Search</Button>
+            <Button onClick={handleSearch}><Search />Search</Button>
           </div>
           <Select value={role} onValueChange={setRole}>
             <SelectTrigger>
@@ -149,7 +150,7 @@ export default function UserList() {
           {users.map((user) => (
             <Card key={user._id}>
               <CardContent className="pt-6">
-                <UserItem user={user} currentUser={user} onEdit={() => handleEditClick(user._id)}/>
+                <UserItem user={user} currentUser={currentUser ?? null} onEdit={() => handleEditClick(user._id)}/>
               </CardContent>
             </Card>
           ))}
@@ -159,6 +160,7 @@ export default function UserList() {
         userId={selectedUserId}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+        currentUser={currentUser ?? null}
       />
     </div>
   );

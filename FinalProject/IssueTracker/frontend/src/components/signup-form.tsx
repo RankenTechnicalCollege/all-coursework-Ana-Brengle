@@ -25,6 +25,7 @@ import signupSchema from "@/schemas/signupSchema"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import z from "zod"
+import { UserPlus } from "lucide-react"
 
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
@@ -198,7 +199,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <FieldGroup>
               <Field>
-                <Button type="submit" disabled={isSubmitting}>Create Account</Button>
+                <Button type="submit" disabled={isSubmitting}><UserPlus />Create Account</Button>
                 <Button variant="outline" type="button">
                   Sign up with Google
                 </Button>

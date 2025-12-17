@@ -20,9 +20,14 @@ const UserItem = ({ user ,currentUser, onEdit }: UserProps) => {
   };
 
   const canEdit = () => {
-    if (!currentUser) return false;
-    return currentUser.role?.includes("Technical Manager") || currentUser._id === user._id;
-  };
+  if (!currentUser) return false;
+
+  return (
+    (currentUser.permissions?.canEditAnyUser ?? false) ||
+    currentUser._id === user._id
+  );
+};
+
 
 
   return (

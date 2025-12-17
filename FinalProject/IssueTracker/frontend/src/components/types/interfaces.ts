@@ -25,8 +25,8 @@ export interface Bug {
   assignedUser?: string;
   assignedUserName?: string;
   assignedTo?: string;
-  comments?: string[];
-  testCases?: string[];
+  comments?: Comments[];
+  testCases?: TestCases[];
   createdAt?: string;
   lastUpdated?: string;
   classification?: string;
@@ -34,6 +34,18 @@ export interface Bug {
   fixedOnDate?: string;
   closedOn?: string;
   workHoursLogged?: string[]
+}
+
+export interface TestCases {
+  _id?: string;
+  text?: string;
+  author?: string;
+}
+
+export interface Comments {
+  _id?: string;
+  text?: string;
+  author?: string;
 }
 
 export interface Permissions {

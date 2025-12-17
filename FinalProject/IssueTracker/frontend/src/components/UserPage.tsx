@@ -29,7 +29,6 @@ export default function UserPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [selectedBugId, setSelectedBugId] = useState<string | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Fetch user data
   useEffect(() => {
@@ -64,7 +63,6 @@ export default function UserPage() {
 
   const handleView = (bug: Bug) => {
     if (bug._id) setSelectedBugId(bug._id);
-    setIsSheetOpen(true);
   };
 
   const handleEdit = (bug: Bug) => {
@@ -154,8 +152,6 @@ export default function UserPage() {
       {selectedBugId && (
         <BugSheet
           bugId={selectedBugId}
-          open={isSheetOpen}
-          onOpenChange={setIsSheetOpen}
           onCloseBug={() => setSelectedBugId(null)}
         />
       )}
