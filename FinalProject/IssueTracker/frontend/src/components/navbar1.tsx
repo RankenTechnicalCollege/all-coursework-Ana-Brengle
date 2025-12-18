@@ -1,6 +1,6 @@
 "use client";
 
-import {  BugIcon,Menu, UserRound, EllipsisVertical, LogOutIcon, LogOut} from "lucide-react";
+import {  BugIcon,Menu, UserRound, EllipsisVertical, LogOutIcon, LogOut, UserRoundPen} from "lucide-react";
 import { Spinner } from "@/components/ui/spinner"
 import {
   Accordion,
@@ -37,6 +37,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Example from "./LoginEdit";
+import { useState } from "react";
+
 
 
 import { useNavigate, Link } from "react-router-dom";
@@ -86,13 +89,13 @@ interface Navbar1Props {
 
 const Navbar1 = ({
   logo = {
-    url: "https://www.shadcnblocks.com",
+    url: "",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
     alt: "logo",
     title: "BUG TRACKER",
   },
   menu = [
-    { title: "Home", url: "#" },
+    { title: "Home", url: "/landingPage" },
     {
       title: "Users",
       url: "#",
@@ -101,7 +104,7 @@ const Navbar1 = ({
           title: "All Users",
           description: "The latest industry news, updates, and info",
           icon: <UserRound className="size-5 shrink-0" />,
-          url: "/userList",
+          url: "/users",
         }
         // {
         //   title: "Edit User",
@@ -133,7 +136,7 @@ const Navbar1 = ({
           title: "View Bugs",
           description: "Get all the answers you need right here",
           icon: <BugIcon className="size-5 shrink-0" />,
-          url: "/bugList",
+          url: "/bugs",
         },
         // {
         //   title: "Create Bugs",
@@ -221,6 +224,8 @@ const Navbar1 = ({
 }: Navbar1Props) => {
   const {data:session, isPending} = authClient.useSession();
   const navigate = useNavigate();
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+
 
   const extendedSession = session as ExtendedSession | null
 
@@ -313,6 +318,12 @@ const Navbar1 = ({
                       Account
                     </Link>
                   </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={() => setEditProfileOpen(true)}>
+                    <UserRoundPen className="mr-2" />
+                      Edit Profile
+                  </DropdownMenuItem>
+
                 </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -407,6 +418,15 @@ const Navbar1 = ({
           </div>
         </div>
       </div>
+      {extendedSession && (
+  <Example
+    open={editProfileOpen}
+    onOpenChange={setEditProfileOpen}
+  />
+)}
+
+  
+
     </section>
   );
 };

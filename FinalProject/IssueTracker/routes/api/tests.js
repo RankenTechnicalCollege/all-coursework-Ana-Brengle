@@ -8,12 +8,14 @@ import { hasPermission } from '../../middleware/hasPermissions.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { ObjectId } from 'mongodb';
+import { hasRole } from '../../middleware/hasRole.js';
+import { hasAnyRole } from '../../middleware/hasAnyRole.js';
 const debugTest = debug('app:TestRouter');
 router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
 
-router.get('/:bugId/tests',isAuthenticated, hasPermission('canViewData'), validId('bugId'), async(req,res) => {
+router.get('/:bugId/tests',isAuthenticated, hasPermission('canViewData'), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']),validId('bugId'), async(req,res) => {
     try{
         const id = req.params.bugId;
         const bug = await getBugId(id);
@@ -36,7 +38,7 @@ router.get('/:bugId/tests',isAuthenticated, hasPermission('canViewData'), validI
     }
 });
 
-router.get('/:bugId/tests/:testId', isAuthenticated, hasPermission('canViewData'), validId('bugId'), validId('testId') ,async(req,res) => {
+router.get('/:bugId/tests/:testId', isAuthenticated, hasPermission('canViewData'), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']), validId('bugId'), validId('testId') ,async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugId(id);
@@ -62,7 +64,7 @@ router.get('/:bugId/tests/:testId', isAuthenticated, hasPermission('canViewData'
 
 });
 
-router.post('/:bugId/tests', isAuthenticated, hasPermission('canAddTestCase'), validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
+router.post('/:bugId/tests', isAuthenticated, hasPermission('canAddTestCase'), hasRole('quality analyst'), validId('bugId'), validate(addTestCaseSchema), async(req,res) => {
     try{
         const { title, status} = req.body;
         const id = req.params.bugId;
@@ -116,7 +118,7 @@ router.post('/:bugId/tests', isAuthenticated, hasPermission('canAddTestCase'), v
     }
 });
 
-router.patch('/:bugId/tests/:testId', isAuthenticated, hasPermission('canEditTestCase'), validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
+router.patch('/:bugId/tests/:testId', isAuthenticated, hasPermission('canEditTestCase'), hasRole('quality analyst'), validId('bugId'), validId('testId'), validate(updateTestCaseSchema), async(req,res) =>{
     try {
         const id = req.params.bugId;
         const bug = await getBugId(id);
@@ -172,7 +174,7 @@ router.patch('/:bugId/tests/:testId', isAuthenticated, hasPermission('canEditTes
     }
 });
 
-router.delete('/:bugId/tests/:testId', isAuthenticated, hasPermission('canDeleteTestCase'), validId('bugId'), validId('testId'),async(req,res) =>{
+router.delete('/:bugId/tests/:testId', isAuthenticated, hasPermission('canDeleteTestCase'), hasRole('quality analyst'), validId('bugId'), validId('testId'),async(req,res) =>{
     try {
         const bugId = req.params.bugId;
         const bug = await getBugId(bugId)

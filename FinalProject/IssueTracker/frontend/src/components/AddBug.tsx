@@ -16,33 +16,32 @@ import api from "@/lib/api"; // import your axios instance
 import { useState } from "react";
 import { toast } from "react-toastify";
 
+interface AddBugProps {
 
-const AddBug = () => {
+  onSave: () => void
+}
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [stepsToReproduce, setStepsToReproduce] = useState("");
+
+
+const AddBug = ({ onSave }: AddBugProps) => {
+
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!title || !description || !stepsToReproduce) {
-      toast.error("Please fill in all fields", { position: "bottom-right" });
-      return;
-    }
-
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
-
+    const form = e.currentTarget;
+    const formData = new FormData(e.currentTarget);
     try {
-      const response = await api.post("/bugs", {
-        title,
-        description,
-        stepsToReproduce: stepsToReproduce,
+      const response = await api.post("/bugs/new", {
+        title: formData.get("title"),
+        description: formData.get("description"),
+        stepsToReproduce: formData.get("stepsToReproduce"),
       });
+      form.reset();
+      onSave();
       const addedBug = response.data;
       toast.success(`Bug added successfully!: ${addedBug.title}`, { position: "bottom-right" });
-      setTitle("");
-      setDescription("");
-      setStepsToReproduce("");
     } catch (error) {
       console.error(error);
       toast.error("Failed to add bug", { position: "bottom-right" });
@@ -50,7 +49,7 @@ const AddBug = () => {
       setLoading(false);
     }
   };
-
+return (
   <Dialog>
     <DialogTrigger asChild>
       <Button variant="outline">Add Bug</Button>
@@ -62,20 +61,20 @@ const AddBug = () => {
           Enter your bug details.
         </DialogDescription>
       </DialogHeader>
+      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Bug Title</Label>
-          <Input id="title" placeholder="e.g., Bug Title"
-           value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Input id="title" name="title" placeholder="e.g., Bug Title" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">Bug Description</Label>
-          <Input id="description" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam magna purus, viverra ut sem vel, faucibus semper lacus. " value={description} onChange={(e) => setDescription(e.target.value)} />
+          <Input id="description" name="description" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam magna purus, viverra ut sem vel, faucibus semper lacus. " />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="stepsToReproduce">Steps to Reproduce</Label>
-            <Textarea id="stepsToReproduce" placeholder="Step 1: ......." value={stepsToReproduce} onChange={(e) => setStepsToReproduce(e.target.value)} />
+            <Textarea id="stepsToReproduce" name="stepsToReproduce" placeholder="Step 1: ......." />
           </div>
         </div>
       </div>
@@ -83,11 +82,14 @@ const AddBug = () => {
         <Button type="button" variant="outline">
           Cancel
         </Button>
-        <Button type="button" onClick={handleSubmit} disabled={loading}>
+        <Button type="submit" disabled={loading}>
             {loading ? "Adding..." : "Add Bug"}</Button>
-      </DialogFooter>
+        </DialogFooter>
+        </form>
     </DialogContent>
   </Dialog>
+);
 };
+
 
 export default AddBug;

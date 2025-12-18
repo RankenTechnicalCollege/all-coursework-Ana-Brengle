@@ -1,31 +1,21 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
+"use client";
 
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import type { User } from "@/components/types/interfaces";
-import api from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { UserItem } from "./UserItem";
 import { Search } from "lucide-react";
+import type { User } from "@/components/types/interfaces";
+import api from "@/lib/api";
+import { UserItem } from "./UserItem";
 import { UserEditDialog } from "./UserEdit";
 
-
-export default function UserList({ currentUser }: { currentUser?: User | null }) {
+export default function UserList() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
 
   const [keywords, setKeywords] = useState("");
   const [role, setRole] = useState<string>("all");
@@ -33,14 +23,13 @@ export default function UserList({ currentUser }: { currentUser?: User | null })
   const [maxAge, setMaxAge] = useState("");
   const [sortBy, setSortBy] = useState("name");
 
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedUserId, setSelectedUserId] = useState<string>("")
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
 
   const handleEditClick = (userId: string) => {
-    setSelectedUserId(userId)
-    setEditDialogOpen(true)
-  }
-
+    setSelectedUserId(userId);
+    setEditDialogOpen(true);
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -48,16 +37,17 @@ export default function UserList({ currentUser }: { currentUser?: User | null })
     try {
       const params = new URLSearchParams();
       if (keywords) params.append("keywords", keywords);
-      if (role && role !== "all") params.append("role", role.toLowerCase());
-      if (minAge) params.append("minAge", Number(minAge).toString());
-      if (maxAge) params.append("maxAge", Number(maxAge).toString());
+      if (role && role !== "all") params.append("role", role);
+      if (minAge) params.append("minAge", minAge);
+      if (maxAge) params.append("maxAge", maxAge);
       if (sortBy) params.append("sortBy", sortBy);
 
       const response = await api.get(`/users?${params.toString()}`);
-      setUsers(response.data);
+      const userData = Array.isArray(response.data) ? response.data : response?.data.users;
+      setUsers(userData);
     } catch (err) {
+      console.error(err);
       setError("Failed to fetch users");
-      console.error("Error fetching users:", err);
     } finally {
       setLoading(false);
     }
@@ -65,64 +55,41 @@ export default function UserList({ currentUser }: { currentUser?: User | null })
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [keywords, role, minAge, maxAge, sortBy]);
 
-  
-    useEffect(() => {
-    fetchUsers();
-  }, [keywords, minAge, maxAge]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [role,sortBy]);
-
-
-   const handleSearch = () => {
-    fetchUsers();
-  };
-
-
-
-   return (
+  return (
     <div className="space-y-6">
+      {/* Filters Card */}
       <Card>
         <CardContent className="space-y-4">
           <div className="flex w-full max-w-sm items-center space-x-2">
-            <Search/>
-            <Input
-              placeholder="Search users..."
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-            />
-            <Button onClick={handleSearch}><Search />Search</Button>
+            <Search />
+            <Input placeholder="Search users..." value={keywords} onChange={(e) => setKeywords(e.target.value)} />
+            <Button onClick={fetchUsers}>
+              <Search /> Search
+            </Button>
           </div>
+
           <Select value={role} onValueChange={setRole}>
             <SelectTrigger>
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="developer">Developer</SelectItem>
-              <SelectItem value="business analyst">Business Analyst</SelectItem>
-              <SelectItem value="quality analyst">Quality Analyst</SelectItem>
-              <SelectItem value="product manager">Product Manager</SelectItem>
-              <SelectItem value="technical manager">Technical Manager</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="Developer">Developer</SelectItem>
+              <SelectItem value="Business Analyst">Business Analyst</SelectItem>
+              <SelectItem value="Quality Analyst">Quality Analyst</SelectItem>
+              <SelectItem value="Product Manager">Product Manager</SelectItem>
+              <SelectItem value="Technical Manager">Technical Manager</SelectItem>
             </SelectContent>
           </Select>
+
           <div className="flex space-x-2">
-            <Input
-              type="number"
-              placeholder="Min Age"
-              value={minAge}
-              onChange={(e) => setMinAge(e.target.value)}
-            />
-            <Input
-              type="number"
-              placeholder="Max Age"
-              value={maxAge}
-              onChange={(e) => setMaxAge(e.target.value)}
-            />
+            <Input type="number" placeholder="Min Age" value={minAge} onChange={(e) => setMinAge(e.target.value)} />
+            <Input type="number" placeholder="Max Age" value={maxAge} onChange={(e) => setMaxAge(e.target.value)} />
           </div>
-          <Select onValueChange={setSortBy} value={sortBy}>
+
+          <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -136,7 +103,7 @@ export default function UserList({ currentUser }: { currentUser?: User | null })
         </CardContent>
       </Card>
 
-      {/* Users */}
+      {/* Users List */}
       {loading ? (
         <div className="flex justify-center py-10">
           <Spinner />
@@ -150,18 +117,15 @@ export default function UserList({ currentUser }: { currentUser?: User | null })
           {users.map((user) => (
             <Card key={user._id}>
               <CardContent className="pt-6">
-                <UserItem user={user} currentUser={currentUser ?? null} onEdit={() => handleEditClick(user._id)}/>
+                <UserItem user={user} onEdit={handleEditClick} />
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-      <UserEditDialog
-        userId={selectedUserId}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        currentUser={currentUser ?? null}
-      />
+
+      {/* Edit User Dialog */}
+      <UserEditDialog userId={selectedUserId} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
     </div>
   );
 }

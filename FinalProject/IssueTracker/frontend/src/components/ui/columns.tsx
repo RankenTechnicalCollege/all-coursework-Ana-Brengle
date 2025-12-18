@@ -1,23 +1,16 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
+
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Bug } from "../types/interfaces";
 
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { BugActions } from "./BugActions";
 
-import { EllipsisVertical } from "lucide-react";
 
 export const columns = (
-  onView?: (bug: Bug) => void,
-  onEdit?: (bug: Bug) => void,
+
 ): ColumnDef<Bug>[] => [
   /* ---- Select column ---- */
   {
@@ -77,31 +70,13 @@ export const columns = (
 
   /* ---- Actions (Ellipsis Dropdown) ---- */
   {
-    id: "actions",
-    header: "",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <EllipsisVertical className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-36">
-          {onView && (
-            <DropdownMenuItem onClick={() => onView(row.original)}>
-              View
-            </DropdownMenuItem>
-          )}
-          {onEdit && (
-            <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              Edit
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+  id: "actions",
+  header: "Actions",
+  cell: ({ row }) => { const bugId = row.original._id || row.original.bugId;
+    return bugId ? <BugActions bugId={bugId} /> : null;},
+  enableSorting: false,
+  enableHiding: false,
+
+},
 ];
+  

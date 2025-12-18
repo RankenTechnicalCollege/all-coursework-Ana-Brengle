@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -10,25 +9,26 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
-import api from "@/lib/api"; // Your API helper
+import api from "@/lib/api"; 
 import type { Bug } from "./types/interfaces";
 import { toast } from "react-toastify";
+import { DoorClosed} from "lucide-react";
+
 
 interface BugSheetProps {
   bugId: string;
-  open?: boolean;
+  isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCloseBug?: (bugId: string) => void;
 }
 
-const BugSheet = ({ bugId, onCloseBug }: BugSheetProps) => {
+const BugSheet = ({bugId, isOpen = false, onOpenChange, onCloseBug }: BugSheetProps) => {
   const [bug, setBug] = useState<Bug | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("bugOverview");
 
-  // Fetch the bug data
   useEffect(() => {
     const fetchBug = async () => {
       try {
@@ -41,17 +41,16 @@ const BugSheet = ({ bugId, onCloseBug }: BugSheetProps) => {
         setLoading(false);
       }
     };
-
     fetchBug();
   }, [bugId]);
 
   const handleCloseBug = async () => {
-    if (!bug) return;
+    if (!bug || !bug._id) return;
     try {
       await api.patch(`/bugs/${bug._id}`, { statusLabel: "closed" });
-      console.log("Bug closed successfully!");
       setBug({ ...bug, statusLabel: "closed" });
-      if (onCloseBug && bug._id) onCloseBug(bug._id);
+      toast.success("Bug closed successfully!");
+      if (onCloseBug) onCloseBug(bug._id);
     } catch (err) {
       console.error("Failed to close bug:", err);
       toast.error("Failed to close bug");
@@ -61,12 +60,65 @@ const BugSheet = ({ bugId, onCloseBug }: BugSheetProps) => {
   if (loading) return <p>Loading bug details...</p>;
   if (!bug) return <p>Bug not found</p>;
 
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button>View Bug Details</Button>
-      </SheetTrigger>
+  const steps = bug.stepsToReproduce?.split("\n") || [];
 
+  const tabs = [
+    {
+      id: "bugOverview",
+      label: "Basic Bug Info",
+      content: (
+        <div className="space-y-2">
+          <p><strong>Title:</strong> {bug.title}</p>
+          <p><strong>Description:</strong> {bug.description}</p>
+          <p><strong>Author:</strong> {bug.authorOfBug}</p>
+          {steps.length > 0 && (
+            <div>
+              <strong>Steps to Reproduce:</strong>
+              <ul className="list-disc list-inside">
+                {steps.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "comments",
+      label: "Comments",
+      content: (
+        <div className="space-y-2">
+          {bug.comments?.length ? (
+            bug.comments.map((comment, index) => (
+              <div key={index} className="p-2 border rounded">
+                <p className="text-sm font-semibold">{bug.authorOfBug}:</p>
+                <p>{comment.text}</p>
+              </div>
+            ))
+          ) : (
+            <p>No comments yet.</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "testCases",
+      label: "Test Cases",
+      content: (
+        <div className="space-y-2">
+          {bug.testCases?.length ? (
+            bug.testCases.map((tc, index) => <p key={index}>{tc.text}</p>)
+          ) : (
+            <p>No test cases found.</p>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle>Bug Information</SheetTitle>
@@ -75,55 +127,36 @@ const BugSheet = ({ bugId, onCloseBug }: BugSheetProps) => {
           </SheetDescription>
         </SheetHeader>
 
-        <Separator />
+        <div className="flex flex-col gap-4 p-4">
+          <div className="flex gap-2 border-b">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`px-3 pb-2 text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? "border-b-2 border-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Title</h4>
-              <p className="text-sm text-muted-foreground">{bug.title}</p>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Description</h4>
-              <p className="text-sm text-muted-foreground">{bug.description}</p>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Steps to Reproduce</h4>
-              <p className="text-sm text-muted-foreground">{bug.stepsToReproduce}</p>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Status</h4>
-              <p className="text-sm text-muted-foreground">{bug.statusLabel}</p>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Classification</h4>
-              <p className="text-sm text-muted-foreground">{bug.classification}</p>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Assigned To</h4>
-              <p className="text-sm text-muted-foreground">{bug.assignedUser ?? "Unassigned"}</p>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Author</h4>
-              <p className="text-sm text-muted-foreground">{bug.authorOfBug ?? "Unknown"}</p>
-            </div>
+          <div className="text-sm mt-4">
+            {tabs.find((tab) => tab.id === activeTab)?.content}
           </div>
         </div>
 
-        <Separator />
-
-        <SheetFooter className="flex flex-col gap-2">
-          <Button className="w-full" variant="outline">
-            Add Comment
-          </Button>
-          <Button className="w-full">Edit Bug</Button>
+        <SheetFooter className="flex flex-col gap-2 mt-4">
           <Button
             className="w-full"
             variant="destructive"
             onClick={handleCloseBug}
             disabled={bug.statusLabel === "closed"}
           >
-            Close Bug
+            <DoorClosed /> Close Bug
           </Button>
         </SheetFooter>
       </SheetContent>

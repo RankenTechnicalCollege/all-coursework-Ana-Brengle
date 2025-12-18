@@ -1,6 +1,6 @@
 "use client";
 
-import { columns } from "@/components/ui/columns";
+import { columns as getColumns } from "@/components/ui/columns";
 import { DataTable } from "@/components/ui/data-table";
 import type { Bug, User } from "./types/interfaces";
 import {
@@ -13,20 +13,19 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
-import EditBugDialog from "./BugEdit";
+
 import { ChartRadialLabel } from "./ui/BugChart";
 import BugSheet from "./BugInfo";
 import api from "@/lib/api";
 import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
+import AddBug from "./AddBug";
 
 export default function UserPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [bugs, setBugs] = useState<Bug[]>([]);
+  const [bugs, setBugs] = useState<(Bug & { userRelation: string })[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingBugs, setLoadingBugs] = useState(true);
-
-  const [selectedBug, setSelectedBug] = useState<Bug | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [selectedBugId, setSelectedBugId] = useState<string | null>(null);
 
@@ -34,7 +33,7 @@ export default function UserPage() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await api.get(`/users/me`); // adjust endpoint
+        const res = await api.get(`/users/me`);
         setUser(res.data);
       } catch (err) {
         console.error("Failed to fetch user", err);
@@ -45,19 +44,30 @@ export default function UserPage() {
     fetchUser();
   }, []);
 
-  // Fetch bugs assigned to this user
+  // Fetch both assigned and created bugs
   useEffect(() => {
     async function fetchBugs() {
       if (!user?._id) return;
+      setLoadingBugs(true);
       try {
-        const res = await api.get(`/bugs?assignedUser=${user._id}`);
-        setBugs(res.data);
-      } catch (err) {
-        console.error("Failed to fetch bugs", err);
-      } finally {
-        setLoadingBugs(false);
-      }
+        const [assignedRes, createdRes] = await Promise.all([
+          api.get(`/bugs?assignedUser=${user._id}`),
+          api.get(`/bugs?authorOfBug=${user.fullName}`)
+        ]);
+
+        // Mark assigned bugs
+        const assignedIds = new Set(assignedRes.data.map((bug: Bug) => bug._id));
+      const intersectionBugs = createdRes.data
+        .filter((bug: Bug) => assignedIds.has(bug._id))
+        .map((bug: Bug) => ({ ...bug, userRelation: "Both" }));
+
+      setBugs(intersectionBugs);
+    } catch (err) {
+      console.error("Failed to fetch bugs", err);
+    } finally {
+      setLoadingBugs(false);
     }
+  }
     fetchBugs();
   }, [user]);
 
@@ -65,14 +75,10 @@ export default function UserPage() {
     if (bug._id) setSelectedBugId(bug._id);
   };
 
-  const handleEdit = (bug: Bug) => {
-    setSelectedBug(bug);
-    setIsDialogOpen(true);
-  };
-
   return (
     <div className="flex flex-col gap-6 p-4">
       <div className="grid md:grid-cols-2 gap-4">
+        {/* User Card */}
         <Card className="flex flex-col h-full">
           <CardHeader className="flex flex-row items-center gap-4">
             {loadingUser ? (
@@ -86,8 +92,11 @@ export default function UserPage() {
                   <CardTitle>{user.fullName}</CardTitle>
                   <CardDescription>{user.email}</CardDescription>
                   <CardDescription>
-                    Roles: {user.role?.join(", ") ?? "None"}
+                    Roles: {Array.isArray(user.role) ? user.role.join(", ") : "None"}
                   </CardDescription>
+                  <div className="mt-3">
+                    <AddBug onSave={() => {}} />
+                  </div>
                 </div>
               </>
             ) : (
@@ -96,6 +105,7 @@ export default function UserPage() {
           </CardHeader>
         </Card>
 
+        {/* Bugs Card */}
         <Card className="flex flex-col h-full">
           <CardHeader>
             <CardTitle>User Bugs</CardTitle>
@@ -110,7 +120,7 @@ export default function UserPage() {
                   </div>
                 ) : bugs.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center">
-                    No bugs assigned.
+                    No bugs assigned or created.
                   </p>
                 ) : (
                   bugs.map((bug) => (
@@ -119,13 +129,13 @@ export default function UserPage() {
                       className="p-3 hover:bg-muted cursor-pointer"
                       onClick={() => handleView(bug)}
                     >
-                      <CardHeader className="p-0">
-                        <CardTitle className="text-sm font-semibold">
-                          {bug.title}
-                        </CardTitle>
-                        {/* <CardDescription className="text-xs text-muted-foreground">
-                          Last Updated: {new Date(bug.lastUpdated).toLocaleDateString()}
-                        </CardDescription> */}
+                      <CardHeader className="p-0 flex justify-between items-center">
+                        <div>
+                          <CardTitle className="text-sm font-semibold">
+                            {bug.title}
+                          </CardTitle>
+                        </div>
+                        <Badge variant="outline">Created & Assigned</Badge>
                       </CardHeader>
                     </Card>
                   ))
@@ -135,20 +145,19 @@ export default function UserPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Chart */}
       <div className="md:grid md:grid-cols-1 gap-4">
         <ChartRadialLabel />
       </div>
-      <DataTable columns={columns(handleView, handleEdit)} data={bugs} />
-      {selectedBug && (
-        <EditBugDialog
-          bug={selectedBug}
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-          onSave={() => {
-            console.log("Bug saved");
-          }}
-        />
-      )}
+
+      {/* DataTable with userRelation column */}
+      <DataTable
+        columns={getColumns()}
+        data={bugs}
+      />
+
+      {/* BugSheet */}
       {selectedBugId && (
         <BugSheet
           bugId={selectedBugId}

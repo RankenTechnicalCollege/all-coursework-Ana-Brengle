@@ -97,7 +97,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
       // Better Auth automatically sets session cookies
       // Redirect to home page after successful registration
-      navigate("/");
+      navigate("/landingPage");
 
   } catch (error) {
     console.error("Registration error:", error);

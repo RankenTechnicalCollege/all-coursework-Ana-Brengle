@@ -7,12 +7,14 @@ import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
 import { hasPermission } from '../../middleware/hasPermissions.js';
+import { hasRole } from '../../middleware/hasRole.js';
+import { hasAnyRole } from '../../middleware/hasAnyRole.js';
 //import { ObjectId } from 'mongodb';
 const debugBug = debug('app:BugRouter');
 router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
-router.get('', isAuthenticated, hasPermission('canViewData'),async(req, res) => {
+router.get('', isAuthenticated, hasPermission('canViewData'), hasRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager', 'user']),async(req, res) => {
     try{
         const {keywords, classification, minAge, maxAge, closed, page, limit, sortBy} = req.query;
 
@@ -57,10 +59,10 @@ router.get('', isAuthenticated, hasPermission('canViewData'),async(req, res) => 
     }catch (error) {
         console.error("Error loading bugs:", error);
         res.status(500).json({ message: 'Error loading bugs.' });
-    }
+    } 
 });
 
-router.get('/:bugId', isAuthenticated, hasPermission("canViewData"), validId('bugId'), async(req, res) => {
+router.get('/:bugId', isAuthenticated, hasPermission("canViewData"), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']),validId('bugId'), async(req, res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugId(id);
@@ -78,7 +80,7 @@ router.get('/:bugId', isAuthenticated, hasPermission("canViewData"), validId('bu
 
 });
 
-router.post('/new', isAuthenticated, hasPermission("canCreateBug"),validate(addBugSchema),async(req,res) => {
+router.post('/new', isAuthenticated, hasPermission("canCreateBug"), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager', 'user']), validate(addBugSchema),async(req,res) => {
     try {
         const newBug = req.body;
         const author = req.user;
@@ -129,7 +131,7 @@ router.post('/new', isAuthenticated, hasPermission("canCreateBug"),validate(addB
     }
 });
 
-router.patch('/:bugId', isAuthenticated, hasPermission(["canEditAnyBug","canEditIfAssignedTo","canEditMyBug"]), validId('bugId'), validate(updateBugSchema), async(req,res) => {
+router.patch('/:bugId', isAuthenticated, hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager', 'user']), validId('bugId'), validate(updateBugSchema), async(req,res) => {
     try {
         const id = req.params.bugId;
         const oldBug = await getBugId(id);
@@ -192,7 +194,7 @@ router.patch('/:bugId', isAuthenticated, hasPermission(["canEditAnyBug","canEdit
     }
 });
 
-router.patch('/:bugId/classify', isAuthenticated, hasPermission('canClassifyAnyBug'),validId('bugId'), validate(classifyBugSchema),async(req,res) => {
+router.patch('/:bugId/classify', isAuthenticated, hasPermission('canClassifyAnyBug'), hasAnyRole(['business analyst', 'quality analyst', 'product manager', 'technical manager']), validId('bugId'), validate(classifyBugSchema),async(req,res) => {
     try{
         const id = req.params.bugId;
         const bugToUpdate = req.body
@@ -239,7 +241,7 @@ router.patch('/:bugId/classify', isAuthenticated, hasPermission('canClassifyAnyB
     }
 });
 
-router.patch('/:bugId/assign', isAuthenticated, hasPermission(['canReassignAnyBug', 'canReassignIfAssignedTo']),validId('bugId'), validate(assignBugSchema),async(req,res) => {
+router.patch('/:bugId/assign', isAuthenticated, hasPermission(['canReassignAnyBug', 'canReassignIfAssignedTo']), hasAnyRole(['business analyst', 'quality analyst', 'product manager', 'technical manager']),validId('bugId'), validate(assignBugSchema),async(req,res) => {
     try {
        const id = req.params.bugId;
        const {assignedToUserId} = req.body;
@@ -286,7 +288,7 @@ router.patch('/:bugId/assign', isAuthenticated, hasPermission(['canReassignAnyBu
     }
 });
 
-router.patch('/:bugId/close', isAuthenticated, hasPermission('canCloseAnyBug'),validId('bugId'), validate(closeBugSchema), async(req,res) => {
+router.patch('/:bugId/close', isAuthenticated, hasPermission('canCloseAnyBug'),  hasRole('business analyst, technical manager'), validId('bugId'), validate(closeBugSchema), async(req,res) => {
     try{
         const id = req.params.bugId
         const bugToClose = req.body;

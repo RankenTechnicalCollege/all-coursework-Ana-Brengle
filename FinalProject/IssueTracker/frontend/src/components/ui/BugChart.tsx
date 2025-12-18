@@ -16,6 +16,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { Spinner } from "./spinner"
 
 type Bug = {
   _id: string
@@ -80,7 +81,7 @@ export function ChartRadialLabel() {
       <CardContent className="flex-1 pb-0">
         {loading ? (
           <div className="text-center text-muted-foreground">
-            Loading bugs…
+            <Spinner/>
           </div>
         ) : (
           <ChartContainer

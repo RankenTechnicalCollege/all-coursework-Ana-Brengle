@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import loginSchema from "@/schemas/loginSchema"
-import { Link } from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
 
 export function LoginForm({
   className,
@@ -28,6 +28,7 @@ export function LoginForm({
    const [password, setPassword] = useState("");
    const { signIn } = authClient;
    const [error, setError] = useState<string | null>(null);
+   const navigate =  useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +48,7 @@ export function LoginForm({
       onSuccess: () => {
         console.log("Login successful");
         setError(null);
+        navigate("/landingPage");
       },
       onError: () => {
         setError("Invalid email or password");

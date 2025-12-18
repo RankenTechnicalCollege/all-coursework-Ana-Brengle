@@ -5,8 +5,7 @@ export interface User{
     role: string[];
     createdBugs: string[];
     assignedBugs: string[];
-    fullName: string
-    permissions: Permissions;
+    fullName: string;
 }
 
 
@@ -38,35 +37,23 @@ export interface Bug {
 
 export interface TestCases {
   _id?: string;
+  testId?: string;
   text?: string;
-  author?: string;
+  testAuthor?:{
+    _id?: string;
+    fullName: string;
+  }
+  createdOn?: string | Date;
 }
 
 export interface Comments {
   _id?: string;
+  commentId?: string;
   text?: string;
-  author?: string;
-}
-
-export interface Permissions {
-  canEditAnyUser: boolean;
-  canViewData: boolean;
-  canAssignRoles: boolean;
-  canCreateBug: boolean;
-  canEditAnyBug: boolean;
-  canCloseAnyBug: boolean;
-  canClassifyAnyBug: boolean;
-  canReassignAnyBug: boolean;
-  canEditMyBug: boolean;
-  canEditIfAssignedTo: boolean;
-  canReassignIfAssignedTo: boolean;
-  canBeAssignedTo: boolean;
-  canLogHours: boolean;
-  canApplyFixInVersion: boolean;
-  canAssignVersionDate: boolean;
-  canAddComment: boolean;
-  canAddTestCase: boolean;
-  canEditTestCase: boolean;
-  canDeleteTestCase: boolean;
+  commentAuthor?: {
+    _id?: string;
+    fullName: string;
+  }
+  createdOn?: string | Date;
 }
 

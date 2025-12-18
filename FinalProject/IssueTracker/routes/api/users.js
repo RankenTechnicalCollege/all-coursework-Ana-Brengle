@@ -2,11 +2,12 @@ import express from 'express';
 import { getUsers, addUser, getUserById, getUserByEmail, getUpdatedUser, getDeletedUser, saveAuditLog} from '../../database.js';
 import bcrypt from 'bcrypt';
 import { registerSchema, loginSchema, updateUserSchema } from '../../validation/userSchema.js';
-import { hasRole } from '../../middleware/hasRole.js';
 import { hasPermission } from '../../middleware/hasPermissions.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { validId } from '../../middleware/validId.js';
 import { isAuthenticated } from '../../middleware/isAuthenticated.js';
+import { hasAnyRole } from '../../middleware/hasAnyRole.js';
+import { hasRole } from '../../middleware/hasRole.js';
 import debug from 'debug';
 const debugUser = debug('app:User')
 const router = express.Router();
@@ -14,7 +15,7 @@ router.use(express.json())
 router.use(express.urlencoded({extended:false}));
 
 
-router.get('', isAuthenticated, hasPermission('canViewData'), async (req, res) => {
+router.get('', isAuthenticated, hasPermission('canViewData'), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']),async (req, res) => {
     try {
         const {keywords, role, maxAge, minAge, sortBy } = req.query;
         
@@ -24,8 +25,10 @@ router.get('', isAuthenticated, hasPermission('canViewData'), async (req, res) =
 
         const filter = {};
 
-        if(keywords) filter.fullName = {$regex: keywords, options: 'i'};
-        if (role) filter.role = role;
+        if(keywords){ filter.fullName = {$regex: keywords, options: 'i'}};
+        if (role && role !== "all") {
+            filter.role = { $in: [role] };
+}
 
         if(minAge || maxAge) {
             const today = new Date();
@@ -167,7 +170,7 @@ router.get('/me',isAuthenticated, hasPermission('canViewData'), async (req, res)
 
 router.patch('/me', isAuthenticated, hasPermission('canEditAnyUser'), validId('userId'), validate(updateUserSchema), async (req,res) => {
     try{
-        const userId = req.params.userId;
+        const userId = req.session.userId;
         const userToUpdate = req.body;
         const prevUser = await getUserById(userId);
 
@@ -205,9 +208,35 @@ router.patch('/me', isAuthenticated, hasPermission('canEditAnyUser'), validId('u
     }
 });
 
+router.patch('/:userId', isAuthenticated, hasPermission("canEditAnyUser"), hasRole('technical manager'), validId('userId'), validate(updateUserSchema), async (req,res) => {
+    const userId = req.params.userId;
+  const userToUpdate = req.body;
+  const oldUser = await getUserById(userId);
+  if (!oldUser) {
+    res.status(404).json({message: 'User not found'});
+    return;
+  }
+  const authorId = req.session.userId;
+  const fullName = userToUpdate.fullName ? userToUpdate.fullName : oldUser.fullName;
+  const email = userToUpdate.email ? userToUpdate.email : oldUser.email;
+  let role;
+  if (userId == authorId || userToUpdate.role == oldUser.role || !userToUpdate.role) {
+    role = oldUser.role;
+  }
+  else {
+    role = userToUpdate.role;
+  }
 
+  const updatedUser = await getUpdatedUser(userId,fullName, email, role);
+  if (updatedUser.modifiedCount === 0) {
+    res.status(404).json({message: 'User not found'});
+    return;
+  }
+  res.status(200).json({message: `User ${userId} updated successfully.`});
 
-router.delete('/:userId', isAuthenticated, hasPermission("canEditAnyUser"), validId('userId'), async (req,res) => {
+});
+    
+router.delete('/:userId', isAuthenticated, hasPermission("canEditAnyUser"), hasRole('technical manager'), validId('userId'), async (req,res) => {
     try {
         const userId = req.params.userId;
         const deletedUser = await getDeletedUser(userId);

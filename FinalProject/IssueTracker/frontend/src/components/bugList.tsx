@@ -16,7 +16,7 @@ import {
   CardContent,
 } from "@/components/ui/card"
 import { useEffect, useState } from "react";
-import { type Bug} from "@/components/types/interfaces"
+import type {  Bug} from "@/components/types/interfaces"
 import api from "@/lib/api";
 import { Spinner } from "./ui/spinner";
 import { BugItem } from "./BugItem";
@@ -42,6 +42,16 @@ export default function BugList() {
 
      const [dialogOpen, setDialogOpen] = useState(false);
 
+
+     const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get("/users/me");
+      console.log("Current user:", res.data);
+    } catch (err) {
+      console.error("Failed to fetch current user:", err);
+    }
+  };
+
     const fetchBugs = async () => {
       setLoading(true);
       setError(null);
@@ -64,9 +74,14 @@ export default function BugList() {
     }
   };
 
+   useEffect(() => {
+    fetchCurrentUser();
+    fetchBugs();
+  }, []);
+
   useEffect(() => {
     fetchBugs();
-  }, [classification, sortBy, closed]);
+  }, [classification, sortBy, closed, keywords, minAge, maxAge]);
 
 
   const handleSearch = () => {
@@ -189,7 +204,7 @@ const handleEditClick = (bug: Bug) => {
         bug={selectedBug}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onSave={() => {}}
+        onSave={fetchBugs}
       />
 )}
     </>

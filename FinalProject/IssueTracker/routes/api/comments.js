@@ -8,12 +8,14 @@ import { hasPermission } from '../../middleware/hasPermissions.js';
 import { validId } from '../../middleware/validId.js';
 import { validate } from '../../middleware/joiValidator.js';
 import { ObjectId } from 'mongodb';
+import { hasAnyRole } from '../../middleware/hasAnyRole.js';
+import { hasRole } from '../../middleware/hasRole.js';
 const debugComment = debug('app:CommentRouter');
 router.use(express.json())
 router.use(express.urlencoded({extended: false}));
 
 
-router.get('/:bugId/comments', isAuthenticated, hasPermission('CanViewData'), async(req,res) => {
+router.get('/:bugId/comments', isAuthenticated, hasPermission('canViewData'), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']),async(req,res) => {
    try {
         const id = req.params.bugId;
         const bug = await getBugIds(id);
@@ -37,7 +39,7 @@ router.get('/:bugId/comments', isAuthenticated, hasPermission('CanViewData'), as
     }
 });
 
-router.get('/:bugId/comments/:commentId', isAuthenticated, hasPermission('canViewData'), validId('bugId'), async(req, res) => {
+router.get('/:bugId/comments/:commentId', isAuthenticated, hasPermission('canViewData'), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']),validId('bugId'), async(req, res) => {
    try {
      const id = req.params.bugId;
      const bug = await getBugIds(id);
@@ -62,7 +64,7 @@ router.get('/:bugId/comments/:commentId', isAuthenticated, hasPermission('canVie
    } 
 });
 
-router.post('/:bugId/comments', isAuthenticated, hasPermission('canAddComment'), validate(addCommentSchema), validId('bugId'),async(req,res) => {
+router.post('/:bugId/comments', isAuthenticated, hasPermission('canAddComment'), hasAnyRole(['developer', 'business analyst', 'quality analyst', 'product manager', 'technical manager']),validate(addCommentSchema), validId('bugId'),async(req,res) => {
     try {
         const id = req.params.bugId;
         const bug = await getBugIds(id)
